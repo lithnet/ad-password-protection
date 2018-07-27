@@ -1,18 +1,15 @@
 #include "stdafx.h"
 #include "hasher.h"
-#include "stdafx.h"
 #include <wincrypt.h>
 #include "malloc.h"
 #include <iostream>
-#include <string>
 #include <sstream>
 #include <iomanip>
 
 #define BUFFER_SIZE 256
 
-
 template<typename TInputIter>
-std::wstring make_hex_string(TInputIter first, TInputIter last, bool use_uppercase = true, bool insert_spaces = false)
+std::wstring to_hex_string(TInputIter first, TInputIter last, bool use_uppercase = true, bool insert_spaces = false)
 {
 	std::wstringstream ss;
 	ss << std::hex << std::setfill(L'0');
@@ -39,7 +36,7 @@ void make_hash(const WCHAR * data, std::wstring * hash)
 	BYTE * pbBuffer = NULL;
 	DWORD dwCount;
 	DWORD i;
-	unsigned long bufLen = 0;
+	size_t bufLen = 0;
 
 	if (!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL, 0)) {
 		return;
@@ -58,7 +55,7 @@ void make_hash(const WCHAR * data, std::wstring * hash)
 		pbBuffer[i] = (BYTE)data[i];
 	}
 
-	if (!CryptHashData(hHash, pbBuffer, bufLen, 0)) {
+	if (!CryptHashData(hHash, pbBuffer, (DWORD)bufLen, 0)) {
 		return;
 	}
 
@@ -77,7 +74,7 @@ void make_hash(const WCHAR * data, std::wstring * hash)
 		return;
 	}
 	
-	std::wstring hasheds = make_hex_string(pbHash, pbHash + dwHashLen);
+	std::wstring hasheds = to_hex_string(pbHash, pbHash + dwHashLen);
 	OutputDebugString(hasheds.c_str());
 
 	*hash = hasheds;
