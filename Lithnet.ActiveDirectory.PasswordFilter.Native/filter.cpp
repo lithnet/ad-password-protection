@@ -37,7 +37,7 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 		odprintf(L"Password: %s", password.c_str());
 		odprintf(L"Processing password %s for user %s (%s)", SetOperation ? L"set" : L"changed", accountName.c_str(), fullName.c_str());
 
-		if ((SetOperation && GetRegValueDWORD(L"ValidateRawPasswordOnSet", 1) != 0) || (!SetOperation && GetRegValueDWORD(L"ValidateRawPasswordOnChange", 1) != 0))
+		if ((SetOperation && GetRegValue(L"ValidateRawPasswordOnSet", 1) != 0) || (!SetOperation && GetRegValue(L"ValidateRawPasswordOnChange", 1) != 0))
 		{
 			OutputDebugString(L"Checking raw password");
 
@@ -52,7 +52,7 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 			OutputDebugString(L"Raw password did not match any existing hashes");
 		}
 
-		if ((SetOperation && GetRegValueDWORD(L"ValidateNormalizedPasswordOnSet", 1) != 0) || (!SetOperation && GetRegValueDWORD(L"ValidateNormalizedPasswordOnChange", 1) != 0))
+		if ((SetOperation && GetRegValue(L"ValidateNormalizedPasswordOnSet", 1) != 0) || (!SetOperation && GetRegValue(L"ValidateNormalizedPasswordOnChange", 1) != 0))
 		{
 			OutputDebugString(L"Checking normalized password");
 
@@ -75,7 +75,7 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 		OutputDebugString(L"Unexpected Error");
 		OutputDebugStringA(e.what());
 
-		if (GetRegValueDWORD(L"AllowPasswordOnError", 1) == 0)
+		if (GetRegValue(L"AllowPasswordOnError", 1) == 0)
 		{
 			OutputDebugString(L"AllowPasswordOnError is zero, denying password change request");
 			return FALSE;
@@ -84,7 +84,7 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 	catch (...)
 	{
 		OutputDebugString(L"Unexpected Error");
-		if (GetRegValueDWORD(L"AllowPasswordOnError", 1) == 0)
+		if (GetRegValue(L"AllowPasswordOnError", 1) == 0)
 		{
 			OutputDebugString(L"AllowPasswordOnError is zero, denying password change request");
 			return FALSE;

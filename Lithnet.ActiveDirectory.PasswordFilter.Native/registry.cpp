@@ -1,97 +1,152 @@
 #include "stdafx.h"
+#include "registry.h"
 
-
-DWORD GetDWORDRegKey(HKEY hKey, const std::wstring &strValueName, DWORD nDefaultValue)
+DWORD GetPolicyOrSettingsValue(HKEY hKeyPolicy, HKEY hKeySettings, const std::wstring &strValueName, DWORD defaultValue)
 {
 	DWORD dwBufferSize(sizeof(DWORD));
 	DWORD value(0);
+	LONG result;
 
-	LONG result = RegQueryValueEx(hKey, strValueName.c_str(), NULL, NULL, reinterpret_cast<LPBYTE>(&value), &dwBufferSize);
-
-	if (result != ERROR_SUCCESS)
+	if (hKeyPolicy)
 	{
-		return nDefaultValue;
+		result = RegQueryValueEx(hKeyPolicy, strValueName.c_str(), NULL, NULL, reinterpret_cast<LPBYTE>(&value), &dwBufferSize);
+
+		if (result == ERROR_SUCCESS)
+		{
+			return value;
+		}
 	}
 
-	return value;
+	if (hKeySettings)
+	{
+		result = RegQueryValueEx(hKeySettings, strValueName.c_str(), NULL, NULL, reinterpret_cast<LPBYTE>(&value), &dwBufferSize);
+
+		if (result == ERROR_SUCCESS)
+		{
+			return value;
+		}
+	}
+
+	return defaultValue;
 }
 
-const std::wstring GetStringRegKey(HKEY hKey, const std::wstring &strValueName, const std::wstring &strDefaultValue)
+const std::wstring GetPolicyOrSettingsValue(HKEY hKeyPolicy, HKEY hKeySettings, const std::wstring &strValueName, const std::wstring &defaultValue)
 {
-	std::wstring strValue = strDefaultValue;
-
 	DWORD dwBufferSize;
+	LONG result;
 
-	DWORD dwRet = RegQueryValueEx(hKey, strValueName.c_str(), NULL, NULL, NULL, &dwBufferSize);
-
-	if (dwRet != ERROR_SUCCESS)
+	if (hKeyPolicy)
 	{
-		return strDefaultValue;
+		result = RegQueryValueEx(hKeyPolicy, strValueName.c_str(), NULL, NULL, NULL, &dwBufferSize);
+
+		if (result == ERROR_SUCCESS)
+		{
+			return GetValueString(dwBufferSize, hKeyPolicy, strValueName, defaultValue);
+		}
 	}
 
-	wchar_t* szBuffer = new wchar_t[dwBufferSize];
-	 
-	dwRet = RegQueryValueEx(hKey, strValueName.c_str(), NULL, NULL, (LPBYTE)szBuffer, &dwBufferSize);
+	if (hKeySettings)
+	{
+		result = RegQueryValueEx(hKeySettings, strValueName.c_str(), NULL, NULL, NULL, &dwBufferSize);
 
-	if (dwRet != ERROR_SUCCESS)
+		if (result == ERROR_SUCCESS)
+		{
+			return GetValueString(dwBufferSize, hKeySettings, strValueName, defaultValue);
+		}
+	}
+
+	return defaultValue;
+}
+
+const std::wstring GetValueString(DWORD &dwBufferSize, const HKEY &hKeyPolicy, const std::wstring & strValueName, const std::wstring & defaultValue)
+{
+	wchar_t* szBuffer = new wchar_t[dwBufferSize];
+
+	LONG result = RegQueryValueEx(hKeyPolicy, strValueName.c_str(), NULL, NULL, (LPBYTE)szBuffer, &dwBufferSize);
+
+	if (result != ERROR_SUCCESS)
 	{
 		delete[] szBuffer;
-		return strDefaultValue;
+		return defaultValue;
 	}
 
-	std::wstring result = std::wstring(szBuffer);
+	std::wstring value = std::wstring(szBuffer);
 	delete[] szBuffer;
-	return result;
+	return value;
 }
 
-std::wstring GetRegValueString(const std::wstring &valueName, const std::wstring &defaultValue)
+std::wstring GetRegValue(const std::wstring &valueName, const std::wstring &defaultValue)
+{
+	HKEY hKeySettings = OpenSettingsKey();
+	HKEY hKeyPolicy = OpenPolicyKey();
+	
+	std::wstring value = GetPolicyOrSettingsValue(hKeyPolicy, hKeySettings, valueName, defaultValue);
+
+	if (hKeyPolicy)
+	{
+		RegCloseKey(hKeyPolicy);
+	}
+
+	if (hKeySettings)
+	{
+		RegCloseKey(hKeySettings);
+	}
+
+	return value;
+}
+
+DWORD GetRegValue(const std::wstring &valueName, DWORD defaultValue)
+{
+	HKEY hKeySettings = OpenSettingsKey();
+	HKEY hKeyPolicy = OpenPolicyKey();
+
+	DWORD value = GetPolicyOrSettingsValue(hKeyPolicy, hKeySettings, valueName, defaultValue);
+
+	if (hKeyPolicy)
+	{
+		RegCloseKey(hKeyPolicy);
+	}
+
+	if (hKeySettings)
+	{
+		RegCloseKey(hKeySettings);
+	}
+
+	return value;
+}
+
+HKEY OpenSettingsKey()
 {
 	HKEY hKey;
 	LSTATUS result = RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Lithnet\\PasswordFilter", 0, KEY_READ, &hKey);
 
 	if (result == ERROR_FILE_NOT_FOUND)
 	{
-		return defaultValue;
+		return 0;
 	}
 
 	if (result != ERROR_SUCCESS)
 	{
-		OutputDebugString(L"Registry key open failed");
-		return defaultValue;
+		return 0;
 	}
 
-	std::wstring value = GetStringRegKey(hKey, valueName, defaultValue);
-
-	if (hKey)
-	{
-		RegCloseKey(hKey);
-	}
-
-	return value;
+	return hKey;
 }
 
-DWORD GetRegValueDWORD(const std::wstring &valueName, DWORD defaultValue)
+HKEY OpenPolicyKey()
 {
 	HKEY hKey;
-	LSTATUS result = RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Lithnet\\PasswordFilter", 0, KEY_READ, &hKey);
+	LSTATUS result = RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Lithnet\\PasswordFilter", 0, KEY_READ, &hKey);
 
 	if (result == ERROR_FILE_NOT_FOUND)
 	{
-		return defaultValue;
+		return 0;
 	}
 
 	if (result != ERROR_SUCCESS)
 	{
-		OutputDebugString(L"Registry key open failed");
-		return defaultValue;
+		return 0;
 	}
 
-	DWORD value = GetDWORDRegKey(hKey, valueName, defaultValue);
-
-	if (hKey)
-	{
-		RegCloseKey(hKey);
-	}
-
-	return value;
+	return hKey;
 }

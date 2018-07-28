@@ -116,7 +116,7 @@ extern "C" __declspec(dllexport) void CALLBACK GetRegString(HWND hwnd, HINSTANCE
 		MultiByteToWideChar(CP_ACP, 0, lpszCmdLine, -1, commandLineArgument, lenW);
 	}
 
-	std::wstring result = GetRegValueString(commandLineArgument, L"This is a default value");
+	std::wstring result = GetRegValue(commandLineArgument, L"This is a default value");
 
 	odprintf(L"Got value: %s", result.c_str());
 }
@@ -132,9 +132,9 @@ extern "C" __declspec(dllexport) void CALLBACK GetRegDword(HWND hwnd, HINSTANCE 
 	{
 		commandLineArgument = new wchar_t[lenW];
 		MultiByteToWideChar(CP_ACP, 0, lpszCmdLine, -1, commandLineArgument, lenW);
-	}
+	} 
 
-	DWORD result = GetRegValueDWORD(commandLineArgument, 1);
+	DWORD result = GetRegValue(commandLineArgument, 1);
 
 	odprintf(L"Got value: %d", result);
 }
