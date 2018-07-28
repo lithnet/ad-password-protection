@@ -16,7 +16,7 @@ bool IsHashInStore(std::wstring hash)
 
 bool IsHashInStore(std::wstring hash, std::wstring range)
 {
-	std::wstring path = GetStoreFile(range);
+	std::wstring path = GetStoreFileName(range);
 
 	DWORD attr = GetFileAttributes(path.c_str());
 	if (attr == INVALID_FILE_ATTRIBUTES || (attr & FILE_ATTRIBUTE_DIRECTORY))
@@ -25,7 +25,7 @@ bool IsHashInStore(std::wstring hash, std::wstring range)
 	return IsHashInFile(path, hash);
 }
 
-std::wstring GetStoreFile(std::wstring range)
+std::wstring GetStoreFileName(std::wstring range)
 {
 	std::wstring path = GetRegValueString(L"SHA1Store", L"");
 

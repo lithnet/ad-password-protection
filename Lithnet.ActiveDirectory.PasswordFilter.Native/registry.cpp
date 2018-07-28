@@ -30,7 +30,7 @@ const std::wstring GetStringRegKey(HKEY hKey, const std::wstring &strValueName, 
 	}
 
 	wchar_t* szBuffer = new wchar_t[dwBufferSize];
-
+	 
 	dwRet = RegQueryValueEx(hKey, strValueName.c_str(), NULL, NULL, (LPBYTE)szBuffer, &dwBufferSize);
 
 	if (dwRet != ERROR_SUCCESS)
