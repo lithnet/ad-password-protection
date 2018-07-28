@@ -35,6 +35,7 @@ const std::wstring GetStringRegKey(HKEY hKey, const std::wstring &strValueName, 
 
 	if (dwRet != ERROR_SUCCESS)
 	{
+		delete[] szBuffer;
 		return strDefaultValue;
 	}
 

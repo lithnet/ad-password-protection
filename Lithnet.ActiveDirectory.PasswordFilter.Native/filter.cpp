@@ -17,7 +17,7 @@ extern "C" __declspec(dllexport) NTSTATUS __stdcall PasswordChangeNotify(
 	PUNICODE_STRING NewPassword
 )
 {
-	return 0;
+	return 0L;
 }
 
 extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
@@ -37,15 +37,16 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 		odprintf(L"Password: %s", password.c_str());
 		odprintf(L"Account name: %s", accountName.c_str());
 		odprintf(L"Full name: %s", fullName.c_str());
+		odprintf(L"Password is being %s", SetOperation ? L"set" : L"changed");
 
-		if (GetRegValueDWORD(L"CheckRawPassword", 1) != 0)
+
+		if ((SetOperation && GetRegValueDWORD(L"ValidateRawPasswordOnSet", 1) != 0) || (!SetOperation && GetRegValueDWORD(L"ValidateRawPasswordOnChange", 1) != 0))
 		{
 			OutputDebugString(L"Checking raw password");
 
-			std::wstring hash;
-			make_hash(password.c_str(), &hash);
+			std::wstring hash = Sha1Hash(password.c_str());
 
-			if (checkHash(hash))
+			if (IsHashInStore(hash))
 			{
 				OutputDebugString(L"Raw password matched existing hash");
 				return FALSE;
@@ -54,17 +55,14 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 			OutputDebugString(L"Raw password did not match any existing hashes");
 		}
 
-		if (GetRegValueDWORD(L"CheckNormalizedPassword", 1) != 0)
+		if ((SetOperation && GetRegValueDWORD(L"ValidateNormalizedPasswordOnSet", 1) != 0) || (!SetOperation && GetRegValueDWORD(L"ValidateNormalizedPasswordOnChange", 1) != 0))
 		{
 			OutputDebugString(L"Checking normalized password");
 
-			std::wstring normalizedPassword;
-			normalize(password, &normalizedPassword);
+			std::wstring normalizedPassword = NormalizePassword(password);
+			std::wstring normalizedHash = Sha1Hash(normalizedPassword.c_str());
 
-			std::wstring normalizedHash;
-			make_hash(normalizedPassword.c_str(), &normalizedHash);
-
-			if (checkHash(normalizedHash))
+			if (IsHashInStore(normalizedHash))
 			{
 				OutputDebugString(L"Normalized password matched existing hash");
 				return FALSE;
@@ -75,7 +73,18 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 
 		OutputDebugString(L"Password validated");
 	}
-	catch (const std::invalid_argument&)
+	catch (std::exception const& e) 
+	{
+		OutputDebugString(L"Unexpected Error");
+		OutputDebugStringA(e.what());
+
+		if (GetRegValueDWORD(L"AllowPasswordOnError", 1) == 0)
+		{
+			OutputDebugString(L"AllowPasswordOnError is zero, denying password change request");
+			return FALSE;
+		}
+	}
+	catch (...)
 	{
 		OutputDebugString(L"Unexpected Error");
 		if (GetRegValueDWORD(L"AllowPasswordOnError", 1) == 0)

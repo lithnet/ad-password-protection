@@ -1,4 +1,4 @@
-#include "utils.h"
+﻿#include "utils.h"
 #include "stdafx.h"
 #include "filter.h"
 #include "registry.h"
@@ -17,7 +17,7 @@ void __cdecl odprintf(const wchar_t *format, ...)
 
 	p += (n < 0) ? sizeof buf - 3 : n;
 
-	while (p > buf  &&  isspace(p[-1]))
+	while (p > buf && iswspace(p[-1]))
 		*--p = L'\0';
 
 	*p++ = L'\r';
@@ -27,7 +27,7 @@ void __cdecl odprintf(const wchar_t *format, ...)
 	OutputDebugString(buf);
 }
 
-extern "C" __declspec(dllexport) void CALLBACK CheckPassword(HWND hwnd, HINSTANCE hinst, LPSTR lpszCmdLine, int nCmdShow)
+extern "C" __declspec(dllexport) void CALLBACK CheckPasswordSet(HWND hwnd, HINSTANCE hinst, LPSTR lpszCmdLine, int nCmdShow)
 {
 	OutputDebugString(L"*******Check password enter");
 
@@ -46,9 +46,10 @@ extern "C" __declspec(dllexport) void CALLBACK CheckPassword(HWND hwnd, HINSTANC
 	}
 
 	UNICODE_STRING password;
+	//RtlInitUnicodeString(&password, L"Pass\u1E9Eword");
 	RtlInitUnicodeString(&password, commandLineArgument);
 
-	BOOL result = PasswordFilter(&username, &fullname, &password, FALSE);
+	BOOL result = PasswordFilter(&username, &fullname, &password, TRUE);
 
 	if (result == TRUE)
 	{
@@ -62,7 +63,44 @@ extern "C" __declspec(dllexport) void CALLBACK CheckPassword(HWND hwnd, HINSTANC
 	delete[] commandLineArgument;
 
 	OutputDebugString(L"*******Check password leave");
+}
 
+extern "C" __declspec(dllexport) void CALLBACK CheckPasswordChange(HWND hwnd, HINSTANCE hinst, LPSTR lpszCmdLine, int nCmdShow)
+{
+	OutputDebugString(L"*******Check password enter");
+
+	UNICODE_STRING username;
+	RtlInitUnicodeString(&username, L"test");
+
+	UNICODE_STRING fullname;
+	RtlInitUnicodeString(&fullname, L"fullname");
+	wchar_t* commandLineArgument;
+
+	int lenW = MultiByteToWideChar(CP_ACP, 0, lpszCmdLine, -1, NULL, 0);
+	if (lenW > 0)
+	{
+		commandLineArgument = new wchar_t[lenW];
+		MultiByteToWideChar(CP_ACP, 0, lpszCmdLine, -1, commandLineArgument, lenW);
+	}
+
+	UNICODE_STRING password;
+	//RtlInitUnicodeString(&password, L"Pass\u1E9Eword");
+	RtlInitUnicodeString(&password, commandLineArgument);
+
+	BOOL result = PasswordFilter(&username, &fullname, &password, FALSE);
+
+	if (result == TRUE)
+	{
+		OutputDebugString(L"Password filter passed");
+	}
+	else
+	{
+		OutputDebugString(L"Password filter denied the password change");
+	}
+
+	delete[] commandLineArgument;
+
+	OutputDebugString(L"*******Check password leave");
 }
 
 extern "C" __declspec(dllexport) void CALLBACK GetRegString(HWND hwnd, HINSTANCE hinst, LPSTR lpszCmdLine, int nCmdShow)
