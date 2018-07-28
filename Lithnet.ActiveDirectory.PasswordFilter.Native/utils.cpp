@@ -3,6 +3,8 @@
 #include "filter.h"
 #include "registry.h"
 #include <iostream>
+#include "eventlog.h"
+#include "messages.h"
 
 void __cdecl odprintf(const wchar_t *format, ...)
 {
@@ -25,6 +27,22 @@ void __cdecl odprintf(const wchar_t *format, ...)
 	*p = L'\0';
 
 	OutputDebugString(buf);
+}
+
+extern "C" __declspec(dllexport) void CALLBACK Log(HWND hwnd, HINSTANCE hinst, LPSTR lpszCmdLine, int nCmdShow)
+{
+	OutputDebugString(L"*******Log enter");
+	wchar_t* commandLineArgument;
+
+	int lenW = MultiByteToWideChar(CP_ACP, 0, lpszCmdLine, -1, NULL, 0);
+	if (lenW > 0)
+	{
+		commandLineArgument = new wchar_t[lenW];
+		MultiByteToWideChar(CP_ACP, 0, lpszCmdLine, -1, commandLineArgument, lenW);
+	}
+
+	eventlog::getInstance().logw(EVENTLOG_ERROR_TYPE, MSG_PASSWORD_REJECTED, 1, commandLineArgument);
+	OutputDebugString(L"*******Log exit");
 }
 
 extern "C" __declspec(dllexport) void CALLBACK CheckPasswordSet(HWND hwnd, HINSTANCE hinst, LPSTR lpszCmdLine, int nCmdShow)
@@ -55,7 +73,7 @@ extern "C" __declspec(dllexport) void CALLBACK CheckPasswordSet(HWND hwnd, HINST
 	{
 		OutputDebugString(L"Password filter passed");
 	}
-	else 
+	else
 	{
 		OutputDebugString(L"Password filter denied the password change");
 	}
@@ -132,7 +150,7 @@ extern "C" __declspec(dllexport) void CALLBACK GetRegDword(HWND hwnd, HINSTANCE 
 	{
 		commandLineArgument = new wchar_t[lenW];
 		MultiByteToWideChar(CP_ACP, 0, lpszCmdLine, -1, commandLineArgument, lenW);
-	} 
+	}
 
 	DWORD result = GetRegValue(commandLineArgument, 1);
 

@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "registry.h"
-
+#include "settings.h"
 DWORD GetPolicyOrSettingsValue(HKEY hKeyPolicy, HKEY hKeySettings, const std::wstring &strValueName, DWORD defaultValue)
 {
 	DWORD dwBufferSize(sizeof(DWORD));
@@ -16,7 +16,7 @@ DWORD GetPolicyOrSettingsValue(HKEY hKeyPolicy, HKEY hKeySettings, const std::ws
 			return value;
 		}
 	}
-
+	
 	if (hKeySettings)
 	{
 		result = RegQueryValueEx(hKeySettings, strValueName.c_str(), NULL, NULL, reinterpret_cast<LPBYTE>(&value), &dwBufferSize);
@@ -26,7 +26,7 @@ DWORD GetPolicyOrSettingsValue(HKEY hKeyPolicy, HKEY hKeySettings, const std::ws
 			return value;
 		}
 	}
-
+	
 	return defaultValue;
 }
 

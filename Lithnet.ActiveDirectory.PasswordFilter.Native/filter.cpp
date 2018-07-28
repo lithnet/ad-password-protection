@@ -5,6 +5,8 @@
 #include "stringnormalization.h"
 #include "hashevaluator.h"
 #include "registry.h"
+#include "eventlog.h"
+#include "messages.h"
 
 extern "C" __declspec(dllexport)  BOOLEAN __stdcall InitializeChangeNotify(void)
 {
@@ -27,15 +29,20 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 	BOOLEAN SetOperation
 )
 {
-	OutputDebugString(L"*******PasswordFilter Enter");
-
 	try {
+		if (GetRegValue(L"Disabled", 0) != 0)
+		{
+			eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_AGENT_DISABLED, 0);
+			return TRUE;
+		}
+
 		std::wstring password(Password->Buffer, Password->Length / sizeof(WCHAR));
 		std::wstring accountName(AccountName->Buffer, AccountName->Length / sizeof(WCHAR));
 		std::wstring fullName(FullName->Buffer, FullName->Length / sizeof(WCHAR));
 
-		odprintf(L"Password: %s", password.c_str());
-		odprintf(L"Processing password %s for user %s (%s)", SetOperation ? L"set" : L"changed", accountName.c_str(), fullName.c_str());
+		//odprintf(L"Password: %s", password.c_str());
+		DebugBreak();
+		eventlog::getInstance().logw(EVENTLOG_INFORMATION_TYPE, MSG_PROCESSING_REQUEST, 3, SetOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
 
 		if ((SetOperation && GetRegValue(L"ValidateRawPasswordOnSet", 1) != 0) || (!SetOperation && GetRegValue(L"ValidateRawPasswordOnChange", 1) != 0))
 		{
@@ -45,7 +52,7 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 
 			if (IsHashInStore(hash))
 			{
-				OutputDebugString(L"Raw password matched existing hash");
+				eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED, 4, SetOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str(), L"The password was found in the banned password store");
 				return FALSE;
 			}
 
@@ -61,38 +68,35 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 
 			if (IsHashInStore(normalizedHash))
 			{
-				OutputDebugString(L"Normalized password matched existing hash");
+				eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED, 4, SetOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str(), L"The normalized password was found in the banned password store");
 				return FALSE;
 			}
 
 			OutputDebugString(L"Normalized password did not match any existing hashes");
 		}
 
-		OutputDebugString(L"Password validated");
+		eventlog::getInstance().logw(EVENTLOG_SUCCESS, MSG_PASSWORD_APPROVED, 3, SetOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
 	}
-	catch (std::exception const& e) 
+	catch (std::exception const& e)
 	{
-		OutputDebugString(L"Unexpected Error");
-		OutputDebugStringA(e.what());
+		eventlog::getInstance().log(EVENTLOG_ERROR_TYPE, MSG_UNEXPECTEDERROR, 1, e.what());
 
-		if (GetRegValue(L"AllowPasswordOnError", 1) == 0)
+		if ((SetOperation && GetRegValue(L"AllowPasswordSetOnError", 1) == 0) || (!SetOperation && GetRegValue(L"AllowPasswordChangeOnError", 1) == 0))
 		{
-			OutputDebugString(L"AllowPasswordOnError is zero, denying password change request");
+			eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_ON_ERROR, 1, SetOperation ? L"set" : L"change");
 			return FALSE;
 		}
 	}
 	catch (...)
 	{
-		OutputDebugString(L"Unexpected Error");
-		if (GetRegValue(L"AllowPasswordOnError", 1) == 0)
+		eventlog::getInstance().logw(EVENTLOG_ERROR_TYPE, MSG_UNEXPECTEDERROR, 1, L"No exception information was available");
+
+		if ((SetOperation && GetRegValue(L"AllowPasswordSetOnError", 1) == 0) || (!SetOperation && GetRegValue(L"AllowPasswordChangeOnError", 1) == 0))
 		{
-			OutputDebugString(L"AllowPasswordOnError is zero, denying password change request");
+			eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_ON_ERROR, 1, SetOperation ? L"set" : L"change");
 			return FALSE;
 		}
 	}
 
-	OutputDebugString(L"*******PasswordFilter Exit");
-
 	return TRUE;
 }
-
