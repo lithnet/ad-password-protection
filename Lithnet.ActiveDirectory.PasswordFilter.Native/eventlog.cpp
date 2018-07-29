@@ -5,7 +5,6 @@
 
 HANDLE hlog;
 
-
 eventlog::eventlog()
 {
 	hlog = RegisterEventSource(NULL, L"LithnetPasswordFilter");
@@ -35,7 +34,7 @@ void eventlog::logw(WORD severity, DWORD eventID, int argCount, ...)
 
 	if (hlog)
 	{
-		ReportEvent(hlog, EVENTLOG_SUCCESS, 0, eventID, NULL, argCount, 0, (LPCWSTR*)pInsertStrings, NULL);
+		ReportEvent(hlog, severity, 0, eventID, NULL, argCount, 0, (LPCWSTR*)pInsertStrings, NULL);
 	}
 
 	delete[] pInsertStrings;
@@ -58,7 +57,7 @@ void eventlog::log(WORD severity, DWORD eventID, int argCount, ...)
 
 	if (hlog)
 	{
-		ReportEventA(hlog, EVENTLOG_SUCCESS, 0, eventID, NULL, argCount, 0, (LPCSTR*)pInsertStrings, NULL);
+		ReportEventA(hlog, severity, 0, eventID, NULL, argCount, 0, (LPCSTR*)pInsertStrings, NULL);
 	}
 
 	delete[] pInsertStrings;

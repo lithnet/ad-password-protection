@@ -41,7 +41,7 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 		std::wstring fullName(FullName->Buffer, FullName->Length / sizeof(WCHAR));
 
 		//odprintf(L"Password: %s", password.c_str());
-		DebugBreak();
+		//DebugBreak();
 		eventlog::getInstance().logw(EVENTLOG_INFORMATION_TYPE, MSG_PROCESSING_REQUEST, 3, SetOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
 
 		if ((SetOperation && GetRegValue(L"ValidateRawPasswordOnSet", 1) != 0) || (!SetOperation && GetRegValue(L"ValidateRawPasswordOnChange", 1) != 0))

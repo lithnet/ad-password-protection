@@ -32,7 +32,22 @@ std::wstring ToHexString(TInputIter first, TInputIter last, bool use_uppercase =
 	return ss.str();
 }
 
-std::wstring Sha1Hash(std::wstring input)
+std::wstring Sha1Hash(const std::wstring input)
+{
+	std::string result;
+	int lenW = WideCharToMultiByte(CP_UTF8, 0, input.c_str(), input.length(), NULL, 0, NULL, NULL);
+	if (lenW > 0)
+	{
+		char* output = new char[lenW];
+		WideCharToMultiByte(CP_UTF8, 0, input.c_str(), input.length(), output, lenW, NULL, NULL);
+
+		return Sha1Hash(std::string(output, lenW));
+	}
+
+	throw std::system_error(GetLastError(), std::system_category(), "WideCharToMultiByte failed");
+}
+
+std::wstring Sha1Hash(const std::string input)
 {
 	BYTE *pbHash = NULL;
 	HCRYPTPROV hProv = 0;
@@ -54,10 +69,8 @@ std::wstring Sha1Hash(std::wstring input)
 		{
 			throw std::system_error(GetLastError(), std::system_category(), "CryptCreateHash failed");
 		}
-
-		const BYTE* data = (const BYTE*)input.c_str();
-
-		if (!CryptHashData(hHash, data, (DWORD)sizeof(data), 0))
+		
+		if (!CryptHashData(hHash, (BYTE*)(input.c_str()), static_cast<DWORD>(input.size()), 0))
 		{
 			throw std::system_error(GetLastError(), std::system_category(), "CryptHashData failed");
 		}
