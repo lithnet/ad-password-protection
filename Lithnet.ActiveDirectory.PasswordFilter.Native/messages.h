@@ -100,3 +100,13 @@
 //
 #define MSG_PASSWORD_REJECTED_ON_ERROR   ((DWORD)0x80000007L)
 
+//
+// MessageId: MSG_WIN32ERROR
+//
+// MessageText:
+//
+// An unexpected error occurred.
+// %1 %2
+//
+#define MSG_WIN32ERROR                   ((DWORD)0xC0020008L)
+

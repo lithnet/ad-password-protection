@@ -59,10 +59,22 @@ std::wstring Sha1Hash(const std::string input)
 		DWORD dwCount = sizeof(DWORD);
 
 		std::wstring hashedStringResult;
-
+		throw std::system_error(5, std::system_category(), "CryptAcquireContext failed");
 		if (!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL, 0))
 		{
-			throw std::system_error(GetLastError(), std::system_category(), "CryptAcquireContext failed");
+			DWORD result = GetLastError();
+			if (result == NTE_BAD_KEYSET)
+			{
+				// No default container was found. Attempt to create it.
+				if (!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL, CRYPT_NEWKEYSET))
+				{
+					throw std::system_error(GetLastError(), std::system_category(), "CryptAcquireContext create container failed");
+				}
+			}
+			else 
+			{
+				throw std::system_error(GetLastError(), std::system_category(), "CryptAcquireContext failed");
+			}
 		}
 
 		if (!CryptCreateHash(hProv, CALG_SHA1, 0, 0, &hHash))

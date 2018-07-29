@@ -67,3 +67,13 @@ SymbolicName=MSG_PASSWORD_REJECTED_ON_ERROR
 Language=English
 The password %1 request was rejected. The module is configured to deny password requests when an error occurs.
 .
+
+MessageId=0x8
+Severity=Error
+Facility=Runtime
+SymbolicName=MSG_WIN32ERROR
+Language=English
+An unexpected error occurred.
+Error code: %1
+Message: %2
+.

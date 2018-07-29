@@ -39,7 +39,7 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 		std::wstring password(Password->Buffer, Password->Length / sizeof(WCHAR));
 		std::wstring accountName(AccountName->Buffer, AccountName->Length / sizeof(WCHAR));
 		std::wstring fullName(FullName->Buffer, FullName->Length / sizeof(WCHAR));
-		
+
 		eventlog::getInstance().logw(EVENTLOG_INFORMATION_TYPE, MSG_PROCESSING_REQUEST, 3, SetOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
 
 		if ((SetOperation && GetRegValue(L"ValidateRawPasswordOnSet", 1) != 0) || (!SetOperation && GetRegValue(L"ValidateRawPasswordOnChange", 1) != 0))
@@ -79,8 +79,23 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 
 		eventlog::getInstance().logw(EVENTLOG_SUCCESS, MSG_PASSWORD_APPROVED, 3, SetOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
 	}
+	catch (std::system_error const& e)
+	{
+		OutputDebugString(L"Win32 error caught");
+
+		eventlog::getInstance().log(EVENTLOG_ERROR_TYPE, MSG_WIN32ERROR, 2, std::to_string(e.code().value()).c_str(), e.what());
+
+		if ((SetOperation && GetRegValue(L"AllowPasswordSetOnError", 1) == 0) || (!SetOperation && GetRegValue(L"AllowPasswordChangeOnError", 1) == 0))
+		{
+			OutputDebugString(L"Rejected password because AllowPasswordSetOnError or AllowPasswordChangeOnError was non-zero");
+			eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_ON_ERROR, 1, SetOperation ? L"set" : L"change");
+			return FALSE;
+		}
+	}
 	catch (std::exception const& e)
 	{
+		OutputDebugString(L"Other error caught");
+
 		eventlog::getInstance().log(EVENTLOG_ERROR_TYPE, MSG_UNEXPECTEDERROR, 1, e.what());
 
 		if ((SetOperation && GetRegValue(L"AllowPasswordSetOnError", 1) == 0) || (!SetOperation && GetRegValue(L"AllowPasswordChangeOnError", 1) == 0))
@@ -92,6 +107,8 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 	}
 	catch (...)
 	{
+		OutputDebugString(L"Unexpected error caught");
+
 		eventlog::getInstance().logw(EVENTLOG_ERROR_TYPE, MSG_UNEXPECTEDERROR, 1, L"No exception information was available");
 
 		if ((SetOperation && GetRegValue(L"AllowPasswordSetOnError", 1) == 0) || (!SetOperation && GetRegValue(L"AllowPasswordChangeOnError", 1) == 0))

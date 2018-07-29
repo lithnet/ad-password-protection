@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="*"
+           Name="Active Directory Password Filter"
+           Language="1033"
+           Version="1.0.0.0"
+           Manufacturer="Lithnet"
+           UpgradeCode="0b7695f2-5eeb-4331-923a-ca56af5f1eb1">
+    <Package InstallerVersion="200"
+             Compressed="yes"
+             InstallScope="perMachine"
+             InstallPrivileges="elevated"
+             Manufacturer="Lithnet"
+             Platform="x64"/>
+    <!--Version="!(bind.FileVersion.fil8af462b935f3462f99441454d9154d51)"-->
+
+
+    <MajorUpgrade Schedule="afterInstallExecute" DowngradeErrorMessage="A later version of [ProductName] is already installed"  AllowSameVersionUpgrades="yes"/>
+    <Media Id="1" Cabinet="Cab1.cab" EmbedCab="yes" />
+
+    
+    <Property Id="STOREDIR" Secure="yes">
+      <RegistrySearch Id="r152002c8c7b14f7f9d56a3129a68cac3"
+                      Root="HKLM"
+                      Key="Software\Lithnet\PasswordFilter"
+                      Name="SHA1Store"
+                      Type="raw"
+                      Win64="yes" />
+    </Property>
+
+    <UI>
+      <UIRef Id="WixUI_Common" />
+      <Property Id="WixUI_Mode" Value="Custom" />
+
+      <TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8" />
+      <TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="9" Bold="yes" />
+      <TextStyle Id="WixUI_Font_Title"  FaceName="Tahoma" Size="9" Bold="yes" />
+
+      <Property Id="DefaultUIFont" Value="WixUI_Font_Normal" />
+      <DialogRef Id="ProgressDlg" />
+      <DialogRef Id="ErrorDlg" />
+      <DialogRef Id="FilesInUse" />
+      <DialogRef Id="FatalError" />
+      <DialogRef Id="UserExit" />
+
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="StoreDialog">NOT Installed</Publish>
+
+      <Publish Dialog="StoreDialog" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="1"></Publish>
+      <Publish Dialog="StoreDialog" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Order="1"></Publish>
+
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="StoreDialog" Order="1"></Publish>
+      <Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999">1</Publish>
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="EndDialog" Value="Return" Order="2"></Publish>
+    </UI>
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="System64Folder" Name="System64Folder" />
+      <Directory Id="ProgramFiles64Folder" >
+        <Directory Id="LITHNETROOTDIR" Name="Lithnet">
+          <Directory Id="APPROOTDIR" Name="Active Directory Password Filter">
+            <Directory Id="STOREDIR" Name="Store"/>
+          </Directory>
+        </Directory>
+      </Directory>
+    </Directory>
+
+    <Feature Id="Filter" Title="Lithnet Active Directory Password Filter" Level="1">
+      <ComponentGroupRef Id="FilterDLL" />
+    </Feature>
+
+    <DirectoryRef Id="System64Folder">
+      <Component Id="cmpa437d95c32f74a17b1b7537b38cd382a" Win64="yes" Guid="*">
+        <File Id="fil8af462b935f3462f99441454d9154d51" KeyPath="yes" Source="$(var.Lithnet.ActiveDirectory.PasswordFilter.Native.TargetPath)" />
+      </Component>
+      <Component Id="cmp6339c3e064764797a0b4d747e655cb0e" Guid="*">
+        <RegistryKey Root="HKLM"
+                     Key="System\CurrentControlSet\Control\Lsa"
+                     Action="none">
+          <RegistryValue Type="multiString" Action="append" Name="Notification Packages" Value="lithnetpwdf"/>
+        </RegistryKey>
+      </Component>
+      <Component Id="cmp35ae4dbf6f7143f39ff05a2bbe7b4abf" Guid="*">
+        <RegistryKey Root="HKLM"
+                     Key="Software\Lithnet\PasswordFilter"
+                     Action="createAndRemoveOnUninstall">
+          <RegistryValue Type="integer" Action="write" Name="Disabled" Value="0"/>
+          <RegistryValue Type="string" Action="write" Name="SHA1Store" Value="[STOREDIR]"/>
+        </RegistryKey>
+      </Component>
+    </DirectoryRef>
+
+    <DirectoryRef Id="APPROOTDIR">
+      <Component Id="cmpbdb687be91364145aa7b44287c14be38" Win64="yes" Guid="*">
+        <File Id="filf07cd47e42574680b2b8a690abac7806" KeyPath="yes" Source="$(var.Lithnet.ActiveDirectory.PasswordFilter.Native.ProjectDir)messages.dll" />
+      </Component>
+
+      <Component Id="cmp3d41c57e8c89436994a394bf0b01c885" Guid="*" Win64="yes" >
+        <Util:EventSource xmlns:Util="http://schemas.microsoft.com/wix/UtilExtension"
+                          Name="LithnetPasswordFilter" Log="Application" EventMessageFile="[APPROOTDIR]messages.dll" SupportsErrors="yes" SupportsInformationals="yes" SupportsWarnings="yes" KeyPath="yes"/>
+      </Component>
+    </DirectoryRef>
+
+    <ComponentGroup Id="FilterDLL">
+      <ComponentRef Id="cmpa437d95c32f74a17b1b7537b38cd382a"/>
+      <ComponentRef Id="cmp6339c3e064764797a0b4d747e655cb0e"/>
+      <ComponentRef Id="cmp35ae4dbf6f7143f39ff05a2bbe7b4abf"/>
+      <ComponentRef Id="cmpbdb687be91364145aa7b44287c14be38"/>
+      <ComponentRef Id="cmp3d41c57e8c89436994a394bf0b01c885"/>
+    </ComponentGroup>
+  </Product>
+</Wix>
+
+<!--
+
+
+
+   
+
+    <Property Id="FIMINSTALLDIR" Secure="yes">
+      <RegistrySearch Id="FimInstallDirFromRegistry" Root="HKLM" Key="SYSTEM\CurrentControlSet\services\FIMSynchronizationService\Parameters" Name="Path" Type="directory" />
+    </Property>
+
+    <Property Id="SYNCVERSION" Secure="yes">
+      <DirectorySearch Id="MiiserverVersion" Path="[FIMINSTALLDIR]">
+        <DirectorySearch Id="binFolder" AssignToProperty="no" Path="bin">
+          <FileSearch Name="miiserver.exe" MinVersion="4.1.3441.0" />
+        </DirectorySearch>
+      </DirectorySearch>
+    </Property>
+
+    <Condition Message="This application requires Microsoft Forefront Identity Manager 2010 R2 4.1.3441 or later to be installed">
+      <![CDATA[Installed OR SYNCVERSION]]>
+    </Condition>
+
+    <UI>
+      <UIRef Id="WixUI_Common" />
+      <Property Id="WixUI_Mode" Value="Custom" />
+
+      <TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8" />
+      <TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="9" Bold="yes" />
+      <TextStyle Id="WixUI_Font_Title"  FaceName="Tahoma" Size="9" Bold="yes" />
+
+      <Property Id="DefaultUIFont" Value="WixUI_Font_Normal" />
+      <DialogRef Id="ProgressDlg" />
+      <DialogRef Id="ErrorDlg" />
+      <DialogRef Id="FilesInUse" />
+      <DialogRef Id="FatalError" />
+      <DialogRef Id="UserExit" />
+
+      <Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999">1</Publish>
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="EndDialog" Value="Return" Order="2"></Publish>
+
+    </UI>
+     Installation Paths
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="FIMINSTALLDIR" ComponentGuidGenerationSeed="a8b2ba5aac4b4f878f02555da6fc1b0e">
+        <Directory Id="FIMEXTENSIONS" Name="Extensions" />
+        <Directory Id="FIMUISHELL" Name="UIShell">
+          <Directory Id="FIMXMLS" Name="XMLs">
+            <Directory Id="PACKAGEDMAS" Name="PackagedMAs" />
+          </Directory>
+        </Directory>
+      </Directory>
+    </Directory>
+
+     Features 
+
+    <Feature Id="Ecma" Title="Lithnet GoogleApps MA" Level="1">
+      <ComponentGroupRef Id="ManagementAgent" />
+      <ComponentGroupRef Id="PackagedMA" />
+    </Feature>
+
+
+    <ComponentGroup Id="ManagementAgent" Directory="FIMEXTENSIONS">
+      <Component Id="cmp8a9e5af61c92140dc8ffe8d0c5582983e" Guid="*">
+        <File Id="fil5b9cfe4cd7264abeb19e2fe4d5072516" KeyPath="yes" Source="$(var.Lithnet.GoogleApps.MA.TargetDir)Lithnet.GoogleApps.MA.dll" />
+      </Component>
+      <Component Id="cmp98919d8ad8b843e78884dd1b2f9438f2" Guid="*">
+        <File Id="fil3f08b54124624891984b871ba9cf2a96" KeyPath="yes" Source="$(var.Lithnet.GoogleApps.MA.TargetDir)Lithnet.GoogleApps.MA.pdb" />
+      </Component>
+    </ComponentGroup>
+
+    <ComponentGroup Id="PackagedMA" Directory="PACKAGEDMAS">
+      <Component Id="cmpb07bbc05eebf498d96761ad9a3adbafd" Guid="*" >
+        <File Id="fil6995479451494f2b9b6076c0fd5061c9" KeyPath="yes" Source="$(var.Lithnet.GoogleApps.MA.ProjectDir)Lithnet.GoogleApps.MA.PackagedMA.xml" />
+      </Component>
+    </ComponentGroup>
+  </Product>
+</Wix>
+  -->
