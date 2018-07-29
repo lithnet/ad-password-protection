@@ -33,7 +33,7 @@ Severity=Warning
 Facility=Io
 SymbolicName=MSG_AGENT_DISABLED
 Language=English
-The Lithnet AD Password Filter is currently disabled and has not evaluated the password change request
+The Lithnet AD Password Filter is currently disabled and has not evaluated the password change request.
 .
 
 MessageId=0x4
@@ -41,7 +41,7 @@ Severity=Success
 Facility=System
 SymbolicName=MSG_PROCESSING_REQUEST
 Language=English
-Processing a password %1 request for %2 (%3)
+Processing a password %1 request for %2 (%3).
 .
 
 MessageId=0x5
@@ -49,7 +49,7 @@ Severity=Success
 Facility=System
 SymbolicName=MSG_PASSWORD_APPROVED
 Language=English
-The password %1 request for %2 (%3) was approved
+The password %1 request for %2 (%3) was approved.
 .
 
 MessageId=0x6

@@ -80,6 +80,11 @@ std::wstring Sha1Hash(const std::string input)
 			throw std::system_error(GetLastError(), std::system_category(), "CryptGetHashParam failed");
 		}
 
+		if (dwHashLen != 20)
+		{
+			throw std::system_error(GetLastError(), std::system_category(), "CryptGetHashParam returned an invalid hash length");
+		}
+
 		pbHash = new BYTE[dwHashLen];
 
 		if (!CryptGetHashParam(hHash, HP_HASHVAL, pbHash, &dwHashLen, 0))
@@ -88,6 +93,11 @@ std::wstring Sha1Hash(const std::string input)
 		}
 
 		hashedStringResult = ToHexString(pbHash, pbHash + dwHashLen);
+
+		if (hashedStringResult.length() != 40)
+		{
+			throw std::system_error(GetLastError(), std::system_category(), "hashedStringResult returned an invalid hash length");
+		}
 
 		if (pbHash)
 		{

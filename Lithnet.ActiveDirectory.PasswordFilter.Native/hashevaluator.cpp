@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "hasher.h"
 #include <fstream>
-#include "utils.h"
 #include "registry.h"
 #include "hashevaluator.h"
 #include "shlwapi.h"
@@ -9,8 +8,6 @@
 bool IsHashInStore(std::wstring hash)
 {
 	std::wstring range = hash.substr(0, 5);
-	odprintf(L"Range: %s", range.c_str());
-
 	return IsHashInStore(hash, range);
 }
 
@@ -40,8 +37,6 @@ std::wstring GetStoreFileName(std::wstring range)
 	path += range;
 	path += L".txt";
 
-	odprintf(L"Store file: %s", path.c_str());
-	
 	return path;
 }
 
@@ -54,7 +49,6 @@ bool IsHashInFile(std::wstring filename, std::wstring hash)
 	{
 		if (line.compare(hash) == 0)
 		{
-			odprintf(L"Matched hash: %s", line);
 			return true;
 		}
 	}
