@@ -187,17 +187,15 @@ BOOLEAN ProcessPasswordComplexityThreshold(std::wstring password, std::wstring a
 				continue;
 			}
 
-			if (std::iswalpha(c))
+			if (std::iswupper(c))
 			{
-				if (iswupper(c))
-				{
-					hasUpper = true;
-				}
-				else
-				{
-					hasLower = true;
-				}
+				hasUpper = true;
+				continue;
+			}
 
+			if (std::iswlower(c))
+			{
+				hasLower = true;
 				continue;
 			}
 
@@ -281,19 +279,17 @@ BOOLEAN ProcessPasswordComplexityPoints(std::wstring password, std::wstring acco
 				continue;
 			}
 
-			if (std::iswalpha(c))
+			if (std::iswupper(c))
 			{
-				if (iswupper(c))
-				{
-					pointCount += perUpper;
-					hasUpper = true;
-				}
-				else
-				{
-					pointCount += perLower;
-					hasLower = true;
-				}
+				pointCount += perUpper;
+				hasUpper = true;
+				continue;
+			}
 
+			if (std::iswlower(c))
+			{
+				pointCount += perLower;
+				hasLower = true;
 				continue;
 			}
 
