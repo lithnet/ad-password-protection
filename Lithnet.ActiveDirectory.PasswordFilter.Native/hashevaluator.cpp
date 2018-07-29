@@ -24,7 +24,7 @@ bool IsHashInStore(std::wstring hash, std::wstring range)
 
 std::wstring GetStoreFileName(std::wstring range)
 {
-	std::wstring path = GetRegValue(L"SHA1Store", L"");
+	std::wstring path = GetRegValue(L"Store", L"");
 
 	if (path == L"")
 	{
@@ -34,6 +34,7 @@ std::wstring GetStoreFileName(std::wstring range)
 	if (!path.empty() && *path.rbegin() != '\\')
 		path += '\\';
 
+	path += L"SHA1\\";
 	path += range;
 	path += L".txt";
 

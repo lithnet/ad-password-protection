@@ -52,22 +52,6 @@ Language=English
 The password %1 request for %2 (%3) was approved.
 .
 
-MessageId=0x6
-Severity=Warning
-Facility=System
-SymbolicName=MSG_PASSWORD_REJECTED
-Language=English
-The password %1 request for %2 (%3) was rejected. %4
-.
-
-MessageId=0x7
-Severity=Warning
-Facility=System
-SymbolicName=MSG_PASSWORD_REJECTED_ON_ERROR
-Language=English
-The password %1 request was rejected. The module is configured to deny password requests when an error occurs.
-.
-
 MessageId=0x8
 Severity=Error
 Facility=Runtime
@@ -76,4 +60,76 @@ Language=English
 An unexpected error occurred.
 Error code: %1
 Message: %2
+.
+
+MessageId=0x2001
+Severity=Warning
+Facility=System
+SymbolicName=MSG_PASSWORD_REJECTED_ON_ERROR
+Language=English
+The password %1 request was rejected. The module is configured to deny password requests when an error occurs.
+.
+
+MessageId=0x2002
+Severity=Warning
+Facility=System
+SymbolicName=MSG_PASSWORD_REJECTED_MINLENGTH
+Language=English
+The password %1 request for %2 (%3) was rejected because its length (%4) did not meet the minimum configured length (%5).
+.
+
+MessageId=0x2003
+Severity=Warning
+Facility=System
+SymbolicName=MSG_PASSWORD_REJECTED_BANNED
+Language=English
+The password %1 request for %2 (%3) was rejected because it matched a password in the banned password store.
+.
+
+MessageId=0x2004
+Severity=Warning
+Facility=System
+SymbolicName=MSG_PASSWORD_REJECTED_BANNED_NORMALIZED
+Language=English
+The password %1 request for %2 (%3) was rejected after being normalized because it matched a password in the banned password store.
+.
+
+MessageId=0x2005
+Severity=Warning
+Facility=System
+SymbolicName=MSG_PASSWORD_REJECTED_APPROVAL_REGEX
+Language=English
+The password %1 request for %2 (%3) was rejected because it did not match the approval regular expression.
+.
+
+MessageId=0x2006
+Severity=Warning
+Facility=System
+SymbolicName=MSG_PASSWORD_REJECTED_REJECTION_REGEX
+Language=English
+The password %1 request for %2 (%3) was rejected because it matched the rejection regular expression.
+.
+
+MessageId=0x2007
+Severity=Warning
+Facility=System
+SymbolicName=MSG_PASSWORD_REJECTED_NOT_ENOUGH_POINTS
+Language=English
+The password %1 request for %2 (%3) was rejected because it achieved only %4 of the required %5 complexity points.
+.
+
+MessageId=0x2008
+Severity=Warning
+Facility=System
+SymbolicName=MSG_PASSWORD_REJECTED_BELOW_THRESHOLD
+Language=English
+The password %1 request for %2 (%3) was rejected because it did not meet the complexity requirements of a password below the specified threshold.
+.
+
+MessageId=0x2009
+Severity=Warning
+Facility=System
+SymbolicName=MSG_PASSWORD_REJECTED_ABOVE_THRESHOLD
+Language=English
+The password %1 request for %2 (%3) was rejected because it did not meet the complexity requirements of a password above the specified threshold.
 .

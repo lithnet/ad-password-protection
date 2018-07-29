@@ -41,7 +41,7 @@ extern "C" __declspec(dllexport) void CALLBACK Log(HWND hwnd, HINSTANCE hinst, L
 		MultiByteToWideChar(CP_ACP, 0, lpszCmdLine, -1, commandLineArgument, lenW);
 	}
 
-	eventlog::getInstance().logw(EVENTLOG_ERROR_TYPE, MSG_PASSWORD_REJECTED, 1, commandLineArgument);
+	eventlog::getInstance().logw(EVENTLOG_ERROR_TYPE, MSG_PASSWORD_REJECTED_BANNED, 1, commandLineArgument);
 	OutputDebugString(L"*******Log exit");
 }
 

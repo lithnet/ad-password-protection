@@ -59,7 +59,7 @@ std::wstring Sha1Hash(const std::string input)
 		DWORD dwCount = sizeof(DWORD);
 
 		std::wstring hashedStringResult;
-		throw std::system_error(5, std::system_category(), "CryptAcquireContext failed");
+
 		if (!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL, 0))
 		{
 			DWORD result = GetLastError();

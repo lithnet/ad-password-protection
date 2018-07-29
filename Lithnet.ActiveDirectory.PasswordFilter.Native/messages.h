@@ -83,13 +83,15 @@
 #define MSG_PASSWORD_APPROVED            ((DWORD)0x00000005L)
 
 //
-// MessageId: MSG_PASSWORD_REJECTED
+// MessageId: MSG_WIN32ERROR
 //
 // MessageText:
 //
-// The password %1 request for %2 (%3) was rejected. %4
+// An unexpected error occurred.
+// Error code: %1
+// Message: %2
 //
-#define MSG_PASSWORD_REJECTED            ((DWORD)0x80000006L)
+#define MSG_WIN32ERROR                   ((DWORD)0xC0020008L)
 
 //
 // MessageId: MSG_PASSWORD_REJECTED_ON_ERROR
@@ -98,15 +100,77 @@
 //
 // The password %1 request was rejected. The module is configured to deny password requests when an error occurs.
 //
-#define MSG_PASSWORD_REJECTED_ON_ERROR   ((DWORD)0x80000007L)
+#define MSG_PASSWORD_REJECTED_ON_ERROR   ((DWORD)0x80002001L)
 
 //
-// MessageId: MSG_WIN32ERROR
+// MessageId: MSG_PASSWORD_REJECTED_MINLENGTH
 //
 // MessageText:
 //
-// An unexpected error occurred.
-// %1 %2
+// The password %1 request for %2 (%3) was rejected because its length (%4) did not meet the minimum configured length (%5).
 //
-#define MSG_WIN32ERROR                   ((DWORD)0xC0020008L)
+#define MSG_PASSWORD_REJECTED_MINLENGTH  ((DWORD)0x80002002L)
+
+//
+// MessageId: MSG_PASSWORD_REJECTED_BANNED
+//
+// MessageText:
+//
+// The password %1 request for %2 (%3) was rejected because it matched a password in the banned password store.
+//
+#define MSG_PASSWORD_REJECTED_BANNED     ((DWORD)0x80002003L)
+
+//
+// MessageId: MSG_PASSWORD_REJECTED_BANNED_NORMALIZED
+//
+// MessageText:
+//
+// The password %1 request for %2 (%3) was rejected after being normalized because it matched a password in the banned password store.
+//
+#define MSG_PASSWORD_REJECTED_BANNED_NORMALIZED ((DWORD)0x80002004L)
+
+//
+// MessageId: MSG_PASSWORD_REJECTED_APPROVAL_REGEX
+//
+// MessageText:
+//
+// The password %1 request for %2 (%3) was rejected because it did not match the approval regular expression.
+//
+#define MSG_PASSWORD_REJECTED_APPROVAL_REGEX ((DWORD)0x80002005L)
+
+//
+// MessageId: MSG_PASSWORD_REJECTED_REJECTION_REGEX
+//
+// MessageText:
+//
+// The password %1 request for %2 (%3) was rejected because it matched the rejection regular expression.
+//
+#define MSG_PASSWORD_REJECTED_REJECTION_REGEX ((DWORD)0x80002006L)
+
+//
+// MessageId: MSG_PASSWORD_REJECTED_NOT_ENOUGH_POINTS
+//
+// MessageText:
+//
+// The password %1 request for %2 (%3) was rejected because it achieved only %4 of the required %5 complexity points.
+//
+#define MSG_PASSWORD_REJECTED_NOT_ENOUGH_POINTS ((DWORD)0x80002007L)
+
+//
+// MessageId: MSG_PASSWORD_REJECTED_BELOW_THRESHOLD
+//
+// MessageText:
+//
+// The password %1 request for %2 (%3) was rejected because it did not meet the complexity requirements of a password below the specified threshold.
+//
+#define MSG_PASSWORD_REJECTED_BELOW_THRESHOLD ((DWORD)0x80002008L)
+
+//
+// MessageId: MSG_PASSWORD_REJECTED_ABOVE_THRESHOLD
+//
+// MessageText:
+//
+// The password %1 request for %2 (%3) was rejected because it did not meet the complexity requirements of a password above the specified threshold.
+//
+#define MSG_PASSWORD_REJECTED_ABOVE_THRESHOLD ((DWORD)0x80002009L)
 

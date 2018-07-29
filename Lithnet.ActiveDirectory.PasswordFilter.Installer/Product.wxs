@@ -23,7 +23,7 @@
       <RegistrySearch Id="r152002c8c7b14f7f9d56a3129a68cac3"
                       Root="HKLM"
                       Key="Software\Lithnet\PasswordFilter"
-                      Name="SHA1Store"
+                      Name="Store"
                       Type="raw"
                       Win64="yes" />
     </Property>
@@ -84,7 +84,7 @@
                      Key="Software\Lithnet\PasswordFilter"
                      Action="createAndRemoveOnUninstall">
           <RegistryValue Type="integer" Action="write" Name="Disabled" Value="0"/>
-          <RegistryValue Type="string" Action="write" Name="SHA1Store" Value="[STOREDIR]"/>
+          <RegistryValue Type="string" Action="write" Name="Store" Value="[STOREDIR]"/>
         </RegistryKey>
       </Component>
     </DirectoryRef>
