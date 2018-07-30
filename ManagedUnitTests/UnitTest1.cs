@@ -15,9 +15,9 @@ namespace ManagedUnitTests
             RegistryKey key = Registry.LocalMachine.CreateSubKey("Software\\Policies\\Lithnet\\PasswordFilter", true);
             key.SetValue("Disabled", 0);
 
-            using (PrincipalContext ctx = new PrincipalContext(ContextType.Machine))
+            using (PrincipalContext ctx = new PrincipalContext(ContextType.Domain))
             {
-                UserPrincipal p = UserPrincipal.FindByIdentity(ctx, "test");
+                UserPrincipal p = UserPrincipal.FindByIdentity(ctx, "pwntest");
 
                 if (p == null)
                 {
@@ -32,7 +32,7 @@ namespace ManagedUnitTests
                     {
                         p.SetPassword(Guid.NewGuid().ToString());
                     }
-                    catch(PasswordException e)
+                    catch (PasswordException e)
                     {
                         Debug.WriteLine("password did not meet requirements");
                     }
@@ -50,9 +50,9 @@ namespace ManagedUnitTests
 
             try
             {
-                using (PrincipalContext ctx = new PrincipalContext(ContextType.Machine))
+                using (PrincipalContext ctx = new PrincipalContext(ContextType.Domain))
                 {
-                    UserPrincipal p = UserPrincipal.FindByIdentity(ctx, "test");
+                    UserPrincipal p = UserPrincipal.FindByIdentity(ctx, "pwntest");
 
                     if (p == null)
                     {
@@ -61,13 +61,16 @@ namespace ManagedUnitTests
 
                     Stopwatch timer = new Stopwatch();
                     timer.Start();
-                    try
+                    for (int i = 0; i < 100; i++)
                     {
-                        p.SetPassword(Guid.NewGuid().ToString());
-                    }
-                    catch (PasswordException e)
-                    {
-                        Debug.WriteLine("password did not meet requirements");
+                        try
+                        {
+                            p.SetPassword(Guid.NewGuid().ToString());
+                        }
+                        catch (PasswordException e)
+                        {
+                            Debug.WriteLine("password did not meet requirements");
+                        }
                     }
 
                     Debug.WriteLine($"Duration: {timer.Elapsed}");
