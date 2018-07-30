@@ -36,15 +36,18 @@ std::wstring Sha1Hash(const std::wstring input)
 {
 	std::string result;
 	int lenW = WideCharToMultiByte(CP_UTF8, 0, input.c_str(), input.length(), NULL, 0, NULL, NULL);
+
 	if (lenW > 0)
 	{
 		char* output = new char[lenW];
-		WideCharToMultiByte(CP_UTF8, 0, input.c_str(), input.length(), output, lenW, NULL, NULL);
 
-		return Sha1Hash(std::string(output, lenW));
+		if (WideCharToMultiByte(CP_UTF8, 0, input.c_str(), input.length(), output, lenW, NULL, NULL) > 0)
+		{
+			return Sha1Hash(std::string(output, lenW));
+		}
 	}
-
-	throw std::system_error(GetLastError(), std::system_category(), "WideCharToMultiByte failed");
+	
+	throw std::system_error(GetLastError(), std::system_category(), "Sha1Hash/WideCharToMultiByte failed");
 }
 
 std::wstring Sha1Hash(const std::string input)
@@ -71,7 +74,7 @@ std::wstring Sha1Hash(const std::string input)
 					throw std::system_error(GetLastError(), std::system_category(), "CryptAcquireContext create container failed");
 				}
 			}
-			else 
+			else
 			{
 				throw std::system_error(GetLastError(), std::system_category(), "CryptAcquireContext failed");
 			}
@@ -81,7 +84,7 @@ std::wstring Sha1Hash(const std::string input)
 		{
 			throw std::system_error(GetLastError(), std::system_category(), "CryptCreateHash failed");
 		}
-		
+
 		if (!CryptHashData(hHash, (BYTE*)(input.c_str()), static_cast<DWORD>(input.size()), 0))
 		{
 			throw std::system_error(GetLastError(), std::system_category(), "CryptHashData failed");
