@@ -8,8 +8,8 @@
 #include <bcrypt.h>
 #include <locale>
 
-template<typename TInputIter>
-std::wstring ToHexString(TInputIter first, TInputIter last, bool use_uppercase = true, bool insert_spaces = false)
+template<typename T>
+std::wstring ToHexString(T first, T last, bool use_uppercase = true, bool insert_spaces = false)
 {
 	std::wstringstream ss;
 	ss << std::hex << std::setfill(L'0');
@@ -32,7 +32,7 @@ std::wstring ToHexString(TInputIter first, TInputIter last, bool use_uppercase =
 	return ss.str();
 }
 
-std::wstring Sha1Hash(const std::wstring input)
+std::wstring GetSha1HashString(const std::wstring input)
 {
 	std::string result;
 	int lenW = WideCharToMultiByte(CP_UTF8, 0, input.c_str(), input.length(), NULL, 0, NULL, NULL);
@@ -43,16 +43,69 @@ std::wstring Sha1Hash(const std::wstring input)
 
 		if (WideCharToMultiByte(CP_UTF8, 0, input.c_str(), input.length(), output, lenW, NULL, NULL) > 0)
 		{
-			return Sha1Hash(std::string(output, lenW));
+			return GetSha1HashString(std::string(output, lenW));
 		}
 	}
-	
+
 	throw std::system_error(GetLastError(), std::system_category(), "Sha1Hash/WideCharToMultiByte failed");
 }
 
-std::wstring Sha1Hash(const std::string input)
+std::wstring GetSha1HashString(const std::string input)
 {
 	BYTE *pbHash = NULL;
+
+	try 
+	{
+		pbHash = new BYTE[20];
+
+		GetSha1HashBytes(input, pbHash, 20);
+
+		std::wstring hashedStringResult = ToHexString(pbHash, pbHash + 20);
+
+		if (hashedStringResult.length() != 40)
+		{
+			throw std::system_error(GetLastError(), std::system_category(), "hashedStringResult returned an invalid hash length");
+		}
+
+		if (pbHash)
+		{
+			delete[] pbHash;
+		}
+
+		return hashedStringResult;
+	}
+	catch (...)
+	{
+		if (pbHash)
+		{
+			delete[] pbHash;
+		}
+
+		throw;
+	}
+}
+
+void GetSha1HashBytes(const std::wstring input, BYTE* hashBytes, int hashBytesLength)
+{
+	std::string result;
+	int lenW = WideCharToMultiByte(CP_UTF8, 0, input.c_str(), input.length(), NULL, 0, NULL, NULL);
+
+	if (lenW > 0)
+	{
+		char* output = new char[lenW];
+
+		if (WideCharToMultiByte(CP_UTF8, 0, input.c_str(), input.length(), output, lenW, NULL, NULL) > 0)
+		{
+			GetSha1HashBytes(std::string(output, lenW), hashBytes, hashBytesLength);
+			return;
+		}
+	}
+
+	throw std::system_error(GetLastError(), std::system_category(), "Sha1Hash/WideCharToMultiByte failed");
+}
+
+void GetSha1HashBytes(const std::string input, BYTE* hashBytes, int hashBytesLength)
+{
 	HCRYPTPROV hProv = 0;
 	HCRYPTHASH hHash = 0;
 
@@ -60,8 +113,6 @@ std::wstring Sha1Hash(const std::string input)
 	{
 		DWORD dwHashLen;
 		DWORD dwCount = sizeof(DWORD);
-
-		std::wstring hashedStringResult;
 
 		if (!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL, 0))
 		{
@@ -100,23 +151,14 @@ std::wstring Sha1Hash(const std::string input)
 			throw std::system_error(GetLastError(), std::system_category(), "CryptGetHashParam returned an invalid hash length");
 		}
 
-		pbHash = new BYTE[dwHashLen];
+		if (hashBytesLength != dwHashLen)
+		{
+			throw std::invalid_argument("An insufficent buffer was allocated for the hash");
+		}
 
-		if (!CryptGetHashParam(hHash, HP_HASHVAL, pbHash, &dwHashLen, 0))
+		if (!CryptGetHashParam(hHash, HP_HASHVAL, hashBytes, &dwHashLen, 0))
 		{
 			throw std::system_error(GetLastError(), std::system_category(), "CryptGetHashParam failed");
-		}
-
-		hashedStringResult = ToHexString(pbHash, pbHash + dwHashLen);
-
-		if (hashedStringResult.length() != 40)
-		{
-			throw std::system_error(GetLastError(), std::system_category(), "hashedStringResult returned an invalid hash length");
-		}
-
-		if (pbHash)
-		{
-			delete[] pbHash;
 		}
 
 		if (hHash)
@@ -128,16 +170,9 @@ std::wstring Sha1Hash(const std::string input)
 		{
 			CryptReleaseContext(hProv, 0);
 		}
-
-		return hashedStringResult;
 	}
 	catch (...)
 	{
-		if (pbHash)
-		{
-			delete[] pbHash;
-		}
-
 		if (hHash)
 		{
 			CryptDestroyHash(hHash);

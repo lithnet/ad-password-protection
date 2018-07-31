@@ -1,4 +1,5 @@
 std::wstring ToLowerInvariant(const std::wstring & s);
+
 std::wstring NormalizePassword(std::wstring password);
 
 static void ltrim(std::wstring &s, std::wstring charsToRemove);

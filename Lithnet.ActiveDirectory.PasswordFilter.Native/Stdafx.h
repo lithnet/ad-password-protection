@@ -11,7 +11,6 @@
 // Windows Header Files:
 #include <windows.h>
 #include <winnt.h>
-//#include <NTSecAPI.h>
 #include <stdio.h>
 #include <winternl.h>
 #include <string>
