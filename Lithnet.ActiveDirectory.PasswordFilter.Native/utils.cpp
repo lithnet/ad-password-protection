@@ -5,6 +5,7 @@
 #include <iostream>
 #include "eventlog.h"
 #include "messages.h"
+#include "esestore.h"
 
 void __cdecl odprintf(const wchar_t *format, ...)
 {
@@ -82,6 +83,13 @@ void CheckPassword(const LPSTR &lpszCmdLine, BOOL SetPassword)
 
 	OutputDebugString(L"*******Check password leave");
 }
+
+extern "C" __declspec(dllexport) void CALLBACK TestESE(HWND hwnd, HINSTANCE hinst, LPSTR lpszCmdLine, int nCmdShow)
+{
+	DebugBreak();
+	esestore::getInstance();
+}
+
 
 extern "C" __declspec(dllexport) void CALLBACK CheckPasswordSet(HWND hwnd, HINSTANCE hinst, LPSTR lpszCmdLine, int nCmdShow)
 {

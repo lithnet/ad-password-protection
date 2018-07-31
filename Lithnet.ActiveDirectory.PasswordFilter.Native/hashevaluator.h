@@ -2,6 +2,8 @@
 
 bool IsPasswordInStore(std::wstring password);
 
+bool IsHashInEseStore(BYTE * hash);
+
 bool IsHashInStore(std::wstring hash);
 
 bool IsHashInStorev1(BYTE * hash);

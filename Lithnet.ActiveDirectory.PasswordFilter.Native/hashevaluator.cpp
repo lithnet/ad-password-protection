@@ -9,6 +9,7 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
+#include "esestore.h"
 
 const int STORE_VERSION = 1;
 
@@ -47,7 +48,7 @@ bool IsPasswordInStore(std::wstring password)
 
 		GetSha1HashBytes(password, hash, 20);
 		
-		bool result = IsHashInStorev1(hash);
+		bool result = IsHashInEseStore(hash);
 
 		if (hash)
 		{
@@ -65,6 +66,11 @@ bool IsPasswordInStore(std::wstring password)
 
 		throw;
 	}
+}
+
+bool IsHashInEseStore(BYTE* hash)
+{
+	return esestore::getInstance().IsHashInDb(hash);
 }
 
 bool IsHashInStore(std::wstring hash)
