@@ -47,8 +47,31 @@ bool IsPasswordInStore(std::wstring password)
 		hash = new BYTE[20];
 
 		GetSha1HashBytes(password, hash, 20);
-		
-		bool result = IsHashInEseStore(hash);
+
+		bool result;
+
+		int hashCheckMode = GetRegValue(L"HashCheckMode", 0);
+
+		if (hashCheckMode == 0)
+		{
+			OutputDebugString(L"IsHashInEseStore");
+			result = IsHashInEseStore(hash);
+		}
+		else if (hashCheckMode == 1)
+		{
+			OutputDebugString(L"IsHashInStorev1");
+			result = IsHashInStorev1(hash);
+		}
+		else if (hashCheckMode == 2)
+		{
+			OutputDebugString(L"IsHashInStore");
+			result = IsHashInStore(password);
+		}
+		else if (hashCheckMode == 3)
+		{
+			OutputDebugString(L"IsHashInStorev2");
+			result = IsHashInStorev2(hash);
+		}
 
 		if (hash)
 		{
@@ -81,8 +104,14 @@ bool IsHashInStore(std::wstring hash)
 
 bool IsHashInStorev1(BYTE* hash)
 {
-	std::wstring range = ToHexString(hash, hash + 6).substr(0, 5);
+	std::wstring range = ToHexString(hash, hash + 3).substr(0, 5);
 	return IsHashInStorev1(hash, range);
+}
+
+bool IsHashInStorev2(BYTE* hash)
+{
+	std::wstring range = ToHexString(hash, hash + 2);
+	return IsHashInStorev2(hash, range);
 }
 
 bool IsHashInStore(std::wstring hash, std::wstring range)
@@ -95,7 +124,7 @@ bool IsHashInStore(std::wstring hash, std::wstring range)
 		return false;
 	}
 
-	return IsHashInFileBS(path, hash);
+	return IsHashInTextFileBinarySearch(path, hash);
 }
 
 bool IsHashInStorev1(BYTE* hash, std::wstring range)
@@ -108,7 +137,21 @@ bool IsHashInStorev1(BYTE* hash, std::wstring range)
 		return false;
 	}
 
-	return IsHashInFilev1(path, hash);
+	return IsHashInBinaryFilev1(path, hash);
+}
+
+
+bool IsHashInStorev2(BYTE* hash, std::wstring range)
+{
+	std::wstring path = GetStoreFileNamev2(range);
+
+	DWORD attr = GetFileAttributes(path.c_str());
+	if (attr == INVALID_FILE_ATTRIBUTES || (attr & FILE_ATTRIBUTE_DIRECTORY))
+	{
+		return false;
+	}
+
+	return IsHashInBinaryFilev2(path, hash);
 }
 
 
@@ -150,7 +193,26 @@ std::wstring GetStoreFileNamev1(std::wstring range)
 	return path;
 }
 
-bool IsHashInFile(std::wstring filename, std::wstring hash)
+std::wstring GetStoreFileNamev2(std::wstring range)
+{
+	std::wstring path = GetRegValue(L"Store", L"");
+
+	if (path == L"")
+	{
+		throw new std::invalid_argument("No store path was specified");
+	}
+
+	if (!path.empty() && *path.rbegin() != '\\')
+		path += '\\';
+
+	path += L"v2\\";
+	path += range;
+	path += L".db";
+
+	return path;
+}
+
+bool IsHashInFileTextFile(std::wstring filename, std::wstring hash)
 {
 	return false;
 	std::wifstream file(filename.c_str());
@@ -195,7 +257,7 @@ bool hasBOM(std::ifstream & is)
 	return true; // This file contains a BOM for UTF-8.
 }
 
-bool IsHashInFileBS(std::wstring filename, std::wstring hash)
+bool IsHashInTextFileBinarySearch(std::wstring filename, std::wstring hash)
 {
 	char hashVal[SHA1_HASH_LENGTH + 1];
 
@@ -248,7 +310,7 @@ bool IsHashInFileBS(std::wstring filename, std::wstring hash)
 	return false;
 }
 
-bool IsHashInFilev1(std::wstring filename, BYTE* hashBytes)
+bool IsHashInBinaryFilev1(std::wstring filename, BYTE* hashBytes)
 {
 	std::ifstream file(filename.c_str(), std::ios::binary | std::ios::in);
 
@@ -267,9 +329,11 @@ bool IsHashInFilev1(std::wstring filename, BYTE* hashBytes)
 	}
 
 	lastRow = ((length) / (SHA1_BINARY_HASH_LENGTH));
+	int loops = 0;
 
 	while (firstRow <= lastRow)
 	{
+		loops++;
 		currentRow = (firstRow + lastRow + 1) / 2;
 		file.seekg((currentRow * (SHA1_BINARY_HASH_LENGTH)), std::ios::beg);
 
@@ -292,6 +356,62 @@ bool IsHashInFilev1(std::wstring filename, BYTE* hashBytes)
 			return true;
 		}
 	}
+
+	OutputDebugString(std::to_wstring(loops).c_str());
+
+	return false;
+}
+
+bool IsHashInBinaryFilev2(std::wstring filename, BYTE* hashBytes)
+{
+	std::ifstream file(filename.c_str(), std::ios::binary | std::ios::in);
+
+	int firstRow = 0, currentRow = 0, lastRow = 0, length = 0;
+	bool found = false;
+	OutputDebugString(L"Searching");
+	OutputDebugString(filename.c_str());
+	file.seekg(0, std::ios::end);
+	length = file.tellg();
+
+	file.seekg(0, std::ios::beg);
+
+	BYTE* partialHashBytes = hashBytes + 2;
+
+	if (length % SHA1_PARTIAL_BINARY_HASH_LENGTH != 0)
+	{
+		throw new std::invalid_argument("The hash store is corrupted");
+	}
+
+	lastRow = ((length) / (SHA1_PARTIAL_BINARY_HASH_LENGTH));
+	int loops = 0;
+
+	while (firstRow <= lastRow)
+	{
+		loops++;
+		currentRow = (firstRow + lastRow + 1) / 2;
+		file.seekg((currentRow * (SHA1_PARTIAL_BINARY_HASH_LENGTH)), std::ios::beg);
+
+		char rowData[SHA1_PARTIAL_BINARY_HASH_LENGTH];
+
+		file.read(rowData, SHA1_PARTIAL_BINARY_HASH_LENGTH);
+
+		int result = memcmp(rowData, partialHashBytes, SHA1_PARTIAL_BINARY_HASH_LENGTH);
+
+		if (result < 0)
+		{
+			firstRow = currentRow + 1;
+		}
+		else if (result > 0)
+		{
+			lastRow = currentRow - 1;
+		}
+		else
+		{
+			return true;
+		}
+	}
+
+	OutputDebugString(std::to_wstring(loops).c_str());
 
 	return false;
 }

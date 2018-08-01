@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "registry.h"
 #include "settings.h"
+
 DWORD GetPolicyOrSettingsValue(HKEY hKeyPolicy, HKEY hKeySettings, const std::wstring &strValueName, DWORD defaultValue)
 {
 	DWORD dwBufferSize(sizeof(DWORD));
@@ -119,6 +120,24 @@ HKEY OpenSettingsKey()
 {
 	HKEY hKey;
 	LSTATUS result = RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Lithnet\\PasswordFilter", 0, KEY_READ, &hKey);
+
+	if (result == ERROR_FILE_NOT_FOUND)
+	{
+		return 0;
+	}
+
+	if (result != ERROR_SUCCESS)
+	{
+		return 0;
+	}
+
+	return hKey;
+}
+
+HKEY OpenSettingsKeyWritable()
+{
+	HKEY hKey;
+	LSTATUS result = RegCreateKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Lithnet\\PasswordFilter", 0,NULL, NULL, NULL, NULL, &hKey, NULL);
 
 	if (result == ERROR_FILE_NOT_FOUND)
 	{

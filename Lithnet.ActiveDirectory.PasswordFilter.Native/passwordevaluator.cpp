@@ -55,28 +55,6 @@ BOOLEAN ProcessPassword(std::wstring password, std::wstring accountName, std::ws
 	return TRUE;
 }
 
-//BOOLEAN ProcessPasswordRaw(std::wstring password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation)
-//{
-//	if ((setOperation && GetRegValue(L"ValidateRawPasswordOnSet", 1) != 0) || (!setOperation && GetRegValue(L"ValidateRawPasswordOnChange", 1) != 0))
-//	{
-//		std::wstring hash = GetSha1HashString(password.c_str());
-//		std::wstring message = std::wstring(L"Checking raw password in range ");
-//		message.append(hash.substr(0, 5));
-//		OutputDebugString(message.c_str());
-//
-//		if (IsHashInStore(hash))
-//		{
-//			OutputDebugString(L"Rejected password as it was found in the banned store");
-//			eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_BANNED, 3, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
-//			return FALSE;
-//		}
-//
-//		OutputDebugString(L"Raw password did not match any existing hashes");
-//	}
-//
-//	return TRUE;
-//}
-
 BOOLEAN ProcessPasswordRaw(std::wstring password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation)
 {
 	if ((setOperation && GetRegValue(L"ValidateRawPasswordOnSet", 1) != 0) || (!setOperation && GetRegValue(L"ValidateRawPasswordOnChange", 1) != 0))

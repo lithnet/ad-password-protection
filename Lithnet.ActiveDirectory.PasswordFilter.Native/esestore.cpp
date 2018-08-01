@@ -8,6 +8,8 @@ JET_INSTANCE instance;
 JET_DBID dbid;
 JET_COLUMNDEF* column;
 int columnid;
+bool closed = false;
+bool attached = false;
 
 esestore::esestore()
 {
@@ -86,7 +88,9 @@ esestore::esestore()
 		throw new std::exception("JetAttachDatabase failed");
 	}
 
-	result = JetOpenDatabase(sessionid, esedb.c_str(), NULL, &dbid, 0);
+	attached = true;
+
+	result = JetOpenDatabase(sessionid, esedb.c_str(), NULL, &dbid, JET_bitDbReadOnly);
 
 	if (result != 0)
 	{
@@ -114,24 +118,29 @@ esestore::esestore()
 
 bool esestore::IsHashInDb(BYTE* hash)
 {
+	if (closed)
+	{
+		throw std::exception("Cannot access a closed store");
+	}
+
 	JET_ERR result;
 
 	result = JetSetCurrentIndex(sessionid, tableid, NULL);
-	
+
 	if (result != 0)
 	{
 		throw new std::exception("JetSetCurrentIndex failed");
 	}
 
-	result = JetMakeKey(sessionid, tableid, hash, 20, JET_bitNewKey); 
+	result = JetMakeKey(sessionid, tableid, hash, 20, JET_bitNewKey);
 	if (result != 0)
 	{
 		throw new std::exception("JetMakeKey failed");
 	}
 
-	result = JetSeek(sessionid, tableid, JET_bitSeekEQ);
+	result = JetSeek(sessionid, tableid, JET_bitSeekEQ | JET_bitCheckUniqueness);
 
-	if (result == JET_errSuccess)
+	if (result == JET_wrnUniqueKey || result == JET_errSuccess)
 	{
 		return true;
 	}
@@ -146,6 +155,16 @@ bool esestore::IsHashInDb(BYTE* hash)
 
 esestore::~esestore()
 {
+	if (!closed)
+	{
+		Close();
+	}
+}
+
+void esestore::Close()
+{
+	closed = true;
+
 	if (column)
 	{
 		delete[] column;
@@ -154,6 +173,16 @@ esestore::~esestore()
 	if (tableid)
 	{
 		JetCloseTable(sessionid, tableid);
+	}
+
+	if (dbid)
+	{
+		JetCloseDatabase(sessionid, dbid, 0);
+	}
+
+	if (attached)
+	{
+		JetDetachDatabase(sessionid, NULL);
 	}
 
 	if (sessionid)

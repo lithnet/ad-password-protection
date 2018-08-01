@@ -8,6 +8,7 @@
 #include "eventlog.h"
 #include "messages.h"
 #include "passwordevaluator.h"
+#include "esestore.h"
 
 extern "C" __declspec(dllexport)  BOOLEAN __stdcall InitializeChangeNotify(void)
 {
@@ -21,6 +22,11 @@ extern "C" __declspec(dllexport) NTSTATUS __stdcall PasswordChangeNotify(
 )
 {
 	return 0L;
+}
+
+extern "C" __declspec(dllexport) void __stdcall CloseDb()
+{
+	esestore::getInstance().Close();
 }
 
 extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
@@ -47,7 +53,10 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 		std::wstring fullName(FullName->Buffer, FullName->Length / sizeof(WCHAR));
 		
 		BOOLEAN result = ProcessPassword(password, accountName, fullName, SetOperation);
-
+		
+		//SecureZeroMemory(Password->Buffer, Password->MaximumLength);
+		//SecureZeroMemory(&password, password.size() * sizeof(wchar_t));
+		
 		if (simulate)
 		{
 			return TRUE;
