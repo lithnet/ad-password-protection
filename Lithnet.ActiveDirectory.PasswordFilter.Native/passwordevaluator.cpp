@@ -12,7 +12,7 @@
 BOOLEAN ProcessPassword(std::wstring password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation)
 {
 	eventlog::getInstance().logw(EVENTLOG_INFORMATION_TYPE, MSG_PROCESSING_REQUEST, 3, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
-	//DebugBreak();
+
 	if (!ProcessPasswordLength(password, accountName, fullName, setOperation))
 	{
 		return FALSE;

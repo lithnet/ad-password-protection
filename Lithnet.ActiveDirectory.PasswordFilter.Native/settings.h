@@ -1,5 +1,5 @@
 #pragma once
-static class settings
+class settings
 {
 public:
 	settings();
@@ -9,6 +9,3 @@ private:
 	void MyMethod();
 
 };
-
-
-

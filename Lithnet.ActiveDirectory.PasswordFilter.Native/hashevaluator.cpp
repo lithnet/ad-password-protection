@@ -50,7 +50,7 @@ bool IsPasswordInStore(std::wstring password)
 
 		bool result;
 
-		int hashCheckMode = GetRegValue(L"HashCheckMode", 0);
+		int hashCheckMode = GetRegValue(L"HashCheckMode", 3);
 
 		if (hashCheckMode == 0)
 		{
