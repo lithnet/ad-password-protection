@@ -7,7 +7,7 @@ using Microsoft.Win32;
 namespace ManagedUnitTests
 {
     [TestClass]
-    public class UnitTest1
+    public class LsassTests
     {
         [TestMethod]
         public void TestDurationPolicyEnabled()
