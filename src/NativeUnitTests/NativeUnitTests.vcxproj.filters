@@ -50,5 +50,8 @@
     <ClCompile Include="PasswordEvaluatorNameTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="PasswordEvaluatorComplexityThresholdTests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
