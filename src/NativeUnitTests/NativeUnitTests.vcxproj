@@ -160,6 +160,7 @@
     <ClInclude Include="TestUtils.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="PasswordEvaluatorComplexityPointsTests.cpp" />
     <ClCompile Include="PasswordEvaluatorComplexityThresholdTests.cpp" />
     <ClCompile Include="PasswordEvaluatorNameTests.cpp" />
     <ClCompile Include="PasswordEvaluatorRegexApproveTests.cpp" />
