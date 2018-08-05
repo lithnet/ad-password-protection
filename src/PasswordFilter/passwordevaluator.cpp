@@ -112,7 +112,7 @@ BOOLEAN ProcessPasswordNormalized(LPWSTR password, std::wstring accountName, std
 			SecureZeroMemory(normalizedPassword, wcslen(normalizedPassword));
 			delete normalizedPassword;
 
-			return result;
+			return !result;
 		}
 		catch (...)
 		{
