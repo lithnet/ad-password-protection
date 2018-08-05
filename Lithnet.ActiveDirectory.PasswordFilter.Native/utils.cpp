@@ -7,6 +7,18 @@
 #include "messages.h"
 #include "esestore.h"
 
+
+wchar_t* UnicodeStringToWcharArray(UNICODE_STRING str)
+{
+	int len = str.Length + 1;
+
+	wchar_t* ar = new wchar_t[len];
+
+	wcsncpy_s(ar, len, str.Buffer, str.Length);
+
+	return ar;
+}
+
 void __cdecl odprintf(const wchar_t *format, ...)
 {
 	wchar_t buf[4096], *p = buf;

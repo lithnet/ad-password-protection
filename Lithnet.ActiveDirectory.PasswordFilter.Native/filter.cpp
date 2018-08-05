@@ -2,13 +2,13 @@
 #include "hasher.h"
 #include "filter.h"
 #include "utils.h"
-#include "stringnormalization.h"
 #include "hashevaluator.h"
 #include "registry.h"
 #include "eventlog.h"
 #include "messages.h"
 #include "passwordevaluator.h"
 #include "esestore.h"
+#include <cstring>
 
 extern "C" __declspec(dllexport)  BOOLEAN __stdcall InitializeChangeNotify(void)
 {
@@ -24,11 +24,6 @@ extern "C" __declspec(dllexport) NTSTATUS __stdcall PasswordChangeNotify(
 	return 0L;
 }
 
-extern "C" __declspec(dllexport) void __stdcall CloseDb()
-{
-	esestore::getInstance().Close();
-}
-
 extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 	PUNICODE_STRING AccountName,
 	PUNICODE_STRING FullName,
@@ -37,6 +32,7 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 )
 {
 	bool simulate = false;
+	LPWSTR password;
 
 	try {
 
@@ -46,22 +42,35 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 			return TRUE;
 		}
 
+		if (Password->Length <= 0)
+		{
+			return FALSE;
+		}
+
 		simulate = GetRegValue(L"Simulate", 0) != 0;
 
-		std::wstring password(Password->Buffer, Password->Length / sizeof(WCHAR));
 		std::wstring accountName(AccountName->Buffer, AccountName->Length / sizeof(WCHAR));
 		std::wstring fullName(FullName->Buffer, FullName->Length / sizeof(WCHAR));
+
+		password = UnicodeStringToWcharArray(*Password);
+
+		BOOLEAN result = ProcessPassword(password , accountName, fullName, SetOperation);
 		
-		BOOLEAN result = ProcessPassword(password, accountName, fullName, SetOperation);
-		
-		//SecureZeroMemory(Password->Buffer, Password->MaximumLength);
-		//SecureZeroMemory(&password, password.size() * sizeof(wchar_t));
-		
+		if (password)
+		{
+			SecureZeroMemory(password, wcslen(password));
+		}
+
+		if (Password && Password->Length > 0)
+		{
+			SecureZeroMemory(Password->Buffer, Password->Length);
+		}
+
 		if (simulate)
 		{
 			return TRUE;
 		}
-		else 
+		else
 		{
 			return result;
 		}
@@ -71,6 +80,16 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 		OutputDebugString(L"Win32 error caught");
 
 		eventlog::getInstance().log(EVENTLOG_ERROR_TYPE, MSG_WIN32ERROR, 2, std::to_string(e.code().value()).c_str(), e.what());
+
+		if (password)
+		{
+			SecureZeroMemory(password, wcslen(password));
+		}
+
+		if (Password && Password->Length > 0)
+		{
+			SecureZeroMemory(Password->Buffer, Password->Length);
+		}
 
 		if ((SetOperation && GetRegValue(L"AllowPasswordSetOnError", 1) == 0) || (!SetOperation && GetRegValue(L"AllowPasswordChangeOnError", 1) == 0))
 		{
@@ -85,6 +104,16 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 
 		eventlog::getInstance().log(EVENTLOG_ERROR_TYPE, MSG_UNEXPECTEDERROR, 1, e.what());
 
+		if (password)
+		{
+			SecureZeroMemory(password, wcslen(password));
+		}
+
+		if (Password && Password->Length > 0)
+		{
+			SecureZeroMemory(Password->Buffer, Password->Length);
+		}
+
 		if ((SetOperation && GetRegValue(L"AllowPasswordSetOnError", 1) == 0) || (!SetOperation && GetRegValue(L"AllowPasswordChangeOnError", 1) == 0))
 		{
 			OutputDebugString(L"Rejected password because AllowPasswordSetOnError or AllowPasswordChangeOnError was non-zero");
@@ -97,6 +126,16 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 		OutputDebugString(L"Unexpected error caught");
 
 		eventlog::getInstance().logw(EVENTLOG_ERROR_TYPE, MSG_UNEXPECTEDERROR, 1, L"No exception information was available");
+
+		if (password)
+		{
+			SecureZeroMemory(password, wcslen(password));
+		}
+
+		if (Password && Password->Length > 0)
+		{
+			SecureZeroMemory(Password->Buffer, Password->Length);
+		}
 
 		if ((SetOperation && GetRegValue(L"AllowPasswordSetOnError", 1) == 0) || (!SetOperation && GetRegValue(L"AllowPasswordChangeOnError", 1) == 0))
 		{

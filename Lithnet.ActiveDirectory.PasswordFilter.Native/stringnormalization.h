@@ -1,15 +1,15 @@
-std::wstring ToLowerInvariant(const std::wstring & s);
+#pragma once
 
-std::wstring NormalizePassword(std::wstring password);
+static const wchar_t* CHARS_TO_TRIM = L"0123456789!@#$%^&*()[]{};:'\"<>,.?\\/+=_-~`";
+static const wchar_t* CHARS_TO_REPLACE = L"$s5s0o4a3e@a^a(c6g1i7t8b2z!i";
+static const wchar_t* CHARS_TO_DELETE = L"_.+";
 
-static void ltrim(std::wstring &s, std::wstring charsToRemove);
+LPWSTR ToLowerInvariant(LPWSTR s);
 
-static void rtrim(std::wstring &s, std::wstring charsToRemove);
+__declspec(dllexport) LPWSTR NormalizePassword(LPWSTR password);
 
-static void ltrim(std::wstring &s);
+void RemoveWhiteSpace(LPWSTR s);
 
-static void rtrim(std::wstring &s);
+void RemoveChars(LPWSTR s, const wchar_t * charsToRemove);
 
-static void trim(std::wstring &s);
-
-std::wstring RemoveWhiteSpace(const std::wstring & str);
+void ReplaceChars(LPWSTR s, const wchar_t * charPairsToReplace);

@@ -9,7 +9,7 @@
 #include <regex>
 #include <cwctype>
 
-BOOLEAN ProcessPassword(std::wstring password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation)
+BOOLEAN ProcessPassword(LPWSTR password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation)
 {
 	eventlog::getInstance().logw(EVENTLOG_INFORMATION_TYPE, MSG_PROCESSING_REQUEST, 3, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
 
@@ -55,12 +55,11 @@ BOOLEAN ProcessPassword(std::wstring password, std::wstring accountName, std::ws
 	return TRUE;
 }
 
-BOOLEAN ProcessPasswordRaw(std::wstring password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation)
+BOOLEAN ProcessPasswordRaw(LPWSTR password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation)
 {
 	if ((setOperation && GetRegValue(L"ValidateRawPasswordOnSet", 1) != 0) || (!setOperation && GetRegValue(L"ValidateRawPasswordOnChange", 1) != 0))
 	{
-		std::wstring message = std::wstring(L"Checking raw password");
-		OutputDebugString(message.c_str());
+		OutputDebugString(L"Checking raw password");
 
 		if (IsPasswordInStore(password))
 		{
@@ -75,30 +74,50 @@ BOOLEAN ProcessPasswordRaw(std::wstring password, std::wstring accountName, std:
 	return TRUE;
 }
 
-BOOLEAN ProcessPasswordNormalized(std::wstring password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation)
+BOOLEAN ProcessPasswordNormalized(LPWSTR password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation)
 {
 	if ((setOperation && GetRegValue(L"ValidateNormalizedPasswordOnSet", 1) != 0) || (!setOperation && GetRegValue(L"ValidateNormalizedPasswordOnChange", 1) != 0))
 	{
-		std::wstring normalizedPassword = NormalizePassword(password);
-		std::wstring normalizedHash = GetSha1HashString(normalizedPassword.c_str());
-		std::wstring message = std::wstring(L"Checking normalized password in range ");
-		message.append(normalizedHash.substr(0, 5));
-		OutputDebugString(message.c_str());
+		LPWSTR normalizedPassword;
+		bool result = TRUE;
 
-		if (IsHashInStore(normalizedHash))
+		try
 		{
-			OutputDebugString(L"Rejected normalized password as it was found in the banned store");
-			eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_BANNED_NORMALIZED, 3, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
-			return FALSE;
-		}
+			normalizedPassword = NormalizePassword(password);
+			OutputDebugString(L"Checking normalized password");
 
-		OutputDebugString(L"Normalized password did not match any existing hashes");
+			result = IsPasswordInStore(normalizedPassword);
+			if (result)
+			{
+				OutputDebugString(L"Rejected normalized password as it was found in the banned store");
+				eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_BANNED_NORMALIZED, 3, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
+			}
+			else 
+			{
+				OutputDebugString(L"Normalized password did not match any existing hashes");
+			}
+
+			SecureZeroMemory(normalizedPassword, wcslen(normalizedPassword));
+			delete normalizedPassword;
+
+			return result;
+		}
+		catch (...)
+		{
+			if (normalizedPassword)
+			{
+				SecureZeroMemory(normalizedPassword, wcslen(normalizedPassword));
+				delete normalizedPassword;
+			}
+
+			throw;
+		}
 	}
 
 	return TRUE;
 }
 
-BOOLEAN ProcessPasswordLength(std::wstring password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation)
+BOOLEAN ProcessPasswordLength(LPWSTR password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation)
 {
 	int minLength = GetRegValue(L"MinimumLength", 0);
 
@@ -106,10 +125,10 @@ BOOLEAN ProcessPasswordLength(std::wstring password, std::wstring accountName, s
 	{
 		OutputDebugString(L"Checking minimum length");
 
-		if (password.length() < minLength)
+		if (wcslen(password) < minLength)
 		{
 			OutputDebugString(L"Rejected password as it did not meet the minimum length requirements");
-			eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_MINLENGTH, 5, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str(), std::to_wstring(password.length()).c_str(), std::to_wstring(minLength).c_str());
+			eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_MINLENGTH, 5, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str(), std::to_wstring(wcslen(password)).c_str(), std::to_wstring(minLength).c_str());
 			return FALSE;
 		}
 
@@ -119,7 +138,7 @@ BOOLEAN ProcessPasswordLength(std::wstring password, std::wstring accountName, s
 	return TRUE;
 }
 
-BOOLEAN ProcessPasswordRegexApprove(std::wstring password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation)
+BOOLEAN ProcessPasswordRegexApprove(LPWSTR password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation)
 {
 	std::wstring regex = GetRegValue(L"RegexApprove", L"");
 
@@ -142,7 +161,7 @@ BOOLEAN ProcessPasswordRegexApprove(std::wstring password, std::wstring accountN
 	return TRUE;
 }
 
-BOOLEAN ProcessPasswordRegexReject(std::wstring password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation)
+BOOLEAN ProcessPasswordRegexReject(LPWSTR password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation)
 {
 	std::wstring regex = GetRegValue(L"RegexReject", L"");
 
@@ -165,7 +184,7 @@ BOOLEAN ProcessPasswordRegexReject(std::wstring password, std::wstring accountNa
 	return TRUE;
 }
 
-BOOLEAN ProcessPasswordComplexityThreshold(std::wstring password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation)
+BOOLEAN ProcessPasswordComplexityThreshold(LPWSTR password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation)
 {
 	int threshold = GetRegValue(L"ComplexityThreshold", 0);
 
@@ -177,7 +196,9 @@ BOOLEAN ProcessPasswordComplexityThreshold(std::wstring password, std::wstring a
 		bool hasSymbol = false;
 		bool hasNumber = false;
 
-		for (wchar_t& c : password) {
+		for (size_t i = 0; i < wcslen(password); i++)
+		{
+			WCHAR c = password[i];
 
 			if (std::iswdigit(c))
 			{
@@ -200,7 +221,7 @@ BOOLEAN ProcessPasswordComplexityThreshold(std::wstring password, std::wstring a
 			hasSymbol = true;
 		}
 
-		if (password.length() < threshold)
+		if (wcslen(password) < threshold)
 		{
 			bool requiresLower = (GetRegValue(L"BelowThresholdRequiresLower", 0) != 0);
 			bool requiresUpper = (GetRegValue(L"BelowThresholdRequiresUpper", 0) != 0);
@@ -240,7 +261,7 @@ BOOLEAN ProcessPasswordComplexityThreshold(std::wstring password, std::wstring a
 	return TRUE;
 }
 
-BOOLEAN ProcessPasswordComplexityPoints(std::wstring password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation)
+BOOLEAN ProcessPasswordComplexityPoints(LPWSTR password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation)
 {
 	int requiredPoints = GetRegValue(L"ComplexityPointsRequired", 0);
 
@@ -267,7 +288,9 @@ BOOLEAN ProcessPasswordComplexityPoints(std::wstring password, std::wstring acco
 
 		int pointCount = 0;
 
-		for (wchar_t& c : password) {
+		for (size_t i = 0; i < wcslen(password); i++)
+		{
+			WCHAR c = password[i];
 			pointCount += perChar;
 
 			if (std::iswdigit(c))

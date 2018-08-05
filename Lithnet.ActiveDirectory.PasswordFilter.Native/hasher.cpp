@@ -32,79 +32,91 @@ std::wstring ToHexString(T first, T last, bool use_uppercase = true, bool insert
 	return ss.str();
 }
 
-std::wstring GetSha1HashString(const std::wstring input)
+//
+//std::wstring GetSha1HashString(const std::wstring input)
+//{
+//	std::string result;
+//	int lenW = WideCharToMultiByte(CP_UTF8, 0, input.c_str(), input.length(), NULL, 0, NULL, NULL);
+//
+//	if (lenW > 0)
+//	{
+//		char* output = new char[lenW];
+//
+//		if (WideCharToMultiByte(CP_UTF8, 0, input.c_str(), input.length(), output, lenW, NULL, NULL) > 0)
+//		{
+//			return GetSha1HashString(std::string(output, lenW));
+//		}
+//	}
+//
+//	throw std::system_error(GetLastError(), std::system_category(), "Sha1Hash/WideCharToMultiByte failed");
+//}
+//
+//std::wstring GetSha1HashString(const std::string input)
+//{
+//	BYTE *pbHash = NULL;
+//
+//	try 
+//	{
+//		pbHash = new BYTE[20];
+//
+//		GetSha1HashBytes(input, pbHash, 20);
+//
+//		std::wstring hashedStringResult = ToHexString(pbHash, pbHash + 20);
+//
+//		if (hashedStringResult.length() != 40)
+//		{
+//			throw std::system_error(GetLastError(), std::system_category(), "hashedStringResult returned an invalid hash length");
+//		}
+//
+//		if (pbHash)
+//		{
+//			delete[] pbHash;
+//		}
+//
+//		return hashedStringResult;
+//	}
+//	catch (...)
+//	{
+//		if (pbHash)
+//		{
+//			delete[] pbHash;
+//		}
+//
+//		throw;
+//	}
+//}
+
+void GetSha1HashBytes(LPWSTR input, BYTE* hashBytes, int hashBytesLength)
 {
-	std::string result;
-	int lenW = WideCharToMultiByte(CP_UTF8, 0, input.c_str(), input.length(), NULL, 0, NULL, NULL);
+	int lenW = WideCharToMultiByte(CP_UTF8, 0, input, -1, NULL, 0, NULL, NULL);
 
 	if (lenW > 0)
 	{
 		char* output = new char[lenW];
 
-		if (WideCharToMultiByte(CP_UTF8, 0, input.c_str(), input.length(), output, lenW, NULL, NULL) > 0)
+		if (WideCharToMultiByte(CP_UTF8, 0, input, -1, output, lenW, NULL, NULL) > 0)
 		{
-			return GetSha1HashString(std::string(output, lenW));
-		}
-	}
+			GetSha1HashBytes(output, hashBytes, hashBytesLength);
+			if (output)
+			{
+				SecureZeroMemory(output, lenW);
+				delete[] output;
+			}
 
-	throw std::system_error(GetLastError(), std::system_category(), "Sha1Hash/WideCharToMultiByte failed");
-}
-
-std::wstring GetSha1HashString(const std::string input)
-{
-	BYTE *pbHash = NULL;
-
-	try 
-	{
-		pbHash = new BYTE[20];
-
-		GetSha1HashBytes(input, pbHash, 20);
-
-		std::wstring hashedStringResult = ToHexString(pbHash, pbHash + 20);
-
-		if (hashedStringResult.length() != 40)
-		{
-			throw std::system_error(GetLastError(), std::system_category(), "hashedStringResult returned an invalid hash length");
-		}
-
-		if (pbHash)
-		{
-			delete[] pbHash;
-		}
-
-		return hashedStringResult;
-	}
-	catch (...)
-	{
-		if (pbHash)
-		{
-			delete[] pbHash;
-		}
-
-		throw;
-	}
-}
-
-void GetSha1HashBytes(const std::wstring input, BYTE* hashBytes, int hashBytesLength)
-{
-	std::string result;
-	int lenW = WideCharToMultiByte(CP_UTF8, 0, input.c_str(), input.length(), NULL, 0, NULL, NULL);
-
-	if (lenW > 0)
-	{
-		char* output = new char[lenW];
-
-		if (WideCharToMultiByte(CP_UTF8, 0, input.c_str(), input.length(), output, lenW, NULL, NULL) > 0)
-		{
-			GetSha1HashBytes(std::string(output, lenW), hashBytes, hashBytesLength);
 			return;
 		}
+
+		if (output)
+		{
+			SecureZeroMemory(output, lenW);
+			delete[] output;
+		}
 	}
 
 	throw std::system_error(GetLastError(), std::system_category(), "Sha1Hash/WideCharToMultiByte failed");
 }
 
-void GetSha1HashBytes(const std::string input, BYTE* hashBytes, int hashBytesLength)
+void GetSha1HashBytes(LPSTR input, BYTE* hashBytes, int hashBytesLength)
 {
 	HCRYPTPROV hProv = 0;
 	HCRYPTHASH hHash = 0;
@@ -136,7 +148,7 @@ void GetSha1HashBytes(const std::string input, BYTE* hashBytes, int hashBytesLen
 			throw std::system_error(GetLastError(), std::system_category(), "CryptCreateHash failed");
 		}
 
-		if (!CryptHashData(hHash, (BYTE*)(input.c_str()), static_cast<DWORD>(input.size()), 0))
+		if (!CryptHashData(hHash, (BYTE*)input, static_cast<DWORD>(strlen(input)), 0))
 		{
 			throw std::system_error(GetLastError(), std::system_category(), "CryptHashData failed");
 		}

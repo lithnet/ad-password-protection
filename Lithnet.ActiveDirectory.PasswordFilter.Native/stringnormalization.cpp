@@ -7,152 +7,122 @@
 #include "stringnormalization.h"
 #include "registry.h"
 #include <cwctype>
+#include <iterator>
+#include "shlwapi.h"
 
-std::wstring ToLowerInvariant(const std::wstring& s)
+LPWSTR ToLowerInvariant(LPWSTR s)
 {
-	// on Windows use LCMapString to handle internationalized-aware lowercasing
-	if (s.empty())
-	{
-		return s;
-	}
+	int sizeRequired = 0;
 
-	const wchar_t* inBuf = s.c_str();
-	int result = 0;
+	sizeRequired = LCMapString(LOCALE_INVARIANT, LCMAP_LOWERCASE, s, -1, 0, 0);
 
-	// Find the size of the buffer we need.
-	result = LCMapString(LOCALE_INVARIANT, LCMAP_LOWERCASE, inBuf, s.size(), 0, 0);
-
-	if (result == 0)
+	if (sizeRequired == 0)
 	{
 		throw std::system_error(GetLastError(), std::system_category(), "LCMapString failed");
 	}
 
-	wchar_t* buf = new wchar_t[result];
+	wchar_t* buf = new wchar_t[sizeRequired];
 
-	// Get lowercased string.
-	result = LCMapString(LOCALE_INVARIANT, LCMAP_LOWERCASE, inBuf, s.size(), buf, result);
+	int sizeAllocated = LCMapString(LOCALE_INVARIANT, LCMAP_LOWERCASE, s, -1, buf, sizeRequired);
 
-	if (result == 0)
+	if (sizeAllocated == 0)
 	{
-		delete[](buf);
+		SecureZeroMemory(buf, sizeRequired);
+		delete[] buf;
 		throw std::system_error(GetLastError(), std::system_category(), "LCMapString failed");
 	}
-	
-	std::wstring transformed = std::wstring(buf, result);
 
-	delete[](buf);
-
-	return transformed;
+	return buf;
 }
 
-std::wstring NormalizePassword(std::wstring password)
+LPWSTR NormalizePassword(LPWSTR password)
 {
-	if (password.length() == 0)
+	if (wcslen(password) == 0)
 	{
 		return password;
 	}
 
-	std::wstring newPassword = ToLowerInvariant(password);
+	LPWSTR newPassword = ToLowerInvariant(password);
 
-	odprintf(L"ToLower: %s", newPassword.c_str());
-
-	newPassword = RemoveWhiteSpace(newPassword);
-
-	odprintf(L"Whitespace remove: %s", newPassword.c_str());
-
-	std::wstring charsToRemove = L"0123456789!@#$%^&*()[]{};:'\"<>,.?\\/+=_-~`";
-
-	ltrim(newPassword, charsToRemove);
-
-	odprintf(L"Ltrim: %s", newPassword.c_str());
-
-	rtrim(newPassword, charsToRemove);
-
-	odprintf(L"Rtrim: %s", newPassword.c_str());
-
-	std::wstring charsToReplace = L"$s0o4a3e@a^a(c6g1i7t8b2z!i";
-
-	for (size_t i = 0; i < charsToReplace.length(); i++)
-	{
-		std::replace(newPassword.begin(), newPassword.end(), charsToReplace[i], charsToReplace[i + 1]);
-		i++;
-	}
-
-	odprintf(L"char sub: %s", newPassword.c_str());
-
-	std::wstring charsToDelete = L"_.+";
-
-	for (size_t i = 0; i < charsToDelete.length(); i++)
-	{
-		newPassword.erase(std::remove(newPassword.begin(), newPassword.end(), charsToDelete[i]), newPassword.end());
-	}
-
-	odprintf(L"delete chars: %s", newPassword.c_str());
+	RemoveWhiteSpace(newPassword);
+	StrTrim(newPassword, CHARS_TO_TRIM);
+	ReplaceChars(newPassword, CHARS_TO_REPLACE);
+	RemoveChars(newPassword, CHARS_TO_DELETE);
 
 	return newPassword;
 }
 
-
-void ltrim(std::wstring &s, std::wstring charsToRemove)
+void RemoveWhiteSpace(LPWSTR s)
 {
-	s.erase(s.begin(), std::find_if(s.begin(), s.end(), [&](wchar_t ch) {
-		for (size_t i = 0; i < charsToRemove.length(); i++)
+	LPWSTR cpy = s;  // an alias to iterate through s without moving s
+	LPWSTR temp = s;
+
+	while (*cpy)
+	{
+		if (!std::iswspace(*cpy))
 		{
-			if (charsToRemove[i] == ch)
-			{
-				return false;
-			}
+			*temp++ = *cpy;
 		}
 
-		return true;
-	}));
-}
-
-void rtrim(std::wstring &s, std::wstring charsToRemove)
-{
-	s.erase(std::find_if(s.rbegin(), s.rend(), [&](wchar_t ch) {
-		for (size_t i = 0; i < charsToRemove.length(); i++)
-		{
-			if (charsToRemove[i] == ch)
-			{
-				return false;
-			}
-		}
-
-		return true;
-	}).base(), s.end());
-}
-
-void ltrim(std::wstring &s) {
-	s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int ch) 
-	{
-		return !std::iswspace(ch);
-	}));
-}
-
-void rtrim(std::wstring &s) {
-	s.erase(std::find_if(s.rbegin(), s.rend(), [](int ch) 
-	{
-		return !std::iswspace(ch);
-	}).base(), s.end());
-}
-
-void trim(std::wstring &s) {
-	ltrim(s);
-	rtrim(s);
-}
-
-std::wstring RemoveWhiteSpace(const std::wstring &str)
-{
-	std::wstring str_no_ws;
-
-	for (wchar_t c : str)
-	{
-		if (!std::iswspace(c))
-		{
-			str_no_ws += c;
-		}
+		cpy++;
 	}
 
-	return str_no_ws;
+	*temp = 0;
+}
+
+void RemoveChars(LPWSTR s, const wchar_t * charsToRemove)
+{
+	LPWSTR cpy = s;  // an alias to iterate through s without moving s
+	LPWSTR temp = s;
+
+	for (size_t i = 0; i < wcslen(s); i++)
+	{
+		bool matched = false;
+
+		for (size_t i = 0; i < wcslen(charsToRemove); i++)
+		{
+			if (charsToRemove[i] == *cpy)
+			{
+				matched = true;
+				break;
+			}
+		}
+
+		if (!matched)
+		{
+			*temp++ = *cpy;
+		}
+
+		cpy++;
+	}
+
+	*temp = 0;
+}
+
+void ReplaceChars(LPWSTR s, const wchar_t * charPairsToReplace)
+{
+	LPWSTR cpy = s;  // an alias to iterate through s without moving s
+	LPWSTR temp = s;
+
+	for (size_t i = 0; i < wcslen(s); i++)
+	{
+		bool matched = false;
+
+		for (size_t j = 0; j < wcslen(charPairsToReplace); j = j + 2)
+		{
+			if (charPairsToReplace[j] == *cpy)
+			{
+				*temp++ = charPairsToReplace[j + 1];
+				matched = true;
+				break;
+			}
+		}
+
+		if (!matched)
+		{
+			*temp++ = *cpy;
+		}
+
+		cpy++;
+	}
 }

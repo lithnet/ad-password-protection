@@ -12,5 +12,3 @@ extern "C" __declspec(dllexport) NTSTATUS __stdcall PasswordChangeNotify(
 	PUNICODE_STRING UserName,
 	ULONG RelativeId,
 	PUNICODE_STRING NewPassword);
-
-extern "C" __declspec(dllexport) void __stdcall CloseDb();
