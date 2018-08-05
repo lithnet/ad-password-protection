@@ -38,10 +38,16 @@
     <ClCompile Include="FilterTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PasswordLengthTests.cpp">
+    <ClCompile Include="TestUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TestUtils.cpp">
+    <ClCompile Include="PasswordEvaluatorLengthTests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PasswordEvaluatorRegexApproveTests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PasswordEvaluatorNameTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

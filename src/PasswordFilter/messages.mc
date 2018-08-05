@@ -133,3 +133,19 @@ SymbolicName=MSG_PASSWORD_REJECTED_ABOVE_THRESHOLD
 Language=English
 The password %1 request for %2 (%3) was rejected because it did not meet the complexity requirements of a password above the specified threshold.
 .
+
+MessageId=0x200A
+Severity=Warning
+Facility=System
+SymbolicName=MSG_PASSWORD_REJECTED_CONTAINS_ACCOUNTNAME
+Language=English
+The password %1 request for %2 (%3) was rejected because it contained the account name
+.
+
+MessageId=0x200B
+Severity=Warning
+Facility=System
+SymbolicName=MSG_PASSWORD_REJECTED_CONTAINS_DISPLAYNAME
+Language=English
+The password %1 request for %2 (%3) was rejected because it contained at least part of the display name
+.

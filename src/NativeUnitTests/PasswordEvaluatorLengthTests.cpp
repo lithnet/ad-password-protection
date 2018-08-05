@@ -6,7 +6,7 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace NativeUnitTests
 {
-	TEST_CLASS(PasswordLengthTests)
+	TEST_CLASS(PasswordEvaluatorLengthTests)
 	{
 	public:
 

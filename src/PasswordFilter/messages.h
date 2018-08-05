@@ -174,3 +174,21 @@
 //
 #define MSG_PASSWORD_REJECTED_ABOVE_THRESHOLD ((DWORD)0x80002009L)
 
+//
+// MessageId: MSG_PASSWORD_REJECTED_CONTAINS_ACCOUNTNAME
+//
+// MessageText:
+//
+// The password %1 request for %2 (%3) was rejected because it contained the account name
+//
+#define MSG_PASSWORD_REJECTED_CONTAINS_ACCOUNTNAME ((DWORD)0x8000200AL)
+
+//
+// MessageId: MSG_PASSWORD_REJECTED_CONTAINS_DISPLAYNAME
+//
+// MessageText:
+//
+// The password %1 request for %2 (%3) was rejected because it contained at least part of the display name
+//
+#define MSG_PASSWORD_REJECTED_CONTAINS_DISPLAYNAME ((DWORD)0x8000200BL)
+

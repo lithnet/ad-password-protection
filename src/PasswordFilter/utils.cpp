@@ -6,7 +6,23 @@
 #include "eventlog.h"
 #include "messages.h"
 #include "esestore.h"
+#include <vector>
 
+std::vector<std::wstring> SplitString(const std::wstring &text, wchar_t sep) {
+	std::vector<std::wstring> tokens;
+	std::size_t start = 0, end = 0;
+	while ((end = text.find(sep, start)) != std::wstring::npos) {
+		if (end != start) {
+			tokens.push_back(text.substr(start, end - start));
+		}
+		start = end + 1;
+	}
+	if (end != start) {
+		tokens.push_back(text.substr(start));
+	}
+
+	return tokens;
+}
 
 wchar_t* UnicodeStringToWcharArray(UNICODE_STRING str)
 {

@@ -8,6 +8,10 @@ __declspec(dllexport) BOOLEAN ProcessPasswordNormalized(LPWSTR password, std::ws
 
 __declspec(dllexport) BOOLEAN ProcessPasswordLength(LPWSTR password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation);
 
+__declspec(dllexport) BOOLEAN ProcessPasswordDoesntContainAccountName(LPWSTR password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation);
+
+__declspec(dllexport) BOOLEAN ProcessPasswordDoesntContainFullName(LPWSTR password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation);
+
 __declspec(dllexport) BOOLEAN ProcessPasswordRegexApprove(LPWSTR password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation);
 
 __declspec(dllexport) BOOLEAN ProcessPasswordRegexReject(LPWSTR password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation);

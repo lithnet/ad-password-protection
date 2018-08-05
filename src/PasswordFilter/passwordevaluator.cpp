@@ -8,6 +8,8 @@
 #include "passwordevaluator.h"
 #include <regex>
 #include <cwctype>
+#include <shlwapi.h>
+#include "utils.h"
 
 BOOLEAN ProcessPassword(LPWSTR password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation)
 {
@@ -34,6 +36,16 @@ BOOLEAN ProcessPassword(LPWSTR password, std::wstring accountName, std::wstring 
 	}
 
 	if (!ProcessPasswordRegexReject(password, accountName, fullName, setOperation))
+	{
+		return FALSE;
+	}
+
+	if (!ProcessPasswordDoesntContainAccountName(password, accountName, fullName, setOperation))
+	{
+		return FALSE;
+	}
+
+	if (!ProcessPasswordDoesntContainFullName(password, accountName, fullName, setOperation))
 	{
 		return FALSE;
 	}
@@ -133,6 +145,61 @@ BOOLEAN ProcessPasswordLength(LPWSTR password, std::wstring accountName, std::ws
 		}
 
 		OutputDebugString(L"Password met the minimum length requirements");
+	}
+
+	return TRUE;
+}
+
+BOOLEAN ProcessPasswordDoesntContainAccountName(LPWSTR password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation)
+{
+	int flag = GetRegValue(L"ValidatePasswordDoesntContainAccountName", 0);
+
+	if (flag != 0 && accountName.length() > 3)
+	{
+		OutputDebugString(L"Checking to see if password contains account name");
+
+		for each (std::wstring substring in SplitString(accountName, L' '))
+		{
+			if (substring.length() > 3)
+			{
+				if (StrStrI(password, substring.c_str()) != NULL)
+				{
+					OutputDebugString(L"Rejected password as it contained part of the account name");
+					eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_CONTAINS_ACCOUNTNAME, 3, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
+					return FALSE;
+				}
+			}
+		}
+
+		OutputDebugString(L"Password did not contain part of the account name");
+	}
+
+	return TRUE;
+}
+
+
+BOOLEAN ProcessPasswordDoesntContainFullName(LPWSTR password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation)
+{
+	int flag = GetRegValue(L"ValidatePasswordDoesntContainFullName", 0);
+
+	if (flag != 0 && fullName.length() > 3)
+	{
+		OutputDebugString(L"Checking to see if password contains full name");
+
+		for each (std::wstring substring in SplitString(fullName, L' '))
+		{
+			if (substring.length() > 3)
+			{
+				if (StrStrI(password, substring.c_str()) != NULL)
+				{
+					OutputDebugString(L"Rejected password as it contained part of the full name");
+					eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_CONTAINS_DISPLAYNAME, 3, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
+					return FALSE;
+				}
+			}
+		}
+
+		OutputDebugString(L"Password did not contain any part of the full name");
 	}
 
 	return TRUE;
