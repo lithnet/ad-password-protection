@@ -332,7 +332,7 @@ bool IsHashInBinaryFilev1(std::wstring filename, BYTE* hashBytes)
 	while (firstRow <= lastRow)
 	{
 		loops++;
-		currentRow = (firstRow + lastRow + 1) / 2;
+		currentRow = (firstRow + lastRow) / 2;
 		file.seekg((currentRow * (SHA1_BINARY_HASH_LENGTH)), std::ios::beg);
 
 		char rowData[SHA1_BINARY_HASH_LENGTH];
@@ -392,7 +392,7 @@ bool IsHashInBinaryFilev2(std::wstring filename, BYTE* hashBytes)
 	while (firstRow <= lastRow)
 	{
 		loops++;
-		currentRow = (firstRow + lastRow + 1) / 2;
+		currentRow = (firstRow + lastRow) / 2;
 		file.seekg((currentRow * (SHA1_PARTIAL_BINARY_HASH_LENGTH)), std::ios::beg);
 
 		char rowData[SHA1_PARTIAL_BINARY_HASH_LENGTH];
