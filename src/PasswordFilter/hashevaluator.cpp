@@ -50,7 +50,7 @@ bool IsPasswordInStore(LPWSTR password)
 
 		bool result;
 
-		int hashCheckMode = GetRegValue(L"HashCheckMode", 3);
+		int hashCheckMode = GetRegValue(L"HashCheckMode", 2);
 
 		if (hashCheckMode == 0)
 		{
@@ -62,12 +62,7 @@ bool IsPasswordInStore(LPWSTR password)
 			OutputDebugString(L"IsHashInStorev1");
 			result = IsHashInStorev1(hash);
 		}
-		/*else if (hashCheckMode == 2)
-		{
-			OutputDebugString(L"IsHashInStore");
-			result = IsHashInStore(password);
-		}*/
-		else if (hashCheckMode == 3)
+		else if (hashCheckMode == 2)
 		{
 			OutputDebugString(L"IsHashInStorev2");
 			result = IsHashInStorev2(hash);
@@ -316,13 +311,14 @@ bool IsHashInBinaryFilev1(std::wstring filename, BYTE* hashBytes)
 {
 	std::ifstream file(filename.c_str(), std::ios::binary | std::ios::in);
 
-	UINT64 firstRow = 0, currentRow = 0, lastRow = 0, length = 0;
+	int firstRow = 0, currentRow = 0, lastRow = 0;
+	std::streamoff length = 0;
 	bool found = false;
 	OutputDebugString(L"Searching");
 	OutputDebugString(filename.c_str());
 	file.seekg(0, std::ios::end);
 	length = file.tellg();
-
+	
 	file.seekg(0, std::ios::beg);
 
 	if (length % SHA1_BINARY_HASH_LENGTH != 0)
@@ -355,11 +351,15 @@ bool IsHashInBinaryFilev1(std::wstring filename, BYTE* hashBytes)
 		}
 		else
 		{
+			OutputDebugString(std::to_wstring(loops).c_str());
+			file.close();
 			return true;
 		}
 	}
 
 	OutputDebugString(std::to_wstring(loops).c_str());
+
+	file.close();
 
 	return false;
 }
@@ -368,7 +368,9 @@ bool IsHashInBinaryFilev2(std::wstring filename, BYTE* hashBytes)
 {
 	std::ifstream file(filename.c_str(), std::ios::binary | std::ios::in);
 
-	UINT64 firstRow = 0, currentRow = 0, lastRow = 0, length = 0;
+	int firstRow = 0, currentRow = 0, lastRow = 0;
+	std::streamoff length = 0;
+
 	bool found = false;
 	OutputDebugString(L"Searching");
 	OutputDebugString(filename.c_str());
@@ -409,11 +411,14 @@ bool IsHashInBinaryFilev2(std::wstring filename, BYTE* hashBytes)
 		}
 		else
 		{
+			OutputDebugString(std::to_wstring(loops).c_str());
+			file.close();
 			return true;
 		}
 	}
 
 	OutputDebugString(std::to_wstring(loops).c_str());
 
+	file.close();
 	return false;
 }

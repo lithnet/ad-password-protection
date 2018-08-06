@@ -70,30 +70,6 @@ void DeleteValue(std::wstring key)
 	}
 }
 
-void DisplayError(DWORD Err)
-{
-	LPVOID lpMessageBuffer;
-	HMODULE Hand = LoadLibrary(L"NTDLL.DLL");
-
-	FormatMessage(
-		FORMAT_MESSAGE_ALLOCATE_BUFFER |
-		FORMAT_MESSAGE_FROM_SYSTEM |
-		FORMAT_MESSAGE_FROM_HMODULE,
-		Hand,
-		Err,
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		(LPTSTR)&lpMessageBuffer,
-		0,
-		NULL);
-
-	// Now display the string.
-	printf("%ls\n", lpMessageBuffer);
-
-	// Free the buffer allocated by the system.
-	LocalFree(lpMessageBuffer);
-	FreeLibrary(Hand);
-}
-
 BOOL SetPrivilege(HANDLE hToken, LPCTSTR lpszPrivilege, BOOL bEnablePrivilege)
 {
 	TOKEN_PRIVILEGES tp;
@@ -147,7 +123,6 @@ int ClearStandbyCache()
 			printf("Flush FileCache WorkingSet : ok\n");
 		}
 		else {
-			DisplayError(ret);
 			return -1;
 		}
 	}
@@ -164,7 +139,6 @@ int ClearStandbyCache()
 			printf("Purge Memory Standby : ok\n");
 		}
 		else {
-			DisplayError(ret);
 			return -1;
 		}
 	}

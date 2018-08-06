@@ -4,7 +4,7 @@
 #include <sstream>
 #include <iomanip>
 #include <fstream>
-#include "../PasswordFilter/filter.h"
+#include "../PasswordFilter/passwordevaluator.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -17,47 +17,37 @@ namespace NativeUnitTests
 		{
 			ClearCache();
 
-			PUNICODE_STRING username = new UNICODE_STRING();
-			RtlInitUnicodeString(username, L"test");
-
-			PUNICODE_STRING fullname = new UNICODE_STRING();
-			RtlInitUnicodeString(fullname, L"fullname");
+			std::wstring accountName = std::wstring(L"accountName");
+			std::wstring fullname = std::wstring(L"full name");
 
 			for (size_t i = 0; i < 1000; i++)
 			{
-				PUNICODE_STRING password = new UNICODE_STRING();
 				GUID gidReference;
 				HRESULT hCreateGuid = CoCreateGuid(&gidReference);
 				WCHAR* wszUuid = NULL;
 				UuidToStringW(&gidReference, (RPC_WSTR*)&wszUuid);
+				std::wstringstream ss;
+				ss << i << L": " << wszUuid << L": ";
 
-				RtlInitUnicodeString(password, wszUuid);
+				bool result = ProcessPasswordRaw(wszUuid, accountName, fullname, TRUE);
 
-				PasswordFilter(username, fullname, password, TRUE);
+				ss << (result ? "passed" : "rejected");
 
-				RpcStringFree((RPC_WSTR*)&wszUuid);
-
-				delete[] password;
+				OutputDebugString(ss.str().c_str());
 			}
-
-			delete[] username;
-			delete[] fullname;
 		}
 
 		void LoopKnownBadPasswords()
 		{
 			ClearCache();
 
+			std::wstring accountName = std::wstring(L"accountName");
+			std::wstring fullname = std::wstring(L"full name");
+
 			std::wstring filename = L"D:\\pwnedpwds\\raw\\words.txt";
 
 			std::wifstream file(filename.c_str());
 			std::wstring line;
-
-			PUNICODE_STRING username = new UNICODE_STRING();
-			RtlInitUnicodeString(username, L"test");
-
-			PUNICODE_STRING fullname = new UNICODE_STRING();
-			RtlInitUnicodeString(fullname, L"fullname");
 
 			int limit = 1000;
 			int count = 0;
@@ -65,30 +55,22 @@ namespace NativeUnitTests
 			while (std::getline(file, line))
 			{
 				count++;
-				PUNICODE_STRING password = new UNICODE_STRING();
-
-				RtlInitUnicodeString(password, line.c_str());
 
 				std::wstringstream ss;
 
-				ss << line << L": ";
+				ss << count << L": " << line << L": ";
 
-				bool result = PasswordFilter(username, fullname, password, TRUE);
+				bool result = ProcessPasswordRaw((LPWSTR)line.c_str(), accountName, fullname, TRUE);
 
 				ss << (result ? "passed" : "rejected");
 
 				OutputDebugString(ss.str().c_str());
-
-				delete[] password;
 
 				if (count >= limit)
 				{
 					break;
 				}
 			}
-
-			delete[] username;
-			delete[] fullname;
 		}
 
 	public:
@@ -109,7 +91,7 @@ namespace NativeUnitTests
 
 		TEST_METHOD(LoopKnownBadPasswordsv2Store)
 		{
-			SetValue(L"HashCheckMode", 3);
+			SetValue(L"HashCheckMode", 2);
 			LoopKnownBadPasswords();
 			SetValue(L"HashCheckMode", 0);
 		}
@@ -125,7 +107,7 @@ namespace NativeUnitTests
 
 		TEST_METHOD(LoopGoodPasswordv2Store)
 		{
-			SetValue(L"HashCheckMode", 3);
+			SetValue(L"HashCheckMode", 2);
 
 			LoopGoodRandomPasswords();
 
@@ -137,6 +119,11 @@ namespace NativeUnitTests
 			SetValue(L"HashCheckMode", 0);
 
 			LoopGoodRandomPasswords();
+		}
+
+		TEST_CLASS_INITIALIZE(Initialize)
+		{
+			SetValue(L"ValidateRawPasswordOnSet", 1);
 		}
 	};
 }

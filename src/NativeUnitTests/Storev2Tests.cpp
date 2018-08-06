@@ -93,7 +93,7 @@ namespace NativeUnitTests
 
 		TEST_CLASS_INITIALIZE(Initialize)
 		{
-			SetValue(L"HashCheckMode", 3);
+			SetValue(L"HashCheckMode", 2);
 		}
 	};
 }

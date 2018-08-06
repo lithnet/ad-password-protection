@@ -81,7 +81,7 @@ namespace NativeUnitTests
 
 		TEST_METHOD(TestBadPasswordv2Store)
 		{
-			SetValue(L"HashCheckMode", 3);
+			SetValue(L"HashCheckMode", 2);
 
 			TestBannedPassword2();
 
