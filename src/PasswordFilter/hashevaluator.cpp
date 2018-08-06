@@ -316,7 +316,7 @@ bool IsHashInBinaryFilev1(std::wstring filename, BYTE* hashBytes)
 {
 	std::ifstream file(filename.c_str(), std::ios::binary | std::ios::in);
 
-	int firstRow = 0, currentRow = 0, lastRow = 0, length = 0;
+	UINT64 firstRow = 0, currentRow = 0, lastRow = 0, length = 0;
 	bool found = false;
 	OutputDebugString(L"Searching");
 	OutputDebugString(filename.c_str());
@@ -368,7 +368,7 @@ bool IsHashInBinaryFilev2(std::wstring filename, BYTE* hashBytes)
 {
 	std::ifstream file(filename.c_str(), std::ios::binary | std::ios::in);
 
-	int firstRow = 0, currentRow = 0, lastRow = 0, length = 0;
+	UINT64 firstRow = 0, currentRow = 0, lastRow = 0, length = 0;
 	bool found = false;
 	OutputDebugString(L"Searching");
 	OutputDebugString(filename.c_str());
