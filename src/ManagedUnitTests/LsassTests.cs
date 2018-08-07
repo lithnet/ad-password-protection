@@ -32,7 +32,7 @@ namespace ManagedUnitTests
                     {
                         p.SetPassword(Guid.NewGuid().ToString());
                     }
-                    catch (PasswordException e)
+                    catch (PasswordException)
                     {
                         Debug.WriteLine("password did not meet requirements");
                     }
@@ -67,7 +67,7 @@ namespace ManagedUnitTests
                         {
                             p.SetPassword(Guid.NewGuid().ToString());
                         }
-                        catch (PasswordException e)
+                        catch (PasswordException)
                         {
                             Debug.WriteLine("password did not meet requirements");
                         }

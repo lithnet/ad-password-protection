@@ -5,7 +5,7 @@ using System.IO;
 
 namespace StoreInterface
 {
-    public class EsentStore : IDisposable
+    public class EsentStore : Store, IDisposable
     {
         private const string StoreSubPath = "ese\\";
         private const string StoreFileName = "ppwdflt.edb";
@@ -68,14 +68,15 @@ namespace StoreInterface
         private JET_COLUMNID columnid;
         private JET_TABLEID tableid;
 
-        public EsentStore(string path)
+        public EsentStore(string storeBasePath)
+        : base(20)
         {
-            this.OpenDB(path);
+            this.OpenDB(storeBasePath);
         }
 
-        private void OpenDB(string store)
+        private void OpenDB(string storeBasePath)
         {
-            string eseStoreRoot = Path.Combine(store, EsentStore.StoreSubPath);
+            string eseStoreRoot = Path.Combine(storeBasePath, EsentStore.StoreSubPath);
             string dbpath = Path.Combine(eseStoreRoot, EsentStore.StoreFileName);
 
             if (!File.Exists(dbpath))
@@ -83,7 +84,7 @@ namespace StoreInterface
                 throw new FileNotFoundException("The store file could not be found", dbpath);
             }
 
-            Api.JetCreateInstance(out this.instance, "instance");
+            Api.JetCreateInstance(out this.instance, "lithnetpwdf");
             Api.JetSetSystemParameter(this.instance, JET_SESID.Nil, JET_param.CircularLog, 1, null);
             Api.JetSetSystemParameter(this.instance, JET_SESID.Nil, JET_param.CreatePathIfNotExist, 1, null);
             Api.JetSetSystemParameter(this.instance, JET_SESID.Nil, JET_param.LogFilePath, 0, eseStoreRoot);
@@ -126,57 +127,6 @@ namespace StoreInterface
             }
         }
 
-        public bool IsHashInDB(byte[] hash)
-        {
-            Api.JetSetCurrentIndex(this.sessionId, this.tableid, null);
-            Api.MakeKey(this.sessionId, this.tableid, hash, MakeKeyGrbit.NewKey);
-            return Api.TrySeek(this.sessionId, this.tableid, SeekGrbit.SeekEQ);
-        }
-
-        public int AddToDb(byte[] hash)
-        {
-            return this.AddToDb(new List<byte[]> {hash});
-        }
-
-        public int AddToDb(IEnumerable<byte[]> hashes)
-        {
-            int added = 0;
-
-            Api.JetBeginTransaction(this.sessionId);
-
-            try
-            {
-                foreach (byte[] hash in hashes)
-                {
-                    Api.JetPrepareUpdate(this.sessionId, this.tableid, JET_prep.Insert);
-
-                    try
-                    {
-                        Api.SetColumn(this.sessionId, this.tableid, this.columnid, hash, SetColumnGrbit.None);
-                        Api.JetUpdate(this.sessionId, this.tableid);
-                        added++;
-                    }
-                    catch (EsentKeyDuplicateException)
-                    {
-                        Api.JetPrepareUpdate(this.sessionId, this.tableid, JET_prep.Cancel);
-                    }
-                    catch
-                    {
-                        Api.JetPrepareUpdate(this.sessionId, this.tableid, JET_prep.Cancel);
-                        throw;
-                    }
-                }
-
-                Api.JetCommitTransaction(this.sessionId, CommitTransactionGrbit.None);
-            }
-            catch
-            {
-                Api.JetRollback(this.sessionId, RollbackTransactionGrbit.None);
-                throw;
-            }
-
-            return added;
-        }
 
         private void ReleaseUnmanagedResources()
         {
@@ -192,6 +142,85 @@ namespace StoreInterface
         ~EsentStore()
         {
             this.ReleaseUnmanagedResources();
+        }
+
+        protected override string GetRangeFromHash(string hash)
+        {
+            return null;
+        }
+
+        protected override string GetRangeFromHash(byte[] hash)
+        {
+            return null;
+        }
+
+        public override void ClearStore()
+        {
+            Api.JetBeginTransaction(this.sessionId);
+            try
+            {
+                if (Api.TryMoveFirst(this.sessionId, this.tableid))
+                {
+                    Api.JetMove(this.sessionId, this.tableid, JET_Move.First, MoveGrbit.None);
+
+                    do
+                    {
+                        Api.JetDelete(this.sessionId, this.tableid);
+                    } while (Api.TryMoveNext(this.sessionId, this.tableid));
+
+                }
+
+                Api.JetCommitTransaction(this.sessionId, CommitTransactionGrbit.None);
+            }
+            catch
+            {
+                Api.JetRollback(this.sessionId, RollbackTransactionGrbit.None);
+                throw;
+            }
+        }
+
+        protected override void AddHashRangeToStore(HashSet<byte[]> hashes, string range, ref int hashesAdded, ref int hashesDiscarded)
+        {
+            Api.JetBeginTransaction(this.sessionId);
+
+            try
+            {
+                foreach (byte[] hash in hashes)
+                {
+                    Api.JetPrepareUpdate(this.sessionId, this.tableid, JET_prep.Insert);
+
+                    try
+                    {
+                        Api.SetColumn(this.sessionId, this.tableid, this.columnid, hash, SetColumnGrbit.None);
+                        Api.JetUpdate(this.sessionId, this.tableid);
+                        System.Threading.Interlocked.Increment(ref hashesAdded);
+                    }
+                    catch (EsentKeyDuplicateException)
+                    {
+                        Api.JetPrepareUpdate(this.sessionId, this.tableid, JET_prep.Cancel);
+                        System.Threading.Interlocked.Increment(ref hashesDiscarded);
+                    }
+                    catch
+                    {
+                        Api.JetPrepareUpdate(this.sessionId, this.tableid, JET_prep.Cancel);
+                        throw;
+                    }
+                }
+
+                Api.JetCommitTransaction(this.sessionId, CommitTransactionGrbit.None);
+            }
+            catch
+            {
+                Api.JetRollback(this.sessionId, RollbackTransactionGrbit.None);
+                throw;
+            }
+        }
+
+        public override bool IsHashInStore(byte[] hash)
+        {
+            Api.JetSetCurrentIndex(this.sessionId, this.tableid, null);
+            Api.MakeKey(this.sessionId, this.tableid, hash, MakeKeyGrbit.NewKey);
+            return Api.TrySeek(this.sessionId, this.tableid, SeekGrbit.SeekEQ);
         }
     }
 }

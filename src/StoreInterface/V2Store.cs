@@ -7,10 +7,10 @@ using System.Security.Cryptography;
 
 namespace StoreInterface
 {
-    public class V2Store : BinaryStoreBase
+    public class V2Store : BinaryStore
     {
-        public V2Store(string store)
-        : base(store, "v2", 18)
+        public V2Store(string storeBasePath)
+        : base(storeBasePath, "v2", 18)
         {
         }
 

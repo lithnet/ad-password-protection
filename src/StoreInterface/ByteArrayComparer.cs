@@ -9,6 +9,8 @@ namespace StoreInterface
 {
     public class ByteArrayComparer : IComparer<byte[]>, IEqualityComparer<byte[]>
     {
+        public static ByteArrayComparer Comparer { get; } = new ByteArrayComparer();
+
         [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl)]
         static extern int memcmp(byte[] b1, byte[] b2, long count);
 

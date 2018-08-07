@@ -48,8 +48,9 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="IStore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Store.cs" />
     <Compile Include="StringNormalizer.cs" />
-    <Compile Include="BinaryStoreBase.cs" />
+    <Compile Include="BinaryStore.cs" />
     <Compile Include="V2Store.cs" />
     <Compile Include="V1Store.cs" />
   </ItemGroup>
