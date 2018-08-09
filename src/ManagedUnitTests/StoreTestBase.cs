@@ -54,7 +54,10 @@ namespace ManagedUnitTests
             int added = 0;
             int discarded = 0;
 
-            this.store.AddHashesToStore(new HashSet<byte[]>(hashBytes, new ByteArrayComparer()), ref added, ref discarded);
+            this.store.AddHashesToStore(
+                new HashSet<byte[]>(hashBytes, new ByteArrayComparer()), 
+                ref added, 
+                ref discarded);
 
             foreach (string hash in hashes)
             {

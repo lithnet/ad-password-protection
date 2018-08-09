@@ -179,6 +179,21 @@ namespace StoreInterface
             }
         }
 
+        protected override IEnumerable<byte[]> GetHashes()
+        {
+            if (Api.TryMoveFirst(this.sessionId, this.tableid))
+            {
+                Api.JetMove(this.sessionId, this.tableid, JET_Move.First, MoveGrbit.None);
+
+                do
+                {
+                    yield return Api.RetrieveColumn(this.sessionId, this.tableid, this.columnid);
+
+                } while (Api.TryMoveNext(this.sessionId, this.tableid));
+
+            }
+        }
+
         protected override void AddHashRangeToStore(HashSet<byte[]> hashes, string range, ref int hashesAdded, ref int hashesDiscarded)
         {
             Api.JetBeginTransaction(this.sessionId);
@@ -216,6 +231,14 @@ namespace StoreInterface
             }
         }
 
+        protected override void StartBatch()
+        {
+        }
+
+        protected override void EndBatch(ref int hashesAdded, ref int hashesDiscarded)
+        {
+        }
+      
         public override bool IsHashInStore(byte[] hash)
         {
             Api.JetSetCurrentIndex(this.sessionId, this.tableid, null);

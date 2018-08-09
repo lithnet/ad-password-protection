@@ -89,7 +89,9 @@ namespace ManagedUnitTests
             int added = 0;
             int discarded = 0;
 
-            this.Store.AddHashesToStore(new HashSet<byte[]>(hashBytes, new ByteArrayComparer()), ref added, ref discarded);
+            this.Store.AddHashesToStore(new HashSet<byte[]>(hashBytes, new ByteArrayComparer()),
+                ref added,
+                ref discarded);
 
             Assert.AreEqual(0, discarded);
             Assert.AreEqual(hashes.Length, added);
@@ -97,7 +99,9 @@ namespace ManagedUnitTests
             string rawFile = Path.Combine(this.Store.StorePath, this.GetFileNameFromHash(hashes[0]));
             TestHelpers.AssertFileIsExpectedSize(rawFile, this.HashSize * hashes.Length);
 
-            this.Store.AddHashesToStore(new HashSet<byte[]>(hashBytes, new ByteArrayComparer()), ref added, ref discarded);
+            this.Store.AddHashesToStore(new HashSet<byte[]>(hashBytes, new ByteArrayComparer()),
+                ref added,
+                ref discarded);
             TestHelpers.AssertFileIsExpectedSize(rawFile, this.HashSize * hashes.Length);
         }
 
@@ -122,7 +126,9 @@ namespace ManagedUnitTests
             int added = 0;
             int discarded = 0;
 
-            this.Store.AddHashesToStore(new HashSet<byte[]>(hashBytes, new ByteArrayComparer()), ref added, ref discarded);
+            this.Store.AddHashesToStore(new HashSet<byte[]>(hashBytes, new ByteArrayComparer()),
+                ref added,
+                ref discarded);
 
             foreach (string hash in hashes)
             {
@@ -163,7 +169,9 @@ namespace ManagedUnitTests
             int added = 0;
             int discarded = 0;
 
-            this.Store.AddHashesToStore(new HashSet<byte[]>(hashBytes, new ByteArrayComparer()), ref added, ref discarded);
+            this.Store.AddHashesToStore(new HashSet<byte[]>(hashBytes, new ByteArrayComparer()),
+                ref added,
+                ref discarded);
 
             Assert.AreEqual(0, discarded);
             Assert.AreEqual(hashes.Length, added);

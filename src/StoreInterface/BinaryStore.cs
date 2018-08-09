@@ -4,11 +4,14 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace StoreInterface
 {
     public abstract class BinaryStore : Store
     {
+        public bool IsInBatch { get; private set; }
+
         public string StorePath { get; }
 
         protected BinaryStore(string storeBasePath, string storeSubPath, int hashSize)
@@ -47,15 +50,21 @@ namespace StoreInterface
 
             return items;
         }
-        
+
         public override bool IsHashInStore(byte[] hash)
         {
             string file = Path.Combine(this.StorePath, $"{this.GetRangeFromHash(hash)}.db");
             return this.IsHashInStoreFile(file, hash);
         }
-        
+
         protected override void AddHashRangeToStore(HashSet<byte[]> hashes, string range, ref int hashesAdded, ref int hashesDiscarded)
         {
+            if (this.IsInBatch)
+            {
+                this.AddHashRangeToTempStore(hashes, range);
+                return;
+            }
+
             string file = Path.Combine(this.StorePath, $"{range}.db");
 
             bool writeFile = false;
@@ -64,7 +73,6 @@ namespace StoreInterface
 
             if (File.Exists(file))
             {
-                Trace.WriteLine($"Retrieving store {range}.db");
                 this.LoadHashesFromStoreFile(file, hashes, ref hashesAlreadyInStore);
             }
             else
@@ -76,12 +84,11 @@ namespace StoreInterface
 
             if (uniqueNewHashes > 0)
             {
-                Trace.WriteLine($"{uniqueNewHashes} new hashes for store {range}.db");
                 writeFile = true;
             }
             else
             {
-                Trace.WriteLine($"No new hashes for store {range}.db");
+                //Trace.WriteLine($"No new hashes for store {range}.db");
             }
 
             Interlocked.Add(ref hashesAdded, uniqueNewHashes);
@@ -89,17 +96,78 @@ namespace StoreInterface
 
             if (writeFile)
             {
-                this.WriteStoreFile(file, hashes);
+                this.WriteStoreFile(file, false, hashes);
             }
         }
 
+        protected override void StartBatch()
+        {
+            this.IsInBatch = true;
+        }
+
+        protected override void EndBatch(ref int hashesAdded, ref int hashesDiscarded)
+        {
+            this.ConsolidateAndSort(ref hashesAdded, ref hashesDiscarded);
+            this.IsInBatch = false;
+        }
+
+        private void AddHashRangeToTempStore(HashSet<byte[]> hashes, string range)
+        {
+            string file = Path.Combine(this.StorePath, $"{range}.db.bin");
+            this.WriteStoreFile(file, true, hashes);
+            this.IsInBatch = true;
+        }
+
+        public void ConsolidateAndSort(ref int hashesAdded, ref int hashesDiscarded)
+        {
+            Trace.WriteLine("Sorting store");
+
+            int added = 0;
+            int discarded = 0;
+
+            Parallel.ForEach(Directory.EnumerateFiles(this.StorePath, "*.db.bin"),
+                tempFile =>
+                {
+                    HashSet<byte[]> hashes = new HashSet<byte[]>(ByteArrayComparer.Comparer);
+
+                    string realFile = tempFile.Substring(0, tempFile.Length - 4);
+                    Trace.WriteLine($"Consolidating {realFile}");
+
+                    this.LoadHashesFromStoreFile(realFile, hashes, ref discarded);
+                    int originalCount = hashes.Count;
+
+                    this.LoadHashesFromStoreFile(tempFile, hashes, ref discarded);
+
+                    added += hashes.Count - originalCount;
+
+                    this.WriteStoreFile(realFile, false, hashes);
+                    hashes.Clear();
+
+                    File.Delete(tempFile);
+                });
+
+            hashesAdded += added;
+            hashesDiscarded += discarded;
+        }
+
         private void LoadHashesFromStoreFile(string file, HashSet<byte[]> hashes, ref int hashesDiscarded)
+        {
+            foreach (byte[] hash in this.LoadHashesFromStoreFile(file))
+            {
+                if (!hashes.Add(hash))
+                {
+                    hashesDiscarded++;
+                }
+            }
+        }
+
+        private IEnumerable<byte[]> LoadHashesFromStoreFile(string file)
         {
             FileInfo fileInfo = new FileInfo(file);
 
             if (!fileInfo.Exists)
             {
-                return;
+                yield break;
             }
 
             long size = fileInfo.Length;
@@ -108,7 +176,6 @@ namespace StoreInterface
             {
                 throw new DataMisalignedException($"The store file {file} was corrupted");
             }
-
 
             byte[] rangeBytes = null;
 
@@ -137,10 +204,7 @@ namespace StoreInterface
                         raw = hash;
                     }
 
-                    if (!hashes.Add(raw))
-                    {
-                        hashesDiscarded++;
-                    }
+                    yield return raw;
                 }
             }
         }
@@ -206,22 +270,76 @@ namespace StoreInterface
             return false;
         }
 
-        private void WriteStoreFile(string file, HashSet<byte[]> hashes)
+        protected override IEnumerable<byte[]> GetHashes()
         {
-            using (BinaryWriter writer = new BinaryWriter(File.Open(file, FileMode.Create, FileAccess.Write, FileShare.None)))
-            {
-                foreach (byte[] item in hashes.OrderBy(t => t, ByteArrayComparer.Comparer))
-                {
-                    if (item.Length != 20)
-                    {
-                        throw new InvalidDataException("The hash was not of the correct length");
-                    }
+            DirectoryInfo directory = new DirectoryInfo(this.StorePath);
 
-                    writer.Write(item, this.HashOffset, this.HashSize);
+            foreach (FileInfo file in directory.EnumerateFiles("*.db", SearchOption.TopDirectoryOnly))
+            {
+                foreach (byte[] item in this.LoadHashesFromStoreFile(file.FullName))
+                {
+                    yield return item;
                 }
             }
+        }
 
-            Trace.WriteLine($"Wrote {hashes.Count} items to {file}");
+        private void WriteStoreFile(string file, bool append, IEnumerable<byte[]> hashes)
+        {
+            FileMode mode;
+            string originalFile = file;
+            string fileToOpen;
+
+            if (append)
+            {
+                mode = FileMode.Append;
+                fileToOpen = file;
+            }
+            else
+            {
+                mode = FileMode.Create;
+                fileToOpen = file + ".tmp";
+            }
+
+            bool success = false;
+
+            try
+            {
+                using (BinaryWriter writer = new BinaryWriter(File.Open(fileToOpen, mode, FileAccess.Write, FileShare.None)))
+                {
+                    foreach (byte[] item in hashes.OrderBy(t => t, ByteArrayComparer.Comparer))
+                    {
+                        if (item.Length != 20)
+                        {
+                            throw new InvalidDataException("The hash was not of the correct length");
+                        }
+
+                        writer.Write(item, this.HashOffset, this.HashSize);
+                    }
+                }
+
+                success = true;
+            }
+            finally
+            {
+                if (mode == FileMode.Create)
+                {
+                    if (success)
+                    {
+                        if (File.Exists(originalFile))
+                        {
+                            File.Replace(fileToOpen, originalFile, null);
+                        }
+                        else
+                        {
+                            File.Move(fileToOpen, originalFile);
+                        }
+                    }
+                    else
+                    {
+                        File.Delete(fileToOpen);
+                    }
+                }
+            }
         }
     }
 }
