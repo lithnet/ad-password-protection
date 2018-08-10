@@ -17,7 +17,7 @@ namespace NativeUnitTests
 			PUNICODE_STRING fullname = new UNICODE_STRING();
 			RtlInitUnicodeString(fullname, L"fullname");
 
-			const wchar_t * pwd = L"Password";
+			const wchar_t * pwd = L"Password345!";
 
 			size_t  len = wcslen(pwd);
 			wchar_t * p = (wchar_t*)malloc((len + 1) * sizeof(wchar_t));
@@ -83,10 +83,9 @@ namespace NativeUnitTests
 		{
 			SetValue(L"HashCheckMode", 2);
 
-			TestBannedPassword2();
+			TestBannedPassword();
 
 			SetValue(L"HashCheckMode", 0);
 		}
-	
 	};
 }

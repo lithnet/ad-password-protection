@@ -30,6 +30,13 @@ namespace NativeUnitTests
 			Assert::IsFalse(ProcessPasswordNormalized(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE));
 		}
 
+		TEST_METHOD(TestBannedPasswordOnSetNormalized2)
+		{
+			SetValue(L"ValidateNormalizedPasswordOnSet", 1);
+			LPWSTR password = L"Password345!";
+			Assert::IsFalse(ProcessPasswordNormalized(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE));
+		}
+
 		TEST_METHOD(TestGoodPasswordOnSetRaw)
 		{
 			SetValue(L"ValidateRawPasswordOnSet", 1);

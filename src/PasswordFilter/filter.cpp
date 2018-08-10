@@ -53,17 +53,12 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 		std::wstring fullName(FullName->Buffer, FullName->Length / sizeof(WCHAR));
 
 		password = UnicodeStringToWcharArray(*Password);
-
+		
 		BOOLEAN result = ProcessPassword(password , accountName, fullName, SetOperation);
 		
 		if (password)
 		{
 			SecureZeroMemory(password, wcslen(password));
-		}
-
-		if (Password && Password->Length > 0)
-		{
-			SecureZeroMemory(Password->Buffer, Password->Length);
 		}
 
 		if (simulate)
@@ -86,11 +81,6 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 			SecureZeroMemory(password, wcslen(password));
 		}
 
-		if (Password && Password->Length > 0)
-		{
-			SecureZeroMemory(Password->Buffer, Password->Length);
-		}
-
 		if ((SetOperation && GetRegValue(L"AllowPasswordSetOnError", 1) == 0) || (!SetOperation && GetRegValue(L"AllowPasswordChangeOnError", 1) == 0))
 		{
 			OutputDebugString(L"Rejected password because AllowPasswordSetOnError or AllowPasswordChangeOnError was non-zero");
@@ -109,11 +99,6 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 			SecureZeroMemory(password, wcslen(password));
 		}
 
-		if (Password && Password->Length > 0)
-		{
-			SecureZeroMemory(Password->Buffer, Password->Length);
-		}
-
 		if ((SetOperation && GetRegValue(L"AllowPasswordSetOnError", 1) == 0) || (!SetOperation && GetRegValue(L"AllowPasswordChangeOnError", 1) == 0))
 		{
 			OutputDebugString(L"Rejected password because AllowPasswordSetOnError or AllowPasswordChangeOnError was non-zero");
@@ -130,11 +115,6 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 		if (password)
 		{
 			SecureZeroMemory(password, wcslen(password));
-		}
-
-		if (Password && Password->Length > 0)
-		{
-			SecureZeroMemory(Password->Buffer, Password->Length);
 		}
 
 		if ((SetOperation && GetRegValue(L"AllowPasswordSetOnError", 1) == 0) || (!SetOperation && GetRegValue(L"AllowPasswordChangeOnError", 1) == 0))

@@ -88,6 +88,15 @@ namespace ManagedUnitTests
         }
 
         [TestMethod]
+        public void TestBadPassword2()
+        {
+            string path = Path.Combine(TestHelpers.TestStorePath, "merged");
+            var target = new V2Store(path);
+
+            Assert.IsTrue(target.IsPasswordInStore("Password345!", true));
+        }
+
+        [TestMethod]
         public void BuildStoreEnglish()
         {
             this.BuildStore(@"D:\pwnedpwds\raw\english.txt");

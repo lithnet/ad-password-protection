@@ -39,6 +39,12 @@ namespace NativeUnitTests
 			LPWSTR password = L"p@$5w0rd";
 			Assert::AreEqual(L"password", NormalizePassword(password));
 		}
+
+		TEST_METHOD(NormalizedStringTestReplaceSubstitutions2)
+		{
+			LPWSTR password = L"Password345!";
+			Assert::AreEqual(L"password", NormalizePassword(password));
+		}
 	};
 
 }

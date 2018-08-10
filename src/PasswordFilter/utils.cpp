@@ -26,11 +26,12 @@ std::vector<std::wstring> SplitString(const std::wstring &text, wchar_t sep) {
 
 wchar_t* UnicodeStringToWcharArray(UNICODE_STRING str)
 {
-	int len = str.Length + 1;
+	int charCount = str.Length / sizeof(wchar_t);
+	int len = charCount + 1;
 
 	wchar_t* ar = new wchar_t[len];
 
-	wcsncpy_s(ar, len, str.Buffer, str.Length);
+	wcsncpy_s(ar, len, str.Buffer, charCount);
 
 	return ar;
 }
