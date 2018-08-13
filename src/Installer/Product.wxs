@@ -80,7 +80,7 @@
       </Component>
       <Component Id="cmp35ae4dbf6f7143f39ff05a2bbe7b4abf" Guid="*">
         <RegistryKey Root="HKLM"
-                     Key="Software\Lithnet\PasswordFilter"
+                     Key="Software\Lithnet\PasswordFilter" 
                      ForceDeleteOnUninstall="yes">
           <RegistryValue Type="integer" Action="write" Name="Disabled" Value="0"/>
           <RegistryValue Type="string" Action="write" Name="Store" Value="[STOREDIR]"/>

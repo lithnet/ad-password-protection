@@ -54,7 +54,7 @@ LPWSTR NormalizePassword(LPWSTR password)
 
 void RemoveWhiteSpace(LPWSTR s)
 {
-	LPWSTR cpy = s;  // an alias to iterate through s without moving s
+	LPWSTR cpy = s;
 	LPWSTR temp = s;
 
 	while (*cpy)
@@ -72,7 +72,7 @@ void RemoveWhiteSpace(LPWSTR s)
 
 void RemoveChars(LPWSTR s, const wchar_t * charsToRemove)
 {
-	LPWSTR cpy = s;  // an alias to iterate through s without moving s
+	LPWSTR cpy = s;
 	LPWSTR temp = s;
 
 	for (size_t i = 0; i < wcslen(s); i++)
@@ -101,7 +101,7 @@ void RemoveChars(LPWSTR s, const wchar_t * charsToRemove)
 
 void ReplaceChars(LPWSTR s, const wchar_t * charPairsToReplace)
 {
-	LPWSTR cpy = s;  // an alias to iterate through s without moving s
+	LPWSTR cpy = s;
 	LPWSTR temp = s;
 
 	for (size_t i = 0; i < wcslen(s); i++)

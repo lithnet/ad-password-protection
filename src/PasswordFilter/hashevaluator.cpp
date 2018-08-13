@@ -54,17 +54,17 @@ bool IsPasswordInStore(LPWSTR password)
 
 		if (hashCheckMode == 0)
 		{
-			OutputDebugString(L"IsHashInEseStore");
+			//OutputDebugString(L"IsHashInEseStore");
 			result = IsHashInEseStore(hash);
 		}
 		else if (hashCheckMode == 1)
 		{
-			OutputDebugString(L"IsHashInStorev1");
+			//OutputDebugString(L"IsHashInStorev1");
 			result = IsHashInStorev1(hash);
 		}
 		else if (hashCheckMode == 2)
 		{
-			OutputDebugString(L"IsHashInStorev2");
+			//OutputDebugString(L"IsHashInStorev2");
 			result = IsHashInStorev2(hash);
 		}
 
@@ -351,13 +351,13 @@ bool IsHashInBinaryFilev1(std::wstring filename, BYTE* hashBytes)
 		}
 		else
 		{
-			OutputDebugString(std::to_wstring(loops).c_str());
+			//OutputDebugString(std::to_wstring(loops).c_str());
 			file.close();
 			return true;
 		}
 	}
 
-	OutputDebugString(std::to_wstring(loops).c_str());
+	//OutputDebugString(std::to_wstring(loops).c_str());
 
 	file.close();
 
@@ -411,13 +411,13 @@ bool IsHashInBinaryFilev2(std::wstring filename, BYTE* hashBytes)
 		}
 		else
 		{
-			OutputDebugString(std::to_wstring(loops).c_str());
+			//OutputDebugString(std::to_wstring(loops).c_str());
 			file.close();
 			return true;
 		}
 	}
 
-	OutputDebugString(std::to_wstring(loops).c_str());
+	//OutputDebugString(std::to_wstring(loops).c_str());
 
 	file.close();
 	return false;
