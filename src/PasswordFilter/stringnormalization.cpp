@@ -10,7 +10,7 @@
 #include <iterator>
 #include "shlwapi.h"
 
-LPWSTR ToLowerInvariant(LPWSTR s)
+LPWSTR ToLowerInvariant(const LPWSTR &s)
 {
 	int sizeRequired = 0;
 
@@ -35,11 +35,11 @@ LPWSTR ToLowerInvariant(LPWSTR s)
 	return buf;
 }
 
-LPWSTR NormalizePassword(LPWSTR password)
+LPWSTR NormalizePassword(const LPWSTR &password)
 {
 	if (wcslen(password) == 0)
 	{
-		return password;
+		return (LPWSTR)password;
 	}
 
 	LPWSTR newPassword = ToLowerInvariant(password);
@@ -52,7 +52,7 @@ LPWSTR NormalizePassword(LPWSTR password)
 	return newPassword;
 }
 
-void RemoveWhiteSpace(LPWSTR s)
+void RemoveWhiteSpace(LPWSTR &s)
 {
 	LPWSTR cpy = s;
 	LPWSTR temp = s;
@@ -70,7 +70,7 @@ void RemoveWhiteSpace(LPWSTR s)
 	*temp = 0;
 }
 
-void RemoveChars(LPWSTR s, const wchar_t * charsToRemove)
+void RemoveChars(LPWSTR &s, const wchar_t *charsToRemove)
 {
 	LPWSTR cpy = s;
 	LPWSTR temp = s;
@@ -99,7 +99,7 @@ void RemoveChars(LPWSTR s, const wchar_t * charsToRemove)
 	*temp = 0;
 }
 
-void ReplaceChars(LPWSTR s, const wchar_t * charPairsToReplace)
+void ReplaceChars(LPWSTR &s, const wchar_t *charPairsToReplace)
 {
 	LPWSTR cpy = s;
 	LPWSTR temp = s;

@@ -8,7 +8,8 @@
 #include "esestore.h"
 #include <vector>
 
-std::vector<std::wstring> SplitString(const std::wstring &text, wchar_t sep) {
+std::vector<std::wstring> SplitString(const std::wstring &text, const wchar_t sep)
+{
 	std::vector<std::wstring> tokens;
 	std::size_t start = 0, end = 0;
 	while ((end = text.find(sep, start)) != std::wstring::npos) {
@@ -24,7 +25,7 @@ std::vector<std::wstring> SplitString(const std::wstring &text, wchar_t sep) {
 	return tokens;
 }
 
-wchar_t* UnicodeStringToWcharArray(UNICODE_STRING str)
+LPWSTR UnicodeStringToWcharArray(const UNICODE_STRING& str)
 {
 	int charCount = str.Length / sizeof(wchar_t);
 	int len = charCount + 1;

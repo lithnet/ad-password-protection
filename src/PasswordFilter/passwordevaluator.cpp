@@ -11,7 +11,7 @@
 #include <shlwapi.h>
 #include "utils.h"
 
-BOOLEAN ProcessPassword(LPWSTR password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation)
+BOOLEAN ProcessPassword(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation)
 {
 	eventlog::getInstance().logw(EVENTLOG_INFORMATION_TYPE, MSG_PROCESSING_REQUEST, 3, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
 
@@ -67,7 +67,7 @@ BOOLEAN ProcessPassword(LPWSTR password, std::wstring accountName, std::wstring 
 	return TRUE;
 }
 
-BOOLEAN ProcessPasswordRaw(LPWSTR password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation)
+BOOLEAN ProcessPasswordRaw(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation)
 {
 	if ((setOperation && GetRegValue(L"ValidateRawPasswordOnSet", 1) != 0) || (!setOperation && GetRegValue(L"ValidateRawPasswordOnChange", 1) != 0))
 	{
@@ -86,7 +86,7 @@ BOOLEAN ProcessPasswordRaw(LPWSTR password, std::wstring accountName, std::wstri
 	return TRUE;
 }
 
-BOOLEAN ProcessPasswordNormalized(LPWSTR password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation)
+BOOLEAN ProcessPasswordNormalized(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation)
 {
 	if ((setOperation && GetRegValue(L"ValidateNormalizedPasswordOnSet", 1) != 0) || (!setOperation && GetRegValue(L"ValidateNormalizedPasswordOnChange", 1) != 0))
 	{
@@ -104,7 +104,7 @@ BOOLEAN ProcessPasswordNormalized(LPWSTR password, std::wstring accountName, std
 				OutputDebugString(L"Rejected normalized password as it was found in the banned store");
 				eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_BANNED_NORMALIZED, 3, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
 			}
-			else 
+			else
 			{
 				OutputDebugString(L"Normalized password did not match any existing hashes");
 			}
@@ -129,7 +129,7 @@ BOOLEAN ProcessPasswordNormalized(LPWSTR password, std::wstring accountName, std
 	return TRUE;
 }
 
-BOOLEAN ProcessPasswordLength(LPWSTR password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation)
+BOOLEAN ProcessPasswordLength(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation)
 {
 	int minLength = GetRegValue(L"MinimumLength", 0);
 
@@ -150,7 +150,7 @@ BOOLEAN ProcessPasswordLength(LPWSTR password, std::wstring accountName, std::ws
 	return TRUE;
 }
 
-BOOLEAN ProcessPasswordDoesntContainAccountName(LPWSTR password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation)
+BOOLEAN ProcessPasswordDoesntContainAccountName(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation)
 {
 	int flag = GetRegValue(L"ValidatePasswordDoesntContainAccountName", 0);
 
@@ -178,7 +178,7 @@ BOOLEAN ProcessPasswordDoesntContainAccountName(LPWSTR password, std::wstring ac
 }
 
 
-BOOLEAN ProcessPasswordDoesntContainFullName(LPWSTR password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation)
+BOOLEAN ProcessPasswordDoesntContainFullName(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation)
 {
 	int flag = GetRegValue(L"ValidatePasswordDoesntContainFullName", 0);
 
@@ -205,7 +205,7 @@ BOOLEAN ProcessPasswordDoesntContainFullName(LPWSTR password, std::wstring accou
 	return TRUE;
 }
 
-BOOLEAN ProcessPasswordRegexApprove(LPWSTR password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation)
+BOOLEAN ProcessPasswordRegexApprove(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation)
 {
 	std::wstring regex = GetRegValue(L"RegexApprove", L"");
 
@@ -228,7 +228,7 @@ BOOLEAN ProcessPasswordRegexApprove(LPWSTR password, std::wstring accountName, s
 	return TRUE;
 }
 
-BOOLEAN ProcessPasswordRegexReject(LPWSTR password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation)
+BOOLEAN ProcessPasswordRegexReject(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation)
 {
 	std::wstring regex = GetRegValue(L"RegexReject", L"");
 
@@ -251,7 +251,7 @@ BOOLEAN ProcessPasswordRegexReject(LPWSTR password, std::wstring accountName, st
 	return TRUE;
 }
 
-BOOLEAN ProcessPasswordComplexityThreshold(LPWSTR password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation)
+BOOLEAN ProcessPasswordComplexityThreshold(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation)
 {
 	int threshold = GetRegValue(L"ComplexityThreshold", 0);
 
@@ -262,7 +262,7 @@ BOOLEAN ProcessPasswordComplexityThreshold(LPWSTR password, std::wstring account
 		bool hasUpper = false;
 		bool hasSymbol = false;
 		bool hasNumber = false;
-
+		
 		for (size_t i = 0; i < wcslen(password); i++)
 		{
 			WCHAR c = password[i];
@@ -296,7 +296,10 @@ BOOLEAN ProcessPasswordComplexityThreshold(LPWSTR password, std::wstring account
 			bool requiresSymbol = (GetRegValue(L"BelowThresholdRequiresSymbol", 0) != 0);
 			bool requiresSymbolOrNumber = (GetRegValue(L"BelowThresholdRequiresSymbolOrNumber", 0) != 0);
 
-			if ((requiresLower && !hasLower) || (requiresUpper && !hasUpper) || (requiresNumber && !hasNumber) || (requiresSymbol && !hasSymbol) || (requiresSymbolOrNumber && !(hasSymbol || hasNumber)))
+			int charSetsRequired = GetRegValue(L"BelowThresholdCharSetsRequired", 0);
+			int charSetsPresent = (hasLower ? 1 : 0) + (hasUpper ? 1 : 0) + (hasSymbol ? 1 : 0) + (hasNumber ? 0 : 1);
+
+			if ((charSetsPresent < charSetsRequired) || (requiresLower && !hasLower) || (requiresUpper && !hasUpper) || (requiresNumber && !hasNumber) || (requiresSymbol && !hasSymbol) || (requiresSymbolOrNumber && !(hasSymbol || hasNumber)))
 			{
 				OutputDebugString(L"Password did not meet the below-threshold complexity requirements");
 				eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_BELOW_THRESHOLD, 3, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
@@ -304,7 +307,6 @@ BOOLEAN ProcessPasswordComplexityThreshold(LPWSTR password, std::wstring account
 			}
 
 			OutputDebugString(L"Password met the below threshold complexity requirements");
-
 		}
 		else
 		{
@@ -314,7 +316,10 @@ BOOLEAN ProcessPasswordComplexityThreshold(LPWSTR password, std::wstring account
 			bool requiresSymbol = (GetRegValue(L"AboveThresholdRequiresSymbol", 0) != 0);
 			bool requiresSymbolOrNumber = (GetRegValue(L"AboveThresholdRequiresSymbolOrNumber", 0) != 0);
 
-			if ((requiresLower && !hasLower) || (requiresUpper && !hasUpper) || (requiresNumber && !hasNumber) || (requiresSymbol && !hasSymbol) || (requiresSymbolOrNumber && !(hasSymbol || hasNumber)))
+			int charSetsRequired = GetRegValue(L"AboveThresholdCharSetsRequired", 0);
+			int charSetsPresent = (hasLower ? 1 : 0) + (hasUpper ? 1 : 0) + (hasSymbol ? 1 : 0) + (hasNumber ? 0 : 1);
+
+			if ((charSetsPresent < charSetsRequired) || (requiresLower && !hasLower) || (requiresUpper && !hasUpper) || (requiresNumber && !hasNumber) || (requiresSymbol && !hasSymbol) || (requiresSymbolOrNumber && !(hasSymbol || hasNumber)))
 			{
 				OutputDebugString(L"Password did not meet the above-threshold complexity requirements");
 				eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_ABOVE_THRESHOLD, 3, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
@@ -328,7 +333,7 @@ BOOLEAN ProcessPasswordComplexityThreshold(LPWSTR password, std::wstring account
 	return TRUE;
 }
 
-BOOLEAN ProcessPasswordComplexityPoints(LPWSTR password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation)
+BOOLEAN ProcessPasswordComplexityPoints(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation)
 {
 	int requiredPoints = GetRegValue(L"ComplexityPointsRequired", 0);
 

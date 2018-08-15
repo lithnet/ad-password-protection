@@ -86,7 +86,7 @@ std::wstring ToHexString(T first, T last, bool use_uppercase = true, bool insert
 //	}
 //}
 
-void GetSha1HashBytes(LPWSTR input, BYTE* hashBytes, int hashBytesLength)
+void GetSha1HashBytes(const LPWSTR &input, BYTE* hashBytes, const int &hashBytesLength)
 {
 	int lenW = WideCharToMultiByte(CP_UTF8, 0, input, -1, NULL, 0, NULL, NULL);
 
@@ -116,7 +116,7 @@ void GetSha1HashBytes(LPWSTR input, BYTE* hashBytes, int hashBytesLength)
 	throw std::system_error(GetLastError(), std::system_category(), "Sha1Hash/WideCharToMultiByte failed");
 }
 
-void GetSha1HashBytes(LPSTR input, BYTE* hashBytes, int hashBytesLength)
+void GetSha1HashBytes(const LPSTR &input, BYTE* hashBytes, const int &hashBytesLength)
 {
 	HCRYPTPROV hProv = 0;
 	HCRYPTHASH hHash = 0;
@@ -165,7 +165,7 @@ void GetSha1HashBytes(LPSTR input, BYTE* hashBytes, int hashBytesLength)
 
 		if (hashBytesLength != dwHashLen)
 		{
-			throw std::invalid_argument("An insufficent buffer was allocated for the hash");
+			throw std::invalid_argument("An insufficient buffer was allocated for the hash");
 		}
 
 		if (!CryptGetHashParam(hHash, HP_HASHVAL, hashBytes, &dwHashLen, 0))

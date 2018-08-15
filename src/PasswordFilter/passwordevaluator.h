@@ -1,21 +1,21 @@
 #pragma once
 
-__declspec(dllexport) BOOLEAN ProcessPassword(LPWSTR password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation);
+__declspec(dllexport) BOOLEAN ProcessPassword(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation);
 
-__declspec(dllexport) BOOLEAN ProcessPasswordRaw(LPWSTR password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation);
+__declspec(dllexport) BOOLEAN ProcessPasswordRaw(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation);
 
-__declspec(dllexport) BOOLEAN ProcessPasswordNormalized(LPWSTR password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation);
+__declspec(dllexport) BOOLEAN ProcessPasswordNormalized(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation);
 
-__declspec(dllexport) BOOLEAN ProcessPasswordLength(LPWSTR password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation);
+__declspec(dllexport) BOOLEAN ProcessPasswordLength(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation);
 
-__declspec(dllexport) BOOLEAN ProcessPasswordDoesntContainAccountName(LPWSTR password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation);
+__declspec(dllexport) BOOLEAN ProcessPasswordDoesntContainAccountName(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation);
 
-__declspec(dllexport) BOOLEAN ProcessPasswordDoesntContainFullName(LPWSTR password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation);
+__declspec(dllexport) BOOLEAN ProcessPasswordDoesntContainFullName(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation);
 
-__declspec(dllexport) BOOLEAN ProcessPasswordRegexApprove(LPWSTR password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation);
+__declspec(dllexport) BOOLEAN ProcessPasswordRegexApprove(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation);
 
-__declspec(dllexport) BOOLEAN ProcessPasswordRegexReject(LPWSTR password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation);
+__declspec(dllexport) BOOLEAN ProcessPasswordRegexReject(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation);
 
-__declspec(dllexport) BOOLEAN ProcessPasswordComplexityThreshold(LPWSTR password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation);
+__declspec(dllexport) BOOLEAN ProcessPasswordComplexityThreshold(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation);
 
-__declspec(dllexport) BOOLEAN ProcessPasswordComplexityPoints(LPWSTR password, std::wstring accountName, std::wstring fullName, BOOLEAN setOperation);
+__declspec(dllexport) BOOLEAN ProcessPasswordComplexityPoints(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation);

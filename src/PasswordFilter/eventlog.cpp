@@ -18,7 +18,7 @@ eventlog::~eventlog()
 	}
 }
 
-void eventlog::logw(WORD severity, DWORD eventID, int argCount, ...)
+void eventlog::logw(const WORD &severity, const DWORD &eventID, const int argCount, ...)
 {
 	LPCWSTR* pInsertStrings = new LPCWSTR[argCount];
 
@@ -34,14 +34,14 @@ void eventlog::logw(WORD severity, DWORD eventID, int argCount, ...)
 
 	if (hlog)
 	{
-		ReportEvent(hlog, severity, 0, eventID, NULL, argCount, 0, (LPCWSTR*)pInsertStrings, NULL);
+		ReportEvent(hlog, severity, 0, eventID, NULL, argCount, 0, pInsertStrings, NULL);
 	}
 
 	delete[] pInsertStrings;
 }
 
 
-void eventlog::log(WORD severity, DWORD eventID, int argCount, ...)
+void eventlog::log(const WORD &severity, const DWORD &eventID, const int argCount, ...)
 {
 	LPCSTR* pInsertStrings = new LPCSTR[argCount];
 
@@ -57,7 +57,7 @@ void eventlog::log(WORD severity, DWORD eventID, int argCount, ...)
 
 	if (hlog)
 	{
-		ReportEventA(hlog, severity, 0, eventID, NULL, argCount, 0, (LPCSTR*)pInsertStrings, NULL);
+		ReportEventA(hlog, severity, 0, eventID, NULL, argCount, 0, pInsertStrings, NULL);
 	}
 
 	delete[] pInsertStrings;

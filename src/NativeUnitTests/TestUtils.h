@@ -25,8 +25,6 @@ typedef struct _SYSTEM_FILECACHE_INFORMATION
 	ULONG Flags;
 } SYSTEM_FILECACHE_INFORMATION;
 
-void DisplayError(DWORD Err);
-
 BOOL SetPrivilege(HANDLE hToken, LPCTSTR lpszPrivilege, BOOL bEnablePrivilege);
 
 int ClearStandbyCache();

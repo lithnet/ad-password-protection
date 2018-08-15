@@ -38,7 +38,7 @@ std::wstring ToHexString(T first, T last, bool use_uppercase = true, bool insert
 	return ss.str();
 }
 
-bool IsPasswordInStore(LPWSTR password)
+bool IsPasswordInStore(const LPWSTR &password)
 {
 	BYTE *hash = NULL;
 
@@ -54,17 +54,14 @@ bool IsPasswordInStore(LPWSTR password)
 
 		if (hashCheckMode == 0)
 		{
-			//OutputDebugString(L"IsHashInEseStore");
 			result = IsHashInEseStore(hash);
 		}
 		else if (hashCheckMode == 1)
 		{
-			//OutputDebugString(L"IsHashInStorev1");
 			result = IsHashInStorev1(hash);
 		}
 		else if (hashCheckMode == 2)
 		{
-			//OutputDebugString(L"IsHashInStorev2");
 			result = IsHashInStorev2(hash);
 		}
 
@@ -88,7 +85,7 @@ bool IsPasswordInStore(LPWSTR password)
 	}
 }
 
-bool IsHashInEseStore(BYTE* hash)
+bool IsHashInEseStore(const BYTE* hash)
 {
 	return esestore::getInstance().IsHashInDb(hash);
 }
@@ -99,13 +96,13 @@ bool IsHashInEseStore(BYTE* hash)
 //	return IsHashInStore(hash, range);
 //}
 
-bool IsHashInStorev1(BYTE* hash)
+bool IsHashInStorev1(const BYTE* hash)
 {
 	std::wstring range = ToHexString(hash, hash + 3).substr(0, 5);
 	return IsHashInStorev1(hash, range);
 }
 
-bool IsHashInStorev2(BYTE* hash)
+bool IsHashInStorev2(const BYTE* hash)
 {
 	std::wstring range = ToHexString(hash, hash + 2);
 	return IsHashInStorev2(hash, range);
@@ -124,7 +121,7 @@ bool IsHashInStorev2(BYTE* hash)
 //	return IsHashInTextFileBinarySearch(path, hash);
 //}
 
-bool IsHashInStorev1(BYTE* hash, std::wstring range)
+bool IsHashInStorev1(const BYTE* hash, const std::wstring &range)
 {
 	std::wstring path = GetStoreFileNamev1(range);
 
@@ -138,7 +135,7 @@ bool IsHashInStorev1(BYTE* hash, std::wstring range)
 }
 
 
-bool IsHashInStorev2(BYTE* hash, std::wstring range)
+bool IsHashInStorev2(const BYTE* hash, const std::wstring &range)
 {
 	std::wstring path = GetStoreFileNamev2(range);
 
@@ -152,7 +149,7 @@ bool IsHashInStorev2(BYTE* hash, std::wstring range)
 }
 
 
-std::wstring GetStoreFileName(std::wstring range)
+std::wstring GetStoreFileName(const std::wstring &range)
 {
 	std::wstring path = GetRegValue(L"Store", L"");
 
@@ -171,7 +168,7 @@ std::wstring GetStoreFileName(std::wstring range)
 	return path;
 }
 
-std::wstring GetStoreFileNamev1(std::wstring range)
+std::wstring GetStoreFileNamev1(const std::wstring &range)
 {
 	std::wstring path = GetRegValue(L"Store", L"");
 
@@ -190,7 +187,7 @@ std::wstring GetStoreFileNamev1(std::wstring range)
 	return path;
 }
 
-std::wstring GetStoreFileNamev2(std::wstring range)
+std::wstring GetStoreFileNamev2(const std::wstring &range)
 {
 	std::wstring path = GetRegValue(L"Store", L"");
 
@@ -307,7 +304,7 @@ std::wstring GetStoreFileNamev2(std::wstring range)
 //	return false;
 //}
 
-bool IsHashInBinaryFilev1(std::wstring filename, BYTE* hashBytes)
+bool IsHashInBinaryFilev1(const std::wstring &filename, const BYTE* hashBytes)
 {
 	std::ifstream file(filename.c_str(), std::ios::binary | std::ios::in);
 
@@ -364,7 +361,7 @@ bool IsHashInBinaryFilev1(std::wstring filename, BYTE* hashBytes)
 	return false;
 }
 
-bool IsHashInBinaryFilev2(std::wstring filename, BYTE* hashBytes)
+bool IsHashInBinaryFilev2(const std::wstring &filename, const BYTE* hashBytes)
 {
 	std::ifstream file(filename.c_str(), std::ios::binary | std::ios::in);
 
@@ -379,7 +376,7 @@ bool IsHashInBinaryFilev2(std::wstring filename, BYTE* hashBytes)
 
 	file.seekg(0, std::ios::beg);
 
-	BYTE* partialHashBytes = hashBytes + 2;
+	const BYTE* partialHashBytes = hashBytes + 2;
 
 	if (length % SHA1_PARTIAL_BINARY_HASH_LENGTH != 0)
 	{

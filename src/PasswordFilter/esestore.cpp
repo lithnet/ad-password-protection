@@ -116,7 +116,7 @@ esestore::esestore()
 	columnid = column->columnid;
 }
 
-bool esestore::IsHashInDb(BYTE* hash)
+bool esestore::IsHashInDb(const BYTE* hash) const
 {
 	if (closed)
 	{

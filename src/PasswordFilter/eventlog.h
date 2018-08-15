@@ -2,8 +2,8 @@
 class eventlog
 {
 public:
-	void logw(WORD severity, DWORD eventID, int argCount, ...);
-	void log(WORD severity, DWORD eventID, int argCount, ...);
+	void logw(const WORD &severity, const DWORD &eventID, const int argCount, ...);
+	void log(const WORD &severity, const DWORD &eventID, const int argCount, ...);
 
 	static eventlog& getInstance()
 	{

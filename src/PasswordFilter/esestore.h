@@ -21,7 +21,7 @@ private:
 public:
 	esestore(esestore const&) = delete;
 	void operator=(esestore const&) = delete;
-	bool IsHashInDb(BYTE* hash);
+	bool IsHashInDb(const BYTE* hash) const;
 	void Close();
 };
 
