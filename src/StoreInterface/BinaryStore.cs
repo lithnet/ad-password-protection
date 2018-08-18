@@ -221,6 +221,7 @@ namespace StoreInterface
             using (BinaryReader reader = new BinaryReader(File.Open(file, FileMode.Open)))
             {
                 long length = reader.BaseStream.Length;
+
                 if (length % this.HashSize != 0)
                 {
                     throw new DataMisalignedException($"The store file {file} was corrupted");

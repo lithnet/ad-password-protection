@@ -92,15 +92,14 @@ void GetSha1HashBytes(const LPWSTR &input, BYTE* hashBytes, const int &hashBytes
 
 	if (lenW > 0)
 	{
-		char* output = new char[lenW];
+		std::unique_ptr<char[]> output = std::make_unique<char[]>(lenW);
 
-		if (WideCharToMultiByte(CP_UTF8, 0, input, -1, output, lenW, NULL, NULL) > 0)
+		if (WideCharToMultiByte(CP_UTF8, 0, input, -1, output.get(), lenW, NULL, NULL) > 0)
 		{
-			GetSha1HashBytes(output, hashBytes, hashBytesLength);
+			GetSha1HashBytes(output.get(), hashBytes, hashBytesLength);
 			if (output)
 			{
-				SecureZeroMemory(output, lenW);
-				delete[] output;
+				SecureZeroMemory(output.get(), lenW);
 			}
 
 			return;
@@ -108,8 +107,7 @@ void GetSha1HashBytes(const LPWSTR &input, BYTE* hashBytes, const int &hashBytes
 
 		if (output)
 		{
-			SecureZeroMemory(output, lenW);
-			delete[] output;
+			SecureZeroMemory(output.get(), lenW);
 		}
 	}
 

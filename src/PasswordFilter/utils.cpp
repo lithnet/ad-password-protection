@@ -36,3 +36,44 @@ LPWSTR UnicodeStringToWcharArray(const UNICODE_STRING& str)
 
 	return ar;
 }
+
+template<typename T>
+std::wstring ToHexString(T first, T last, bool use_uppercase = true, bool insert_spaces = false)
+{
+	std::wstringstream ss;
+	ss << std::hex << std::setfill(L'0');
+
+	if (use_uppercase)
+	{
+		ss << std::uppercase;
+	}
+
+	while (first != last)
+	{
+		ss << std::setw(2) << static_cast<int>(*first++);
+
+		if (insert_spaces && first != last)
+		{
+			ss << " ";
+		}
+	}
+
+	return ss.str();
+}
+
+bool DirectoryExists(const std::wstring& dirName_in)
+{
+	DWORD attributes = GetFileAttributes(dirName_in.c_str());
+
+	if (attributes == INVALID_FILE_ATTRIBUTES)
+	{
+		return false;
+	}
+
+	if (attributes & FILE_ATTRIBUTE_DIRECTORY)
+	{
+		return true;  
+	}
+
+	return false;
+}

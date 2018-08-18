@@ -22,70 +22,70 @@ esestore::esestore()
 
 	if (result != 0)
 	{
-		throw new std::exception("JetCreateInstance failed");
+		throw std::exception("JetCreateInstance failed");
 	}
 
 	result = JetSetSystemParameter(&instance, 0, JET_paramCircularLog, 1, 0);
 
 	if (result != 0)
 	{
-		throw new std::exception("JetSetSystemParameter JET_paramCircularLog failed");
+		throw std::exception("JetSetSystemParameter JET_paramCircularLog failed");
 	}
 
 	result = JetSetSystemParameter(&instance, 0, JET_paramCreatePathIfNotExist, 1, 0);
 
 	if (result != 0)
 	{
-		throw new std::exception("JetSetSystemParameter JET_paramCreatePathIfNotExist failed");
+		throw std::exception("JetSetSystemParameter JET_paramCreatePathIfNotExist failed");
 	}
 
 	result = JetSetSystemParameter(&instance, 0, JET_paramExceptionAction, JET_ExceptionNone, 0);
 
 	if (result != 0)
 	{
-		throw new std::exception("JetSetSystemParameter JET_paramExceptionAction failed");
+		throw std::exception("JetSetSystemParameter JET_paramExceptionAction failed");
 	}
 
 	result = JetSetSystemParameter(&instance, 0, JET_paramLogFilePath, 0, eseStoreRoot.c_str());
 
 	if (result != 0)
 	{
-		throw new std::exception("JetSetSystemParameter JET_paramLogFilePath failed");
+		throw std::exception("JetSetSystemParameter JET_paramLogFilePath failed");
 	}
 
 	result = JetSetSystemParameter(&instance, 0, JET_paramSystemPath, 0, eseStoreRoot.c_str());
 
 	if (result != 0)
 	{
-		throw new std::exception("JetSetSystemParameter JET_paramSystemPath failed");
+		throw std::exception("JetSetSystemParameter JET_paramSystemPath failed");
 	}
 
 	result = JetSetSystemParameter(&instance, 0, JET_paramTempPath, 0, eseStoreRoot.c_str());
 
 	if (result != 0)
 	{
-		throw new std::exception("JetSetSystemParameter JET_paramTempPath failed");
+		throw std::exception("JetSetSystemParameter JET_paramTempPath failed");
 	}
 
 	result = JetInit(&instance);
 
 	if (result != 0)
 	{
-		throw new std::exception("JetInit failed");
+		throw std::exception("JetInit failed");
 	}
 
 	result = JetBeginSession(instance, &sessionid, NULL, NULL);
 
 	if (result != 0)
 	{
-		throw new std::exception("JetBeginSession failed");
+		throw std::exception("JetBeginSession failed");
 	}
 
 	result = JetAttachDatabase(sessionid, esedb.c_str(), 0);
 
 	if (result != 0)
 	{
-		throw new std::exception("JetAttachDatabase failed");
+		throw std::exception("JetAttachDatabase failed");
 	}
 
 	attached = true;
@@ -94,7 +94,7 @@ esestore::esestore()
 
 	if (result != 0)
 	{
-		throw new std::exception("JetOpenDatabase failed");
+		throw std::exception("JetOpenDatabase failed");
 	}
 
 	column = new JET_COLUMNDEF();
@@ -103,14 +103,14 @@ esestore::esestore()
 
 	if (result != 0)
 	{
-		throw new std::exception("JetOpenTable failed");
+		throw std::exception("JetOpenTable failed");
 	}
 
 	result = JetGetTableColumnInfo(sessionid, tableid, "sha1", column, sizeof(JET_COLUMNDEF), JET_ColInfoGrbitMinimalInfo);
 
 	if (result != 0)
 	{
-		throw new std::exception("JetGetTableColumnInfo failed");
+		throw std::exception("JetGetTableColumnInfo failed");
 	}
 
 	columnid = column->columnid;
@@ -129,13 +129,13 @@ bool esestore::IsHashInDb(const BYTE* hash) const
 
 	if (result != 0)
 	{
-		throw new std::exception("JetSetCurrentIndex failed");
+		throw std::exception("JetSetCurrentIndex failed");
 	}
 
 	result = JetMakeKey(sessionid, tableid, hash, 20, JET_bitNewKey);
 	if (result != 0)
 	{
-		throw new std::exception("JetMakeKey failed");
+		throw std::exception("JetMakeKey failed");
 	}
 
 	result = JetSeek(sessionid, tableid, JET_bitSeekEQ | JET_bitCheckUniqueness);
@@ -150,7 +150,7 @@ bool esestore::IsHashInDb(const BYTE* hash) const
 		return false;
 	}
 
-	throw new std::exception("JetSeek failed");
+	throw std::exception("JetSeek failed");
 }
 
 esestore::~esestore()
