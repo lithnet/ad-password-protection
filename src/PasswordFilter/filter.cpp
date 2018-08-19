@@ -33,10 +33,11 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 {
 	bool simulate = false;
 	LPWSTR password;
+	registry reg;
 
 	try {
 
-		if (GetRegValue(L"Disabled", 0) != 0)
+		if (reg.GetRegValue(L"Disabled", 0) != 0)
 		{
 			eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_AGENT_DISABLED, 0);
 			return TRUE;
@@ -47,15 +48,15 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 			return FALSE;
 		}
 
-		simulate = GetRegValue(L"Simulate", 0) != 0;
+		simulate = reg.GetRegValue(L"Simulate", 0) != 0;
 
 		std::wstring accountName(AccountName->Buffer, AccountName->Length / sizeof(WCHAR));
 		std::wstring fullName(FullName->Buffer, FullName->Length / sizeof(WCHAR));
 
 		password = UnicodeStringToWcharArray(*Password);
-		
-		BOOLEAN result = ProcessPassword(password , accountName, fullName, SetOperation);
-		
+
+		BOOLEAN result = ProcessPassword(password, accountName, fullName, SetOperation);
+
 		if (password)
 		{
 			SecureZeroMemory(password, wcslen(password));
@@ -81,7 +82,7 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 			SecureZeroMemory(password, wcslen(password));
 		}
 
-		if ((SetOperation && GetRegValue(L"AllowPasswordSetOnError", 1) == 0) || (!SetOperation && GetRegValue(L"AllowPasswordChangeOnError", 1) == 0))
+		if ((SetOperation && reg.GetRegValue(L"AllowPasswordSetOnError", 1) == 0) || (!SetOperation && reg.GetRegValue(L"AllowPasswordChangeOnError", 1) == 0))
 		{
 			OutputDebugString(L"Rejected password because AllowPasswordSetOnError or AllowPasswordChangeOnError was non-zero");
 			eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_ON_ERROR, 1, SetOperation ? L"set" : L"change");
@@ -99,7 +100,7 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 			SecureZeroMemory(password, wcslen(password));
 		}
 
-		if ((SetOperation && GetRegValue(L"AllowPasswordSetOnError", 1) == 0) || (!SetOperation && GetRegValue(L"AllowPasswordChangeOnError", 1) == 0))
+		if ((SetOperation && reg.GetRegValue(L"AllowPasswordSetOnError", 1) == 0) || (!SetOperation && reg.GetRegValue(L"AllowPasswordChangeOnError", 1) == 0))
 		{
 			OutputDebugString(L"Rejected password because AllowPasswordSetOnError or AllowPasswordChangeOnError was non-zero");
 			eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_ON_ERROR, 1, SetOperation ? L"set" : L"change");
@@ -117,7 +118,7 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 			SecureZeroMemory(password, wcslen(password));
 		}
 
-		if ((SetOperation && GetRegValue(L"AllowPasswordSetOnError", 1) == 0) || (!SetOperation && GetRegValue(L"AllowPasswordChangeOnError", 1) == 0))
+		if ((SetOperation && reg.GetRegValue(L"AllowPasswordSetOnError", 1) == 0) || (!SetOperation && reg.GetRegValue(L"AllowPasswordChangeOnError", 1) == 0))
 		{
 			OutputDebugString(L"Rejected password because AllowPasswordSetOnError or AllowPasswordChangeOnError was non-zero");
 			eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_ON_ERROR, 1, SetOperation ? L"set" : L"change");

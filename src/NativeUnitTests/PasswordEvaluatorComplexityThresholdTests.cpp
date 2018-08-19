@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
 #include "../PasswordFilter/passwordevaluator.h"
+#include "../PasswordFilter/registry.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -9,6 +10,7 @@ namespace NativeUnitTests
 	TEST_CLASS(PasswordEvaluatorComplexityThresholdTests)
 	{
 	public:
+		registry reg;
 		TEST_METHOD(AboveThresholdRequiresNumberPass)
 		{
 			SetValue(L"AboveThresholdRequiresLower", 0);
@@ -19,7 +21,7 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityThreshold", 7);
 
 			LPWSTR password = L"password 0";
-			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE));
+			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
 		TEST_METHOD(AboveThresholdRequiresNumberFail)
@@ -32,7 +34,7 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityThreshold", 7);
 
 			LPWSTR password = L"password";
-			Assert::IsFalse(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE));
+			Assert::IsFalse(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
 		TEST_METHOD(AboveThresholdRequiresLowerPass)
@@ -45,7 +47,7 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityThreshold", 7);
 
 			LPWSTR password = L"PASSWORD p";
-			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE));
+			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE,reg));
 		}
 
 		TEST_METHOD(AboveThresholdRequiresLowerFail)
@@ -58,7 +60,7 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityThreshold", 7);
 
 			LPWSTR password = L"PASSWORD";
-			Assert::IsFalse(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE));
+			Assert::IsFalse(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE,reg));
 		}
 
 		TEST_METHOD(AboveThresholdRequiresSymbolPass)
@@ -71,7 +73,7 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityThreshold", 7);
 
 			LPWSTR password = L"password !";
-			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE));
+			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
 		TEST_METHOD(AboveThresholdRequiresSymbolFail)
@@ -84,7 +86,7 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityThreshold", 7);
 
 			LPWSTR password = L"password";
-			Assert::IsFalse(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE));
+			Assert::IsFalse(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
 		TEST_METHOD(AboveThresholdRequiresSymbolOrNumberNumberPass)
@@ -97,7 +99,7 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityThreshold", 7);
 
 			LPWSTR password = L"password 1";
-			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE));
+			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
 		TEST_METHOD(AboveThresholdRequiresSymbolOrNumberSymbolPass)
@@ -110,7 +112,7 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityThreshold", 7);
 
 			LPWSTR password = L"password !";
-			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE));
+			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
 		TEST_METHOD(AboveThresholdRequiresSymbolOrNumberFail)
@@ -123,7 +125,7 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityThreshold", 7);
 
 			LPWSTR password = L"password";
-			Assert::IsFalse(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE));
+			Assert::IsFalse(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
 		TEST_METHOD(AboveThresholdRequiresUpperPass)
@@ -136,7 +138,7 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityThreshold", 7);
 
 			LPWSTR password = L"password P";
-			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE));
+			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
 		TEST_METHOD(AboveThresholdRequiresUpperFail)
@@ -149,7 +151,7 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityThreshold", 7);
 
 			LPWSTR password = L"password";
-			Assert::IsFalse(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE));
+			Assert::IsFalse(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
 // Below Threshold
@@ -164,7 +166,7 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityThreshold", 17);
 
 			LPWSTR password = L"password 0";
-			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE));
+			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
 		TEST_METHOD(BelowThresholdRequiresNumberFail)
@@ -177,7 +179,7 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityThreshold", 17);
 
 			LPWSTR password = L"password";
-			Assert::IsFalse(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE));
+			Assert::IsFalse(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
 		TEST_METHOD(BelowThresholdRequiresLowerPass)
@@ -190,7 +192,7 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityThreshold", 17);
 
 			LPWSTR password = L"PASSWORD p";
-			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE));
+			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
 		TEST_METHOD(BelowThresholdRequiresLowerFail)
@@ -203,7 +205,7 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityThreshold", 17);
 
 			LPWSTR password = L"PASSWORD";
-			Assert::IsFalse(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE));
+			Assert::IsFalse(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
 		TEST_METHOD(BelowThresholdRequiresSymbolPass)
@@ -216,7 +218,7 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityThreshold", 17);
 
 			LPWSTR password = L"password !";
-			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE));
+			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
 		TEST_METHOD(BelowThresholdRequiresSymbolFail)
@@ -229,7 +231,7 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityThreshold", 17);
 
 			LPWSTR password = L"password";
-			Assert::IsFalse(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE));
+			Assert::IsFalse(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
 		TEST_METHOD(BelowThresholdRequiresSymbolOrNumberNumberPass)
@@ -242,7 +244,7 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityThreshold", 17);
 
 			LPWSTR password = L"password 1";
-			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE));
+			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
 		TEST_METHOD(BelowThresholdRequiresSymbolOrNumberSymbolPass)
@@ -255,7 +257,7 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityThreshold", 17);
 
 			LPWSTR password = L"password !";
-			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE));
+			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
 		TEST_METHOD(BelowThresholdRequiresSymbolOrNumberFail)
@@ -268,7 +270,7 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityThreshold", 17);
 
 			LPWSTR password = L"password";
-			Assert::IsFalse(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE));
+			Assert::IsFalse(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
 		TEST_METHOD(BelowThresholdRequiresUpperPass)
@@ -281,7 +283,7 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityThreshold", 17);
 
 			LPWSTR password = L"password P";
-			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE));
+			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
 		TEST_METHOD(BelowThresholdRequiresUpperFail)
@@ -294,7 +296,7 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityThreshold", 17);
 
 			LPWSTR password = L"password";
-			Assert::IsFalse(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE));
+			Assert::IsFalse(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 	};
 }

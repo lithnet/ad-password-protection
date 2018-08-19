@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <fstream>
 #include "../PasswordFilter/passwordevaluator.h"
+#include "../PasswordFilter/registry.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -12,6 +13,8 @@ namespace NativeUnitTests
 {
 	TEST_CLASS(StorePerformanceTests)
 	{
+		registry reg;
+
 	private:
 		void LoopGoodRandomPasswords()
 		{
@@ -29,7 +32,7 @@ namespace NativeUnitTests
 				std::wstringstream ss;
 				ss << i << L": " << wszUuid << L": ";
 
-				bool result = ProcessPasswordRaw(wszUuid, accountName, fullname, TRUE);
+				bool result = ProcessPasswordRaw(wszUuid, accountName, fullname, TRUE, reg);
 
 				ss << (result ? "passed" : "rejected");
 
@@ -60,7 +63,7 @@ namespace NativeUnitTests
 
 				ss << count << L": " << line << L": ";
 
-				bool result = ProcessPasswordRaw((LPWSTR)line.c_str(), accountName, fullname, TRUE);
+				bool result = ProcessPasswordRaw((LPWSTR)line.c_str(), accountName, fullname, TRUE, reg);
 
 				ss << (result ? "passed" : "rejected");
 

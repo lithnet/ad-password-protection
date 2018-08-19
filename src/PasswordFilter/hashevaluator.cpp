@@ -13,6 +13,7 @@
 
 const int STORE_VERSION = 1;
 
+registry reg;
 
 template<typename T>
 std::wstring ToHexString(T first, T last, bool use_uppercase = true, bool insert_spaces = false)
@@ -50,7 +51,7 @@ bool IsPasswordInStore(const LPWSTR &password)
 
 		bool result;
 
-		int hashCheckMode = GetRegValue(L"HashCheckMode", 2);
+		int hashCheckMode = reg.GetRegValue(L"HashCheckMode", 2);
 
 		if (hashCheckMode == 0)
 		{
@@ -151,11 +152,11 @@ bool IsHashInStorev2(const BYTE* hash, const std::wstring &range)
 
 std::wstring GetStoreFileName(const std::wstring &range)
 {
-	std::wstring path = GetRegValue(L"Store", L"");
+	std::wstring path = reg.GetRegValue(L"Store", L"");
 
 	if (path == L"")
 	{
-		throw new std::invalid_argument("No store path was specified");
+		throw std::invalid_argument("No store path was specified");
 	}
 
 	if (!path.empty() && *path.rbegin() != '\\')
@@ -170,11 +171,11 @@ std::wstring GetStoreFileName(const std::wstring &range)
 
 std::wstring GetStoreFileNamev1(const std::wstring &range)
 {
-	std::wstring path = GetRegValue(L"Store", L"");
+	std::wstring path = reg.GetRegValue(L"Store", L"");
 
 	if (path == L"")
 	{
-		throw new std::invalid_argument("No store path was specified");
+		throw std::invalid_argument("No store path was specified");
 	}
 
 	if (!path.empty() && *path.rbegin() != '\\')
@@ -189,11 +190,11 @@ std::wstring GetStoreFileNamev1(const std::wstring &range)
 
 std::wstring GetStoreFileNamev2(const std::wstring &range)
 {
-	std::wstring path = GetRegValue(L"Store", L"");
+	std::wstring path = reg.GetRegValue(L"Store", L"");
 
 	if (path == L"")
 	{
-		throw new std::invalid_argument("No store path was specified");
+		throw std::invalid_argument("No store path was specified");
 	}
 
 	if (!path.empty() && *path.rbegin() != '\\')
@@ -320,7 +321,7 @@ bool IsHashInBinaryFilev1(const std::wstring &filename, const BYTE* hashBytes)
 
 	if (length % SHA1_BINARY_HASH_LENGTH != 0)
 	{
-		throw new std::invalid_argument("The hash store is corrupted");
+		throw std::invalid_argument("The hash store is corrupted");
 	}
 
 	lastRow = ((length) / (SHA1_BINARY_HASH_LENGTH));
@@ -380,7 +381,7 @@ bool IsHashInBinaryFilev2(const std::wstring &filename, const BYTE* hashBytes)
 
 	if (length % SHA1_PARTIAL_BINARY_HASH_LENGTH != 0)
 	{
-		throw new std::invalid_argument("The hash store is corrupted");
+		throw std::invalid_argument("The hash store is corrupted");
 	}
 
 	lastRow = ((length) / (SHA1_PARTIAL_BINARY_HASH_LENGTH));

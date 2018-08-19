@@ -15,47 +15,49 @@ BOOLEAN ProcessPassword(const LPWSTR &password, const std::wstring &accountName,
 {
 	eventlog::getInstance().logw(EVENTLOG_INFORMATION_TYPE, MSG_PROCESSING_REQUEST, 3, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
 
-	if (!ProcessPasswordLength(password, accountName, fullName, setOperation))
+	registry reg = registry::GetRegistryForUser(accountName);
+
+	if (!ProcessPasswordLength(password, accountName, fullName, setOperation, reg))
 	{
 		return FALSE;
 	}
 
-	if (!ProcessPasswordComplexityThreshold(password, accountName, fullName, setOperation))
+	if (!ProcessPasswordComplexityThreshold(password, accountName, fullName, setOperation, reg))
 	{
 		return FALSE;
 	}
 
-	if (!ProcessPasswordComplexityPoints(password, accountName, fullName, setOperation))
+	if (!ProcessPasswordComplexityPoints(password, accountName, fullName, setOperation, reg))
 	{
 		return FALSE;
 	}
 
-	if (!ProcessPasswordRegexApprove(password, accountName, fullName, setOperation))
+	if (!ProcessPasswordRegexApprove(password, accountName, fullName, setOperation, reg))
 	{
 		return FALSE;
 	}
 
-	if (!ProcessPasswordRegexReject(password, accountName, fullName, setOperation))
+	if (!ProcessPasswordRegexReject(password, accountName, fullName, setOperation, reg))
 	{
 		return FALSE;
 	}
 
-	if (!ProcessPasswordDoesntContainAccountName(password, accountName, fullName, setOperation))
+	if (!ProcessPasswordDoesntContainAccountName(password, accountName, fullName, setOperation, reg))
 	{
 		return FALSE;
 	}
 
-	if (!ProcessPasswordDoesntContainFullName(password, accountName, fullName, setOperation))
+	if (!ProcessPasswordDoesntContainFullName(password, accountName, fullName, setOperation, reg))
 	{
 		return FALSE;
 	}
 
-	if (!ProcessPasswordRaw(password, accountName, fullName, setOperation))
+	if (!ProcessPasswordRaw(password, accountName, fullName, setOperation, reg))
 	{
 		return FALSE;
 	}
 
-	if (!ProcessPasswordNormalized(password, accountName, fullName, setOperation))
+	if (!ProcessPasswordNormalized(password, accountName, fullName, setOperation, reg))
 	{
 		return FALSE;
 	}
@@ -67,9 +69,9 @@ BOOLEAN ProcessPassword(const LPWSTR &password, const std::wstring &accountName,
 	return TRUE;
 }
 
-BOOLEAN ProcessPasswordRaw(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation)
+BOOLEAN ProcessPasswordRaw(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
 {
-	if ((setOperation && GetRegValue(L"ValidateRawPasswordOnSet", 1) != 0) || (!setOperation && GetRegValue(L"ValidateRawPasswordOnChange", 1) != 0))
+	if ((setOperation && reg.GetRegValue(L"ValidateRawPasswordOnSet", 1) != 0) || (!setOperation && reg.GetRegValue(L"ValidateRawPasswordOnChange", 1) != 0))
 	{
 		OutputDebugString(L"Checking raw password");
 
@@ -86,9 +88,9 @@ BOOLEAN ProcessPasswordRaw(const LPWSTR &password, const std::wstring &accountNa
 	return TRUE;
 }
 
-BOOLEAN ProcessPasswordNormalized(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation)
+BOOLEAN ProcessPasswordNormalized(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
 {
-	if ((setOperation && GetRegValue(L"ValidateNormalizedPasswordOnSet", 1) != 0) || (!setOperation && GetRegValue(L"ValidateNormalizedPasswordOnChange", 1) != 0))
+	if ((setOperation && reg.GetRegValue(L"ValidateNormalizedPasswordOnSet", 1) != 0) || (!setOperation && reg.GetRegValue(L"ValidateNormalizedPasswordOnChange", 1) != 0))
 	{
 		LPWSTR normalizedPassword;
 		bool result = TRUE;
@@ -129,9 +131,9 @@ BOOLEAN ProcessPasswordNormalized(const LPWSTR &password, const std::wstring &ac
 	return TRUE;
 }
 
-BOOLEAN ProcessPasswordLength(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation)
+BOOLEAN ProcessPasswordLength(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
 {
-	int minLength = GetRegValue(L"MinimumLength", 0);
+	int minLength = reg.GetRegValue(L"MinimumLength", 0);
 
 	if (minLength > 0)
 	{
@@ -150,9 +152,9 @@ BOOLEAN ProcessPasswordLength(const LPWSTR &password, const std::wstring &accoun
 	return TRUE;
 }
 
-BOOLEAN ProcessPasswordDoesntContainAccountName(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation)
+BOOLEAN ProcessPasswordDoesntContainAccountName(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
 {
-	int flag = GetRegValue(L"ValidatePasswordDoesntContainAccountName", 0);
+	int flag = reg.GetRegValue(L"ValidatePasswordDoesntContainAccountName", 0);
 
 	if (flag != 0 && accountName.length() > 3)
 	{
@@ -178,9 +180,9 @@ BOOLEAN ProcessPasswordDoesntContainAccountName(const LPWSTR &password, const st
 }
 
 
-BOOLEAN ProcessPasswordDoesntContainFullName(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation)
+BOOLEAN ProcessPasswordDoesntContainFullName(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
 {
-	int flag = GetRegValue(L"ValidatePasswordDoesntContainFullName", 0);
+	int flag = reg.GetRegValue(L"ValidatePasswordDoesntContainFullName", 0);
 
 	if (flag != 0 && fullName.length() > 3)
 	{
@@ -205,9 +207,9 @@ BOOLEAN ProcessPasswordDoesntContainFullName(const LPWSTR &password, const std::
 	return TRUE;
 }
 
-BOOLEAN ProcessPasswordRegexApprove(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation)
+BOOLEAN ProcessPasswordRegexApprove(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
 {
-	std::wstring regex = GetRegValue(L"RegexApprove", L"");
+	std::wstring regex = reg.GetRegValue(L"RegexApprove", L"");
 
 	if (regex.length() > 0)
 	{
@@ -228,9 +230,9 @@ BOOLEAN ProcessPasswordRegexApprove(const LPWSTR &password, const std::wstring &
 	return TRUE;
 }
 
-BOOLEAN ProcessPasswordRegexReject(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation)
+BOOLEAN ProcessPasswordRegexReject(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
 {
-	std::wstring regex = GetRegValue(L"RegexReject", L"");
+	std::wstring regex = reg.GetRegValue(L"RegexReject", L"");
 
 	if (regex.length() > 0)
 	{
@@ -251,9 +253,9 @@ BOOLEAN ProcessPasswordRegexReject(const LPWSTR &password, const std::wstring &a
 	return TRUE;
 }
 
-BOOLEAN ProcessPasswordComplexityThreshold(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation)
+BOOLEAN ProcessPasswordComplexityThreshold(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
 {
-	int threshold = GetRegValue(L"ComplexityThreshold", 0);
+	int threshold = reg.GetRegValue(L"ComplexityThreshold", 0);
 
 	if (threshold > 0)
 	{
@@ -290,13 +292,13 @@ BOOLEAN ProcessPasswordComplexityThreshold(const LPWSTR &password, const std::ws
 
 		if (wcslen(password) < threshold)
 		{
-			bool requiresLower = (GetRegValue(L"BelowThresholdRequiresLower", 0) != 0);
-			bool requiresUpper = (GetRegValue(L"BelowThresholdRequiresUpper", 0) != 0);
-			bool requiresNumber = (GetRegValue(L"BelowThresholdRequiresNumber", 0) != 0);
-			bool requiresSymbol = (GetRegValue(L"BelowThresholdRequiresSymbol", 0) != 0);
-			bool requiresSymbolOrNumber = (GetRegValue(L"BelowThresholdRequiresSymbolOrNumber", 0) != 0);
+			bool requiresLower = (reg.GetRegValue(L"BelowThresholdRequiresLower", 0) != 0);
+			bool requiresUpper = (reg.GetRegValue(L"BelowThresholdRequiresUpper", 0) != 0);
+			bool requiresNumber = (reg.GetRegValue(L"BelowThresholdRequiresNumber", 0) != 0);
+			bool requiresSymbol = (reg.GetRegValue(L"BelowThresholdRequiresSymbol", 0) != 0);
+			bool requiresSymbolOrNumber = (reg.GetRegValue(L"BelowThresholdRequiresSymbolOrNumber", 0) != 0);
 
-			int charSetsRequired = GetRegValue(L"BelowThresholdCharSetsRequired", 0);
+			int charSetsRequired = reg.GetRegValue(L"BelowThresholdCharSetsRequired", 0);
 			int charSetsPresent = (hasLower ? 1 : 0) + (hasUpper ? 1 : 0) + (hasSymbol ? 1 : 0) + (hasNumber ? 0 : 1);
 
 			if ((charSetsPresent < charSetsRequired) || (requiresLower && !hasLower) || (requiresUpper && !hasUpper) || (requiresNumber && !hasNumber) || (requiresSymbol && !hasSymbol) || (requiresSymbolOrNumber && !(hasSymbol || hasNumber)))
@@ -310,13 +312,13 @@ BOOLEAN ProcessPasswordComplexityThreshold(const LPWSTR &password, const std::ws
 		}
 		else
 		{
-			bool requiresLower = (GetRegValue(L"AboveThresholdRequiresLower", 0) != 0);
-			bool requiresUpper = (GetRegValue(L"AboveThresholdRequiresUpper", 0) != 0);
-			bool requiresNumber = (GetRegValue(L"AboveThresholdRequiresNumber", 0) != 0);
-			bool requiresSymbol = (GetRegValue(L"AboveThresholdRequiresSymbol", 0) != 0);
-			bool requiresSymbolOrNumber = (GetRegValue(L"AboveThresholdRequiresSymbolOrNumber", 0) != 0);
+			bool requiresLower = (reg.GetRegValue(L"AboveThresholdRequiresLower", 0) != 0);
+			bool requiresUpper = (reg.GetRegValue(L"AboveThresholdRequiresUpper", 0) != 0);
+			bool requiresNumber = (reg.GetRegValue(L"AboveThresholdRequiresNumber", 0) != 0);
+			bool requiresSymbol = (reg.GetRegValue(L"AboveThresholdRequiresSymbol", 0) != 0);
+			bool requiresSymbolOrNumber = (reg.GetRegValue(L"AboveThresholdRequiresSymbolOrNumber", 0) != 0);
 
-			int charSetsRequired = GetRegValue(L"AboveThresholdCharSetsRequired", 0);
+			int charSetsRequired = reg.GetRegValue(L"AboveThresholdCharSetsRequired", 0);
 			int charSetsPresent = (hasLower ? 1 : 0) + (hasUpper ? 1 : 0) + (hasSymbol ? 1 : 0) + (hasNumber ? 0 : 1);
 
 			if ((charSetsPresent < charSetsRequired) || (requiresLower && !hasLower) || (requiresUpper && !hasUpper) || (requiresNumber && !hasNumber) || (requiresSymbol && !hasSymbol) || (requiresSymbolOrNumber && !(hasSymbol || hasNumber)))
@@ -333,25 +335,25 @@ BOOLEAN ProcessPasswordComplexityThreshold(const LPWSTR &password, const std::ws
 	return TRUE;
 }
 
-BOOLEAN ProcessPasswordComplexityPoints(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation)
+BOOLEAN ProcessPasswordComplexityPoints(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
 {
-	int requiredPoints = GetRegValue(L"ComplexityPointsRequired", 0);
+	int requiredPoints = reg.GetRegValue(L"ComplexityPointsRequired", 0);
 
 	if (requiredPoints > 0)
 	{
 		OutputDebugString(L"Checking for complexity points");
 
-		int perChar = GetRegValue(L"ComplexityPointsPerCharacter", 2);
+		int perChar = reg.GetRegValue(L"ComplexityPointsPerCharacter", 2);
 
-		int perNumber = GetRegValue(L"ComplexityPointsPerNumber", 0);
-		int perSymbol = GetRegValue(L"ComplexityPointsPerSymbol", 0);
-		int perUpper = GetRegValue(L"ComplexityPointsPerUpper", 0);
-		int perLower = GetRegValue(L"ComplexityPointsPerLower", 0);
+		int perNumber = reg.GetRegValue(L"ComplexityPointsPerNumber", 0);
+		int perSymbol = reg.GetRegValue(L"ComplexityPointsPerSymbol", 0);
+		int perUpper = reg.GetRegValue(L"ComplexityPointsPerUpper", 0);
+		int perLower = reg.GetRegValue(L"ComplexityPointsPerLower", 0);
 
-		int useNumber = GetRegValue(L"ComplexityPointsUseOfNumber", 1);
-		int useSymbol = GetRegValue(L"ComplexityPointsUseOfSymbol", 1);
-		int useUpper = GetRegValue(L"ComplexityPointsUseOfUpper", 1);
-		int useLower = GetRegValue(L"ComplexityPointsUseOfLower", 1);
+		int useNumber = reg.GetRegValue(L"ComplexityPointsUseOfNumber", 1);
+		int useSymbol = reg.GetRegValue(L"ComplexityPointsUseOfSymbol", 1);
+		int useUpper = reg.GetRegValue(L"ComplexityPointsUseOfUpper", 1);
+		int useLower = reg.GetRegValue(L"ComplexityPointsUseOfLower", 1);
 
 		bool hasLower = false;
 		bool hasUpper = false;

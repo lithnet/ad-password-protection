@@ -1,16 +1,29 @@
 #pragma once
 #include "stdafx.h"
 
-DWORD GetPolicyOrSettingsValue(HKEY hKeyPolicy, HKEY hKeySettings, const std::wstring & strValueName, DWORD defaultValue);
+static const LPWSTR BASE_SETTINGS_KEY_NAME = L"SOFTWARE\\Lithnet\\PasswordFilter";
+static const LPWSTR BASE_POLICY_KEY_NAME = L"SOFTWARE\\Policies\\Lithnet\\PasswordFilter";
 
-const std::wstring GetPolicyOrSettingsValue(HKEY hKeyPolicy, HKEY hKeySettings, const std::wstring & strValueName, const std::wstring & defaultValue);
+class registry
+{
+private:
+	std::wstring policyGroup;
+	std::wstring settingsKeyName;
+	std::wstring policyKeyName;
 
-const std::wstring GetValueString(DWORD & dwBufferSize, const HKEY & hKeyPolicy, const std::wstring & strValueName, const std::wstring & defaultValue);
+public:
+	registry();
+	registry(std::wstring policyGroup);
+	~registry();
+	std::wstring GetRegValue(const std::wstring & valueName, const std::wstring & defaultValue) const;
+	DWORD GetRegValue(const std::wstring & valueName, DWORD defaultValue) const;
+	static registry GetRegistryForUser(const std::wstring & user);
 
-std::wstring GetRegValue(const std::wstring & valueName, const std::wstring & defaultValue);
+private:
+	DWORD GetPolicyOrSettingsValue(const std::wstring & strValueName, DWORD defaultValue) const;
+	const std::wstring GetKeyName(const LPWSTR& key) const;
+	const std::wstring GetPolicyOrSettingsValue(const std::wstring & strValueName, const std::wstring & defaultValue) const;
+	const std::wstring GetValueString(DWORD & dwBufferSize, const std::wstring & keyName, const std::wstring & strValueName, const std::wstring & defaultValue) const;
+};
 
-DWORD GetRegValue(const std::wstring & valueName, DWORD defaultValue);
 
-HKEY OpenSettingsKey();
-
-HKEY OpenPolicyKey();

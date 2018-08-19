@@ -2,170 +2,133 @@
 #include "registry.h"
 #include "settings.h"
 
-DWORD GetPolicyOrSettingsValue(HKEY hKeyPolicy, HKEY hKeySettings, const std::wstring &strValueName, DWORD defaultValue)
+registry::registry()
+{
+	this->settingsKeyName = BASE_SETTINGS_KEY_NAME;
+	this->policyKeyName = BASE_POLICY_KEY_NAME;
+}
+
+registry::registry(std::wstring policyGroup)
+{
+	this->policyGroup = policyGroup;
+	this->settingsKeyName = GetKeyName(BASE_SETTINGS_KEY_NAME);
+	this->policyKeyName = GetKeyName(BASE_POLICY_KEY_NAME);
+}
+
+registry::~registry()
+{
+}
+
+std::wstring registry::GetRegValue(const std::wstring & valueName, const std::wstring & defaultValue) const
+{
+	return GetPolicyOrSettingsValue(valueName, defaultValue);
+}
+
+DWORD registry::GetRegValue(const std::wstring & valueName, DWORD defaultValue) const
+{
+	return GetPolicyOrSettingsValue(valueName, defaultValue);
+}
+
+registry registry::GetRegistryForUser(const std::wstring & user)
+{
+	return registry();
+}
+
+DWORD registry::GetPolicyOrSettingsValue(const std::wstring & valueName, DWORD defaultValue) const
 {
 	DWORD dwBufferSize(sizeof(DWORD));
 	DWORD value(0);
-	LONG result;
 
-	if (hKeyPolicy)
+	long result = RegGetValue(HKEY_LOCAL_MACHINE,
+		this->policyKeyName.c_str(),
+		valueName.c_str(),
+		RRF_RT_DWORD,
+		NULL,
+		&value,
+		&dwBufferSize);
+
+	if (result == ERROR_SUCCESS)
 	{
-		result = RegQueryValueEx(hKeyPolicy, strValueName.c_str(), NULL, NULL, reinterpret_cast<LPBYTE>(&value), &dwBufferSize);
-
-		if (result == ERROR_SUCCESS)
-		{
-			return value;
-		}
-	}
-	
-	if (hKeySettings)
-	{
-		result = RegQueryValueEx(hKeySettings, strValueName.c_str(), NULL, NULL, reinterpret_cast<LPBYTE>(&value), &dwBufferSize);
-
-		if (result == ERROR_SUCCESS)
-		{
-			return value;
-		}
-	}
-	
-	return defaultValue;
-}
-
-const std::wstring GetPolicyOrSettingsValue(HKEY hKeyPolicy, HKEY hKeySettings, const std::wstring &strValueName, const std::wstring &defaultValue)
-{
-	DWORD dwBufferSize;
-	LONG result;
-
-	if (hKeyPolicy)
-	{
-		result = RegQueryValueEx(hKeyPolicy, strValueName.c_str(), NULL, NULL, NULL, &dwBufferSize);
-
-		if (result == ERROR_SUCCESS)
-		{
-			return GetValueString(dwBufferSize, hKeyPolicy, strValueName, defaultValue);
-		}
+		return value;
 	}
 
-	if (hKeySettings)
-	{
-		result = RegQueryValueEx(hKeySettings, strValueName.c_str(), NULL, NULL, NULL, &dwBufferSize);
+	result = RegGetValue(HKEY_LOCAL_MACHINE,
+		this->settingsKeyName.c_str(),
+		valueName.c_str(),
+		RRF_RT_DWORD,
+		NULL,
+		&value,
+		&dwBufferSize);
 
-		if (result == ERROR_SUCCESS)
-		{
-			return GetValueString(dwBufferSize, hKeySettings, strValueName, defaultValue);
-		}
+	if (result == ERROR_SUCCESS)
+	{
+		return value;
 	}
 
 	return defaultValue;
 }
 
-const std::wstring GetValueString(DWORD &dwBufferSize, const HKEY &hKeyPolicy, const std::wstring & strValueName, const std::wstring & defaultValue)
+const std::wstring registry::GetKeyName(const LPWSTR & key) const
 {
-	wchar_t* szBuffer = new wchar_t[dwBufferSize];
+	std::wstring name(key);
+	if (!this->policyGroup.empty())
+	{
+		name += L"\\";
+		name += this->policyGroup;
+	}
 
-	LONG result = RegQueryValueEx(hKeyPolicy, strValueName.c_str(), NULL, NULL, (LPBYTE)szBuffer, &dwBufferSize);
+	return name;
+}
+
+const std::wstring registry::GetPolicyOrSettingsValue(const std::wstring & valueName, const std::wstring & defaultValue) const
+{
+	DWORD dwBufferSize = 0;
+
+	long result = RegGetValue(HKEY_LOCAL_MACHINE,
+		this->policyKeyName.c_str(),
+		valueName.c_str(),
+		RRF_RT_REG_SZ,
+		NULL,
+		NULL,
+		&dwBufferSize);
+
+	if (result == ERROR_SUCCESS)
+	{
+		return GetValueString(dwBufferSize, this->policyKeyName, valueName, defaultValue);
+	}
+
+	result = RegGetValue(HKEY_LOCAL_MACHINE,
+		this->settingsKeyName.c_str(),
+		valueName.c_str(),
+		RRF_RT_REG_SZ,
+		NULL,
+		NULL,
+		&dwBufferSize);
+
+	if (result == ERROR_SUCCESS)
+	{
+		return GetValueString(dwBufferSize, this->settingsKeyName, valueName, defaultValue);
+	}
+
+	return defaultValue;
+}
+
+const std::wstring registry::GetValueString(DWORD & dwBufferSize, const std::wstring & keyName, const std::wstring & valueName, const std::wstring & defaultValue) const
+{
+	std::unique_ptr<WCHAR[]> szBuffer = std::make_unique<WCHAR[]>(dwBufferSize / sizeof(WCHAR));
+
+	long result = RegGetValue(HKEY_LOCAL_MACHINE,
+		keyName.c_str(),
+		valueName.c_str(),
+		RRF_RT_REG_SZ,
+		NULL,
+		&szBuffer[0],
+		&dwBufferSize);
 
 	if (result != ERROR_SUCCESS)
 	{
-		delete[] szBuffer;
 		return defaultValue;
 	}
 
-	std::wstring value = std::wstring(szBuffer);
-	delete[] szBuffer;
-	return value;
-}
-
-std::wstring GetRegValue(const std::wstring &valueName, const std::wstring &defaultValue)
-{
-	HKEY hKeySettings = OpenSettingsKey();
-	HKEY hKeyPolicy = OpenPolicyKey();
-	
-	std::wstring value = GetPolicyOrSettingsValue(hKeyPolicy, hKeySettings, valueName, defaultValue);
-
-	if (hKeyPolicy)
-	{
-		RegCloseKey(hKeyPolicy);
-	}
-
-	if (hKeySettings)
-	{
-		RegCloseKey(hKeySettings);
-	}
-
-	return value;
-}
-
-DWORD GetRegValue(const std::wstring &valueName, DWORD defaultValue)
-{
-	HKEY hKeySettings = OpenSettingsKey();
-	HKEY hKeyPolicy = OpenPolicyKey();
-
-	DWORD value = GetPolicyOrSettingsValue(hKeyPolicy, hKeySettings, valueName, defaultValue);
-
-	if (hKeyPolicy)
-	{
-		RegCloseKey(hKeyPolicy);
-	}
-
-	if (hKeySettings)
-	{
-		RegCloseKey(hKeySettings);
-	}
-
-	return value;
-}
-
-HKEY OpenSettingsKey()
-{
-	HKEY hKey;
-	LSTATUS result = RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Lithnet\\PasswordFilter", 0, KEY_READ, &hKey);
-
-	if (result == ERROR_FILE_NOT_FOUND)
-	{
-		return 0;
-	}
-
-	if (result != ERROR_SUCCESS)
-	{
-		return 0;
-	}
-
-	return hKey;
-}
-
-HKEY OpenSettingsKeyWritable()
-{
-	HKEY hKey;
-	LSTATUS result = RegCreateKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Lithnet\\PasswordFilter", 0,NULL, NULL, NULL, NULL, &hKey, NULL);
-
-	if (result == ERROR_FILE_NOT_FOUND)
-	{
-		return 0;
-	}
-
-	if (result != ERROR_SUCCESS)
-	{
-		return 0;
-	}
-
-	return hKey;
-}
-
-HKEY OpenPolicyKey()
-{
-	HKEY hKey;
-	LSTATUS result = RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Lithnet\\PasswordFilter", 0, KEY_READ, &hKey);
-
-	if (result == ERROR_FILE_NOT_FOUND)
-	{
-		return 0;
-	}
-
-	if (result != ERROR_SUCCESS)
-	{
-		return 0;
-	}
-
-	return hKey;
+	return std::wstring(szBuffer.get());
 }
