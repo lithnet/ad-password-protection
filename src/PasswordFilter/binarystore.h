@@ -1,5 +1,5 @@
 #pragma once
-const static int SHA1_BINARY_HASH_LENGTH = 20;
+const static int SHA1_HASH_LENGTH = 20;
 
 class binarystore
 {

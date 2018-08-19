@@ -74,7 +74,7 @@ BOOLEAN ProcessPasswordRaw(const LPWSTR &password, const std::wstring &accountNa
 	if ((setOperation && reg.GetRegValue(L"ValidateRawPasswordOnSet", 1) != 0) || (!setOperation && reg.GetRegValue(L"ValidateRawPasswordOnChange", 1) != 0))
 	{
 		OutputDebugString(L"Checking raw password");
-
+		
 		if (IsPasswordInStore(password))
 		{
 			OutputDebugString(L"Rejected password as it was found in the banned store");

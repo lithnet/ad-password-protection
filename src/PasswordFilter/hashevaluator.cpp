@@ -10,8 +10,8 @@
 #include <sstream>
 #include <iomanip>
 #include "esestore.h"
-
-const int STORE_VERSION = 1;
+#include "v1store.h"
+#include "v2store.h"
 
 registry reg;
 
@@ -52,6 +52,12 @@ bool IsPasswordInStore(const LPWSTR &password)
 		bool result;
 
 		int hashCheckMode = reg.GetRegValue(L"HashCheckMode", 2);
+		std::wstring storePath = reg.GetRegValue(L"Store", L"");
+
+		if (storePath.empty())
+		{
+			throw std::exception("Store path was null");
+		}
 
 		if (hashCheckMode == 0)
 		{
@@ -59,11 +65,13 @@ bool IsPasswordInStore(const LPWSTR &password)
 		}
 		else if (hashCheckMode == 1)
 		{
-			result = IsHashInStorev1(hash);
+			v1store v1s(storePath);
+			result = v1s.IsPasswordInStore(password);
 		}
 		else if (hashCheckMode == 2)
 		{
-			result = IsHashInStorev2(hash);
+			v2store v2s(storePath);
+			result = v2s.IsPasswordInStore(password);
 		}
 
 		if (hash)
@@ -316,7 +324,7 @@ bool IsHashInBinaryFilev1(const std::wstring &filename, const BYTE* hashBytes)
 	OutputDebugString(filename.c_str());
 	file.seekg(0, std::ios::end);
 	length = file.tellg();
-	
+
 	file.seekg(0, std::ios::beg);
 
 	if (length % SHA1_BINARY_HASH_LENGTH != 0)

@@ -17,7 +17,7 @@ binarystore::binarystore(std::wstring storeBasePath, std::wstring storeSubPath, 
 	this->hashSize = hashSize;
 	this->storeSubPath = storeSubPath;
 	this->storeBasePath = storeBasePath;
-	this->hashOffset = SHA1_BINARY_HASH_LENGTH - hashSize;
+	this->hashOffset = SHA1_HASH_LENGTH - hashSize;
 
 	WCHAR path[MAX_PATH] = L"";
 
@@ -51,15 +51,15 @@ bool binarystore::IsPasswordInStore(const LPWSTR &password)
 
 	try
 	{
-		hash = new BYTE[SHA1_BINARY_HASH_LENGTH];
+		hash = new BYTE[SHA1_HASH_LENGTH];
 
-		GetSha1HashBytes(password, hash, SHA1_BINARY_HASH_LENGTH);
+		GetSha1HashBytes(password, hash, SHA1_HASH_LENGTH);
 
 		bool result = IsHashInStore(hash);
 
 		if (hash)
 		{
-			SecureZeroMemory(hash, SHA1_BINARY_HASH_LENGTH);
+			SecureZeroMemory(hash, SHA1_HASH_LENGTH);
 			delete[] hash;
 		}
 
@@ -69,7 +69,7 @@ bool binarystore::IsPasswordInStore(const LPWSTR &password)
 	{
 		if (hash)
 		{
-			SecureZeroMemory(hash, SHA1_BINARY_HASH_LENGTH);
+			SecureZeroMemory(hash, SHA1_HASH_LENGTH);
 			delete[] hash;
 		}
 
@@ -104,8 +104,9 @@ bool binarystore::IsHashInBinaryFile(const std::wstring &filename, const BYTE* h
 	std::ifstream file(filename, std::ios::binary | std::ios::ate | std::ios::in);
 
 	long firstRow = 0, currentRow = 0;
-
-	OutputDebugString(wcscat(L"Searching ", filename.c_str()));
+	std::wstring message = L"Searching ";
+	message += filename;
+	OutputDebugString(message.c_str());
 
 	long length = static_cast<long>(file.tellg());
 
@@ -120,7 +121,7 @@ bool binarystore::IsHashInBinaryFile(const std::wstring &filename, const BYTE* h
 
 	long lastRow = length / this->hashSize;
 
-	BYTE rowData[SHA1_BINARY_HASH_LENGTH] = { 0 };
+	BYTE rowData[SHA1_HASH_LENGTH] = { 0 };
 
 	while (firstRow <= lastRow)
 	{
@@ -141,7 +142,9 @@ bool binarystore::IsHashInBinaryFile(const std::wstring &filename, const BYTE* h
 		}
 		else
 		{
-			OutputDebugString(wcscat(L"Hash found at row ", std::to_wstring(currentRow).c_str()));
+			message = L"Hash found at row ";
+			message += std::to_wstring(currentRow);
+			OutputDebugString(message.c_str());
 			file.close();
 			return true;
 		}
