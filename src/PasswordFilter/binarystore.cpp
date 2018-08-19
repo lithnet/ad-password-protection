@@ -11,6 +11,7 @@
 #include <iomanip>
 #include "utils.h"
 #include <atlconv.h>
+#include "SecureArrayT.h"
 
 binarystore::binarystore(std::wstring storeBasePath, std::wstring storeSubPath, int hashSize)
 {
@@ -47,40 +48,14 @@ binarystore::~binarystore()
 
 bool binarystore::IsPasswordInStore(const LPWSTR &password)
 {
-	BYTE *hash = NULL;
+	SecureArrayT<BYTE> hash = GetSha1HashBytes(password);
 
-	try
-	{
-		hash = new BYTE[SHA1_HASH_LENGTH];
-
-		GetSha1HashBytes(password, hash, SHA1_HASH_LENGTH);
-
-		bool result = IsHashInStore(hash);
-
-		if (hash)
-		{
-			SecureZeroMemory(hash, SHA1_HASH_LENGTH);
-			delete[] hash;
-		}
-
-		return result;
-	}
-	catch (...)
-	{
-		if (hash)
-		{
-			SecureZeroMemory(hash, SHA1_HASH_LENGTH);
-			delete[] hash;
-		}
-
-		throw;
-	}
+	return IsHashInStore(hash.get());
 }
 
 bool binarystore::IsHashInStore(const BYTE* hash)
 {
-	std::wstring range = GetRangeFromHash(hash);
-	std::wstring path = GetStoreFileName(range);
+	std::wstring path = GetStoreFileName(GetRangeFromHash(hash));
 
 	DWORD attr = GetFileAttributes(path.c_str());
 	if (attr == INVALID_FILE_ATTRIBUTES || (attr & FILE_ATTRIBUTE_DIRECTORY))
@@ -127,7 +102,7 @@ bool binarystore::IsHashInBinaryFile(const std::wstring &filename, const BYTE* h
 	{
 		currentRow = (firstRow + lastRow) / 2;
 		file.seekg((currentRow * this->hashSize), std::ios::beg);
-		
+
 		file.read((char*)rowData, this->hashSize);
 
 		int result = memcmp(rowData, toFind, this->hashSize);

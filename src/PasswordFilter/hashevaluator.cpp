@@ -5,93 +5,48 @@
 #include "hashevaluator.h"
 #include "shlwapi.h"
 #include <sstream>
-#include "hasher.h"
 #include <iostream>
 #include <sstream>
 #include <iomanip>
 #include "esestore.h"
 #include "v1store.h"
 #include "v2store.h"
+#include "SecureArrayT.h"
+#include "utils.h"
 
 registry reg;
 
-template<typename T>
-std::wstring ToHexString(T first, T last, bool use_uppercase = true, bool insert_spaces = false)
-{
-	std::wstringstream ss;
-	ss << std::hex << std::setfill(L'0');
-
-	if (use_uppercase)
-	{
-		ss << std::uppercase;
-	}
-
-	while (first != last)
-	{
-		ss << std::setw(2) << static_cast<int>(*first++);
-
-		if (insert_spaces && first != last)
-		{
-			ss << " ";
-		}
-	}
-
-	return ss.str();
-}
 
 bool IsPasswordInStore(const LPWSTR &password)
 {
-	BYTE *hash = NULL;
+	SecureArrayT<BYTE> hash = GetSha1HashBytes(password);
 
-	try
+	bool result;
+
+	int hashCheckMode = reg.GetRegValue(L"HashCheckMode", 2);
+	std::wstring storePath = reg.GetRegValue(L"Store", L"");
+
+	if (storePath.empty())
 	{
-		hash = new BYTE[20];
-
-		GetSha1HashBytes(password, hash, 20);
-
-		bool result;
-
-		int hashCheckMode = reg.GetRegValue(L"HashCheckMode", 2);
-		std::wstring storePath = reg.GetRegValue(L"Store", L"");
-
-		if (storePath.empty())
-		{
-			throw std::exception("Store path was null");
-		}
-
-		if (hashCheckMode == 0)
-		{
-			result = IsHashInEseStore(hash);
-		}
-		else if (hashCheckMode == 1)
-		{
-			v1store v1s(storePath);
-			result = v1s.IsPasswordInStore(password);
-		}
-		else if (hashCheckMode == 2)
-		{
-			v2store v2s(storePath);
-			result = v2s.IsPasswordInStore(password);
-		}
-
-		if (hash)
-		{
-			SecureZeroMemory(hash, 20);
-			delete[] hash;
-		}
-
-		return result;
+		throw std::exception("Store path was null");
 	}
-	catch (...)
+
+	if (hashCheckMode == 0)
 	{
-		if (hash)
-		{
-			SecureZeroMemory(hash, 20);
-			delete[] hash;
-		}
-
-		throw;
+		result = IsHashInEseStore(hash);
 	}
+	else if (hashCheckMode == 1)
+	{
+		v1store v1s(storePath);
+		result = v1s.IsPasswordInStore(password);
+	}
+	else if (hashCheckMode == 2)
+	{
+		v2store v2s(storePath);
+		result = v2s.IsPasswordInStore(password);
+	}
+
+	return result;
 }
 
 bool IsHashInEseStore(const BYTE* hash)
