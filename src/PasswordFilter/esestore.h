@@ -1,4 +1,5 @@
 #pragma once
+#include "SecureArrayT.h"
 
 class esestore
 {
@@ -21,7 +22,7 @@ private:
 public:
 	esestore(esestore const&) = delete;
 	void operator=(esestore const&) = delete;
-	bool IsHashInDb(const BYTE* hash) const;
+	bool IsHashInDb(const SecureArrayT<BYTE> &hash) const;
 	void Close();
 };
 

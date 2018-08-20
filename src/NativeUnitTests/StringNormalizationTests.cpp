@@ -12,37 +12,37 @@ namespace NativeUnitTests
 
 		TEST_METHOD(NormalizedStringTestLowerCase)
 		{
-			LPWSTR password = L"Password";
+			TestString password(L"Password");
 			Assert::AreEqual(L"password", NormalizePassword(password));
 		}
 
 		TEST_METHOD(NormalizedStringTestLTrim)
 		{
-			LPWSTR password = L"!@#$%^&*()091234567890password";
+			TestString password(L"!@#$%^&*()091234567890password");
 			Assert::AreEqual(L"password", NormalizePassword(password));
 		}
 
 		TEST_METHOD(NormalizedStringTestRTrim)
 		{
-			LPWSTR password = L"password!@#$%^&*()091234567890";
+			TestString password(L"password!@#$%^&*()091234567890");
 			Assert::AreEqual(L"password", NormalizePassword(password));
 		}
 
 		TEST_METHOD(NormalizedStringTestRemoveWhitespace)
 		{
-			LPWSTR password = L"pas     sw\tord";
+			TestString password(L"pas     sw\tord");
 			Assert::AreEqual(L"password", NormalizePassword(password));
 		}
 
 		TEST_METHOD(NormalizedStringTestReplaceSubstitutions)
 		{
-			LPWSTR password = L"p@$5w0rd";
+			TestString password(L"p@$5w0rd");
 			Assert::AreEqual(L"password", NormalizePassword(password));
 		}
 
 		TEST_METHOD(NormalizedStringTestReplaceSubstitutions2)
 		{
-			LPWSTR password = L"Password345!";
+			TestString password(L"Password345!");
 			Assert::AreEqual(L"password", NormalizePassword(password));
 		}
 	};

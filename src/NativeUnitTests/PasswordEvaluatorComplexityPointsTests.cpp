@@ -26,8 +26,8 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityPointsUseOfSymbol", 0);
 			SetValue(L"ComplexityPointsUseOfUpper", 0);
 
+			TestString password(L"password1@Pp");
 
-			LPWSTR password = L"password1@Pp";
 			Assert::IsTrue(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
@@ -46,9 +46,9 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityPointsUseOfSymbol", 0);
 			SetValue(L"ComplexityPointsUseOfUpper", 0);
 
+			TestString password(L"password1@Pp");
 
-			LPWSTR password = L"password1@Pp";
-			Assert::IsFalse(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE,reg));
+			Assert::IsFalse(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
 		TEST_METHOD(ComplexityPointsPerLowerTestPass)
@@ -66,8 +66,8 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityPointsUseOfSymbol", 0);
 			SetValue(L"ComplexityPointsUseOfUpper", 0);
 
+			TestString password(L"password1@Pp");
 
-			LPWSTR password = L"password1@Pp";
 			Assert::IsTrue(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
@@ -86,8 +86,8 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityPointsUseOfSymbol", 0);
 			SetValue(L"ComplexityPointsUseOfUpper", 0);
 
+			TestString password(L"password1@Pp");
 
-			LPWSTR password = L"password1@Pp";
 			Assert::IsFalse(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
@@ -106,8 +106,8 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityPointsUseOfSymbol", 0);
 			SetValue(L"ComplexityPointsUseOfUpper", 0);
 
+			TestString password(L"password1@Pp3");
 
-			LPWSTR password = L"password1@Pp3";
 			Assert::IsTrue(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
@@ -126,8 +126,7 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityPointsUseOfSymbol", 0);
 			SetValue(L"ComplexityPointsUseOfUpper", 0);
 
-
-			LPWSTR password = L"password1@Pp";
+			TestString password(L"password1@Pp");
 			Assert::IsFalse(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
@@ -146,8 +145,7 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityPointsUseOfSymbol", 0);
 			SetValue(L"ComplexityPointsUseOfUpper", 0);
 
-
-			LPWSTR password = L"password1@Pp!";
+			TestString password(L"password1@Pp!");
 			Assert::IsTrue(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
@@ -166,8 +164,7 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityPointsUseOfSymbol", 0);
 			SetValue(L"ComplexityPointsUseOfUpper", 0);
 
-
-			LPWSTR password = L"password1@Pp";
+			TestString password(L"password1@Pp");
 			Assert::IsFalse(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
@@ -186,8 +183,7 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityPointsUseOfSymbol", 0);
 			SetValue(L"ComplexityPointsUseOfUpper", 0);
 
-
-			LPWSTR password = L"password1@PpW";
+			TestString password(L"password1@PpW");
 			Assert::IsTrue(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
@@ -207,7 +203,7 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityPointsUseOfUpper", 0);
 
 
-			LPWSTR password = L"password1@Pp";
+			TestString password (L"password1@Pp");
 			Assert::IsFalse(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
@@ -227,7 +223,7 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityPointsUseOfUpper", 0);
 
 
-			LPWSTR password = L"password1@PpW";
+			TestString password (L"password1@PpW");
 			Assert::IsTrue(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
@@ -247,7 +243,7 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityPointsUseOfUpper", 0);
 
 
-			LPWSTR password = L"PASSWORD";
+			TestString password (L"PASSWORD");
 			Assert::IsFalse(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
@@ -268,7 +264,7 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityPointsUseOfUpper", 0);
 
 
-			LPWSTR password = L"password1@PpW";
+			TestString password (L"password1@PpW");
 			Assert::IsTrue(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
@@ -288,7 +284,7 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityPointsUseOfUpper", 0);
 
 
-			LPWSTR password = L"PASSWORD";
+			TestString password (L"PASSWORD");
 			Assert::IsFalse(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
@@ -308,8 +304,7 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityPointsUseOfSymbol", 100);
 			SetValue(L"ComplexityPointsUseOfUpper", 0);
 
-
-			LPWSTR password = L"password1@PpW";
+			TestString password (L"password1@PpW");
 			Assert::IsTrue(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
@@ -328,8 +323,7 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityPointsUseOfSymbol", 100);
 			SetValue(L"ComplexityPointsUseOfUpper", 0);
 
-
-			LPWSTR password = L"PASSWORD";
+			TestString password (L"PASSWORD");
 			Assert::IsFalse(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
@@ -349,8 +343,7 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityPointsUseOfSymbol", 0);
 			SetValue(L"ComplexityPointsUseOfUpper", 100);
 
-
-			LPWSTR password = L"password1@PpW";
+			TestString password (L"password1@PpW");
 			Assert::IsTrue(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
@@ -369,8 +362,7 @@ namespace NativeUnitTests
 			SetValue(L"ComplexityPointsUseOfSymbol", 0);
 			SetValue(L"ComplexityPointsUseOfUpper", 100);
 
-
-			LPWSTR password = L"password";
+			TestString password (L"password");
 			Assert::IsFalse(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 	};

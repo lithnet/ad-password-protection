@@ -14,7 +14,7 @@ namespace NativeUnitTests
 		TEST_METHOD(RegexApprovePass)
 		{
 			SetValue(L"RegexApprove", L"approve.+");
-			LPWSTR password = L"approve me";
+			TestString password(L"approve me");
 			Assert::IsTrue(ProcessPasswordRegexApprove(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 			DeleteValue(L"RegexApprove");
 		}
@@ -22,7 +22,7 @@ namespace NativeUnitTests
 		TEST_METHOD(RegexApproveFail)
 		{
 			SetValue(L"RegexApprove", L"approve.+");
-			LPWSTR password = L"don't approve this";
+			TestString password(L"don't approve this");
 			Assert::IsFalse(ProcessPasswordRegexApprove(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 			DeleteValue(L"RegexApprove");
 		}
@@ -30,7 +30,7 @@ namespace NativeUnitTests
 		TEST_METHOD(RegexRejectPass)
 		{
 			SetValue(L"RegexReject", L"reject.+");
-			LPWSTR password = L"don't reject me";
+			TestString password(L"don't reject me");
 			Assert::IsTrue(ProcessPasswordRegexReject(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 			DeleteValue(L"RegexReject");
 		}
@@ -38,7 +38,7 @@ namespace NativeUnitTests
 		TEST_METHOD(RegexRejectFail)
 		{
 			SetValue(L"RegexReject", L"reject.+");
-			LPWSTR password = L"reject me";
+			TestString password(L"reject me");
 			Assert::IsFalse(ProcessPasswordRegexReject(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 			DeleteValue(L"RegexReject");
 		}

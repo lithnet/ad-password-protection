@@ -2,38 +2,50 @@
 template <class T>
 class SecureArrayT
 {
-private:
+protected:
 	std::shared_ptr<T[]> internalptr;
 	int size;
 
 public:
-	SecureArrayT(int size)
+
+	SecureArrayT(T* item, const int size)
 	{
-		internalptr = std::make_unique<T[]>(size);
+		this->internalptr = std::shared_ptr<T[]>(item);
+		this->size = size;
+	}
+
+	SecureArrayT(const int size)
+	{
+		this->internalptr = std::make_unique<T[]>(size);
 		this->size = size;
 	}
 
 	SecureArrayT(const SecureArrayT& p)
 	{
-		internalptr = p.internalptr;
-		size = p.size;
+		this->internalptr = p.internalptr;
+		this->size = p.size;
 	}
 
 	~SecureArrayT()
 	{
-		if (internalptr && internalptr.use_count() <= 1)
+		if (this->internalptr && this->internalptr.use_count() <= 1)
 		{
-			SecureZeroMemory(internalptr.get(), size);
+			SecureZeroMemory(this->internalptr.get(), this->size);
 		}
 	}
 
-	T* get()
+	T* get() const
 	{
-		return internalptr.get();
+		return this->internalptr.get();
 	}
 
-	operator T*() const 
+	int getSize() const
 	{
-		return internalptr.get();
+		return this->size;
+	}
+
+	operator T*() const
+	{
+		return this->internalptr.get();
 	}
 };

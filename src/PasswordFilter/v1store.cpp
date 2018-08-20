@@ -11,7 +11,7 @@ v1store::~v1store()
 {
 }
 
-std::wstring v1store::GetRangeFromHash(const BYTE * hash)
+std::wstring v1store::GetRangeFromHash(const SecureArrayT<BYTE> &hash)
 {
-	return ToHexString(hash, hash + 3).substr(0, 5);
+	return ToHexString(hash.get(), hash.get() + 3).substr(0, 5);
 }

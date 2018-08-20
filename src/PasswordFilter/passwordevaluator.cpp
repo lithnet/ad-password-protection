@@ -11,7 +11,7 @@
 #include <shlwapi.h>
 #include "utils.h"
 
-BOOLEAN ProcessPassword(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation)
+BOOLEAN ProcessPassword(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation)
 {
 	eventlog::getInstance().logw(EVENTLOG_INFORMATION_TYPE, MSG_PROCESSING_REQUEST, 3, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
 
@@ -69,12 +69,12 @@ BOOLEAN ProcessPassword(const LPWSTR &password, const std::wstring &accountName,
 	return TRUE;
 }
 
-BOOLEAN ProcessPasswordRaw(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
+BOOLEAN ProcessPasswordRaw(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
 {
 	if ((setOperation && reg.GetRegValue(L"ValidateRawPasswordOnSet", 1) != 0) || (!setOperation && reg.GetRegValue(L"ValidateRawPasswordOnChange", 1) != 0))
 	{
 		OutputDebugString(L"Checking raw password");
-		
+
 		if (IsPasswordInStore(password))
 		{
 			OutputDebugString(L"Rejected password as it was found in the banned store");
@@ -88,50 +88,33 @@ BOOLEAN ProcessPasswordRaw(const LPWSTR &password, const std::wstring &accountNa
 	return TRUE;
 }
 
-BOOLEAN ProcessPasswordNormalized(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
+BOOLEAN ProcessPasswordNormalized(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
 {
 	if ((setOperation && reg.GetRegValue(L"ValidateNormalizedPasswordOnSet", 1) != 0) || (!setOperation && reg.GetRegValue(L"ValidateNormalizedPasswordOnChange", 1) != 0))
 	{
-		LPWSTR normalizedPassword;
 		bool result = TRUE;
 
-		try
+		SecureArrayT<WCHAR> normalizedPassword = NormalizePassword(password);
+		OutputDebugString(L"Checking normalized password");
+
+		result = IsPasswordInStore(normalizedPassword);
+		if (result)
 		{
-			normalizedPassword = NormalizePassword(password);
-			OutputDebugString(L"Checking normalized password");
-
-			result = IsPasswordInStore(normalizedPassword);
-			if (result)
-			{
-				OutputDebugString(L"Rejected normalized password as it was found in the banned store");
-				eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_BANNED_NORMALIZED, 3, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
-			}
-			else
-			{
-				OutputDebugString(L"Normalized password did not match any existing hashes");
-			}
-
-			SecureZeroMemory(normalizedPassword, wcslen(normalizedPassword));
-			delete normalizedPassword;
-
-			return !result;
+			OutputDebugString(L"Rejected normalized password as it was found in the banned store");
+			eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_BANNED_NORMALIZED, 3, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
 		}
-		catch (...)
+		else
 		{
-			if (normalizedPassword)
-			{
-				SecureZeroMemory(normalizedPassword, wcslen(normalizedPassword));
-				delete normalizedPassword;
-			}
-
-			throw;
+			OutputDebugString(L"Normalized password did not match any existing hashes");
 		}
+
+		return !result;
 	}
 
 	return TRUE;
 }
 
-BOOLEAN ProcessPasswordLength(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
+BOOLEAN ProcessPasswordLength(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
 {
 	int minLength = reg.GetRegValue(L"MinimumLength", 0);
 
@@ -152,7 +135,7 @@ BOOLEAN ProcessPasswordLength(const LPWSTR &password, const std::wstring &accoun
 	return TRUE;
 }
 
-BOOLEAN ProcessPasswordDoesntContainAccountName(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
+BOOLEAN ProcessPasswordDoesntContainAccountName(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
 {
 	int flag = reg.GetRegValue(L"ValidatePasswordDoesntContainAccountName", 0);
 
@@ -180,7 +163,7 @@ BOOLEAN ProcessPasswordDoesntContainAccountName(const LPWSTR &password, const st
 }
 
 
-BOOLEAN ProcessPasswordDoesntContainFullName(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
+BOOLEAN ProcessPasswordDoesntContainFullName(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
 {
 	int flag = reg.GetRegValue(L"ValidatePasswordDoesntContainFullName", 0);
 
@@ -207,7 +190,7 @@ BOOLEAN ProcessPasswordDoesntContainFullName(const LPWSTR &password, const std::
 	return TRUE;
 }
 
-BOOLEAN ProcessPasswordRegexApprove(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
+BOOLEAN ProcessPasswordRegexApprove(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
 {
 	std::wstring regex = reg.GetRegValue(L"RegexApprove", L"");
 
@@ -217,7 +200,7 @@ BOOLEAN ProcessPasswordRegexApprove(const LPWSTR &password, const std::wstring &
 
 		std::wregex e(regex);
 
-		if (!std::regex_match(password, e))
+		if (!std::regex_match(password.get(), e))
 		{
 			OutputDebugString(L"Password did not match the approval regular expression");
 			eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_APPROVAL_REGEX, 3, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
@@ -230,7 +213,7 @@ BOOLEAN ProcessPasswordRegexApprove(const LPWSTR &password, const std::wstring &
 	return TRUE;
 }
 
-BOOLEAN ProcessPasswordRegexReject(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
+BOOLEAN ProcessPasswordRegexReject(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
 {
 	std::wstring regex = reg.GetRegValue(L"RegexReject", L"");
 
@@ -240,7 +223,7 @@ BOOLEAN ProcessPasswordRegexReject(const LPWSTR &password, const std::wstring &a
 
 		std::wregex e(regex);
 
-		if (std::regex_match(password, e))
+		if (std::regex_match(password.get(), e))
 		{
 			OutputDebugString(L"Password matched the rejection regular expression");
 			eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_REJECTION_REGEX, 3, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
@@ -253,7 +236,7 @@ BOOLEAN ProcessPasswordRegexReject(const LPWSTR &password, const std::wstring &a
 	return TRUE;
 }
 
-BOOLEAN ProcessPasswordComplexityThreshold(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
+BOOLEAN ProcessPasswordComplexityThreshold(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
 {
 	int threshold = reg.GetRegValue(L"ComplexityThreshold", 0);
 
@@ -264,7 +247,7 @@ BOOLEAN ProcessPasswordComplexityThreshold(const LPWSTR &password, const std::ws
 		bool hasUpper = false;
 		bool hasSymbol = false;
 		bool hasNumber = false;
-		
+
 		for (size_t i = 0; i < wcslen(password); i++)
 		{
 			WCHAR c = password[i];
@@ -335,7 +318,7 @@ BOOLEAN ProcessPasswordComplexityThreshold(const LPWSTR &password, const std::ws
 	return TRUE;
 }
 
-BOOLEAN ProcessPasswordComplexityPoints(const LPWSTR &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
+BOOLEAN ProcessPasswordComplexityPoints(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
 {
 	int requiredPoints = reg.GetRegValue(L"ComplexityPointsRequired", 0);
 

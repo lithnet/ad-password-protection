@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "binarystore.h"
-#include "hasher.h"
 #include <fstream>
 #include "registry.h"
 #include "shlwapi.h"
@@ -46,14 +45,14 @@ binarystore::~binarystore()
 {
 }
 
-bool binarystore::IsPasswordInStore(const LPWSTR &password)
+bool binarystore::IsPasswordInStore(const SecureArrayT<WCHAR> &password)
 {
 	SecureArrayT<BYTE> hash = GetSha1HashBytes(password);
 
-	return IsHashInStore(hash.get());
+	return IsHashInStore(hash);
 }
 
-bool binarystore::IsHashInStore(const BYTE* hash)
+bool binarystore::IsHashInStore(const SecureArrayT<BYTE> &hash)
 {
 	std::wstring path = GetStoreFileName(GetRangeFromHash(hash));
 
@@ -74,7 +73,7 @@ std::wstring binarystore::GetStoreFileName(const std::wstring &range)
 	return path;
 }
 
-bool binarystore::IsHashInBinaryFile(const std::wstring &filename, const BYTE* hashBytes)
+bool binarystore::IsHashInBinaryFile(const std::wstring &filename, const SecureArrayT<BYTE> &hashBytes)
 {
 	std::ifstream file(filename, std::ios::binary | std::ios::ate | std::ios::in);
 

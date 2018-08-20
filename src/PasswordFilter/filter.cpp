@@ -9,6 +9,7 @@
 #include "passwordevaluator.h"
 #include "esestore.h"
 #include <cstring>
+#include "SecureArrayT.h"
 
 extern "C" __declspec(dllexport)  BOOLEAN __stdcall InitializeChangeNotify(void)
 {
@@ -32,7 +33,6 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 )
 {
 	bool simulate = false;
-	LPWSTR password;
 	registry reg;
 
 	try {
@@ -53,14 +53,9 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 		std::wstring accountName(AccountName->Buffer, AccountName->Length / sizeof(WCHAR));
 		std::wstring fullName(FullName->Buffer, FullName->Length / sizeof(WCHAR));
 
-		password = UnicodeStringToWcharArray(*Password);
+		SecureArrayT<WCHAR> password = UnicodeStringToWcharArray(*Password);
 
 		BOOLEAN result = ProcessPassword(password, accountName, fullName, SetOperation);
-
-		if (password)
-		{
-			SecureZeroMemory(password, wcslen(password));
-		}
 
 		if (simulate)
 		{
@@ -77,11 +72,6 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 
 		eventlog::getInstance().log(EVENTLOG_ERROR_TYPE, MSG_WIN32ERROR, 2, std::to_string(e.code().value()).c_str(), e.what());
 
-		if (password)
-		{
-			SecureZeroMemory(password, wcslen(password));
-		}
-
 		if ((SetOperation && reg.GetRegValue(L"AllowPasswordSetOnError", 1) == 0) || (!SetOperation && reg.GetRegValue(L"AllowPasswordChangeOnError", 1) == 0))
 		{
 			OutputDebugString(L"Rejected password because AllowPasswordSetOnError or AllowPasswordChangeOnError was non-zero");
@@ -95,11 +85,6 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 
 		eventlog::getInstance().log(EVENTLOG_ERROR_TYPE, MSG_UNEXPECTEDERROR, 1, e.what());
 
-		if (password)
-		{
-			SecureZeroMemory(password, wcslen(password));
-		}
-
 		if ((SetOperation && reg.GetRegValue(L"AllowPasswordSetOnError", 1) == 0) || (!SetOperation && reg.GetRegValue(L"AllowPasswordChangeOnError", 1) == 0))
 		{
 			OutputDebugString(L"Rejected password because AllowPasswordSetOnError or AllowPasswordChangeOnError was non-zero");
@@ -112,11 +97,6 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 		OutputDebugString(L"Unexpected error caught");
 
 		eventlog::getInstance().logw(EVENTLOG_ERROR_TYPE, MSG_UNEXPECTEDERROR, 1, L"No exception information was available");
-
-		if (password)
-		{
-			SecureZeroMemory(password, wcslen(password));
-		}
 
 		if ((SetOperation && reg.GetRegValue(L"AllowPasswordSetOnError", 1) == 0) || (!SetOperation && reg.GetRegValue(L"AllowPasswordChangeOnError", 1) == 0))
 		{

@@ -7,6 +7,7 @@
 #include "messages.h"
 #include "esestore.h"
 #include <vector>
+#include "SecureArrayT.h"
 
 std::vector<std::wstring> SplitString(const std::wstring &text, const wchar_t sep)
 {
@@ -25,14 +26,14 @@ std::vector<std::wstring> SplitString(const std::wstring &text, const wchar_t se
 	return tokens;
 }
 
-LPWSTR UnicodeStringToWcharArray(const UNICODE_STRING& str)
+SecureArrayT<WCHAR> UnicodeStringToWcharArray(const UNICODE_STRING& str)
 {
 	int charCount = str.Length / sizeof(wchar_t);
 	int len = charCount + 1;
 
-	wchar_t* ar = new wchar_t[len];
+	SecureArrayT<WCHAR> ar (len);
 
-	wcsncpy_s(ar, len, str.Buffer, charCount);
+	wcsncpy_s(ar.get(), len, str.Buffer, charCount);
 
 	return ar;
 }

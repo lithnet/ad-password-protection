@@ -10,7 +10,7 @@
 #include "utils.h"
 #include "SecureArrayT.h"
 
-SecureArrayT<BYTE> GetSha1HashBytes(const LPWSTR &input)
+SecureArrayT<BYTE> GetSha1HashBytes(const SecureArrayT<WCHAR> &input)
 {
 	int lenW = WideCharToMultiByte(CP_UTF8, 0, input, -1, NULL, 0, NULL, NULL);
 
@@ -20,7 +20,7 @@ SecureArrayT<BYTE> GetSha1HashBytes(const LPWSTR &input)
 
 		if (WideCharToMultiByte(CP_UTF8, 0, input, -1, output.get(), lenW, NULL, NULL) > 0)
 		{
-			SecureArrayT<BYTE> result = GetSha1HashBytes(output.get());
+			SecureArrayT<BYTE> result = GetSha1HashBytes(output);
 
 			return result;
 		}
@@ -29,7 +29,7 @@ SecureArrayT<BYTE> GetSha1HashBytes(const LPWSTR &input)
 	throw std::system_error(GetLastError(), std::system_category(), "Sha1Hash/WideCharToMultiByte failed");
 }
 
-SecureArrayT<BYTE> GetSha1HashBytes(const LPSTR &input)
+SecureArrayT<BYTE> GetSha1HashBytes(const SecureArrayT<char> &input)
 {
 	HCRYPTPROV hProv = 0;
 	HCRYPTHASH hHash = 0;
@@ -61,7 +61,7 @@ SecureArrayT<BYTE> GetSha1HashBytes(const LPSTR &input)
 			throw std::system_error(GetLastError(), std::system_category(), "CryptCreateHash failed");
 		}
 
-		if (!CryptHashData(hHash, (BYTE*)input, static_cast<DWORD>(strlen(input)), 0))
+		if (!CryptHashData(hHash, (BYTE*)input.get(), static_cast<DWORD>(strlen(input.get())), 0))
 		{
 			throw std::system_error(GetLastError(), std::system_category(), "CryptHashData failed");
 		}

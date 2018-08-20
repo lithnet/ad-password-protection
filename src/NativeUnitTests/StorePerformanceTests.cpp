@@ -31,8 +31,9 @@ namespace NativeUnitTests
 				UuidToStringW(&gidReference, (RPC_WSTR*)&wszUuid);
 				std::wstringstream ss;
 				ss << i << L": " << wszUuid << L": ";
+				TestString password(wszUuid);
 
-				bool result = ProcessPasswordRaw(wszUuid, accountName, fullname, TRUE, reg);
+				bool result = ProcessPasswordRaw(password, accountName, fullname, TRUE, reg);
 
 				ss << (result ? "passed" : "rejected");
 
@@ -62,8 +63,9 @@ namespace NativeUnitTests
 				std::wstringstream ss;
 
 				ss << count << L": " << line << L": ";
+				TestString password(&line.front());
 
-				bool result = ProcessPasswordRaw((LPWSTR)line.c_str(), accountName, fullname, TRUE, reg);
+				bool result = ProcessPasswordRaw(password, accountName, fullname, TRUE, reg);
 
 				ss << (result ? "passed" : "rejected");
 

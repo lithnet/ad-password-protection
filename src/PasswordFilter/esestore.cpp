@@ -116,7 +116,7 @@ esestore::esestore()
 	columnid = column->columnid;
 }
 
-bool esestore::IsHashInDb(const BYTE* hash) const
+bool esestore::IsHashInDb(const SecureArrayT<BYTE> &hash) const
 {
 	if (closed)
 	{
@@ -132,7 +132,7 @@ bool esestore::IsHashInDb(const BYTE* hash) const
 		throw std::exception("JetSetCurrentIndex failed");
 	}
 
-	result = JetMakeKey(sessionid, tableid, hash, 20, JET_bitNewKey);
+	result = JetMakeKey(sessionid, tableid, hash.get(), 20, JET_bitNewKey);
 	if (result != 0)
 	{
 		throw std::exception("JetMakeKey failed");

@@ -9,53 +9,52 @@
 #include <cwctype>
 #include <iterator>
 #include "shlwapi.h"
+#include "SecureArrayT.h"
 
-LPWSTR ToLowerInvariant(const LPWSTR &s)
+SecureArrayT<WCHAR> ToLowerInvariant(const SecureArrayT<WCHAR> &s)
 {
 	int sizeRequired = 0;
 
-	sizeRequired = LCMapString(LOCALE_INVARIANT, LCMAP_LOWERCASE, s, -1, 0, 0);
+	sizeRequired = LCMapString(LOCALE_INVARIANT, LCMAP_LOWERCASE, s.get(), -1, 0, 0);
 
 	if (sizeRequired == 0)
 	{
 		throw std::system_error(GetLastError(), std::system_category(), "LCMapString failed");
 	}
 
-	wchar_t* buf = new wchar_t[sizeRequired];
+	SecureArrayT<WCHAR> buf(sizeRequired);
 
-	int sizeAllocated = LCMapString(LOCALE_INVARIANT, LCMAP_LOWERCASE, s, -1, buf, sizeRequired);
+	int sizeAllocated = LCMapString(LOCALE_INVARIANT, LCMAP_LOWERCASE, s.get(), -1, buf.get(), sizeRequired);
 
 	if (sizeAllocated == 0)
 	{
-		SecureZeroMemory(buf, sizeRequired);
-		delete[] buf;
 		throw std::system_error(GetLastError(), std::system_category(), "LCMapString failed");
 	}
 
 	return buf;
 }
 
-LPWSTR NormalizePassword(const LPWSTR &password)
+SecureArrayT<WCHAR> NormalizePassword(const SecureArrayT<WCHAR> &password)
 {
-	if (wcslen(password) == 0)
+	if (password.getSize() == 0)
 	{
-		return (LPWSTR)password;
+		return SecureArrayT<WCHAR>(0);
 	}
 
-	LPWSTR newPassword = ToLowerInvariant(password);
+	SecureArrayT<WCHAR> newPassword = ToLowerInvariant(password);
 
 	RemoveWhiteSpace(newPassword);
-	StrTrim(newPassword, CHARS_TO_TRIM);
+	StrTrim(newPassword.get(), CHARS_TO_TRIM);
 	ReplaceChars(newPassword, CHARS_TO_REPLACE);
 	RemoveChars(newPassword, CHARS_TO_DELETE);
 
 	return newPassword;
 }
 
-void RemoveWhiteSpace(LPWSTR &s)
+void RemoveWhiteSpace(SecureArrayT<WCHAR> &s)
 {
-	LPWSTR cpy = s;
-	LPWSTR temp = s;
+	LPWSTR cpy = s.get();
+	LPWSTR temp = s.get();
 
 	while (*cpy)
 	{
@@ -70,10 +69,10 @@ void RemoveWhiteSpace(LPWSTR &s)
 	*temp = 0;
 }
 
-void RemoveChars(LPWSTR &s, const wchar_t *charsToRemove)
+void RemoveChars(SecureArrayT<WCHAR> &s, const WCHAR *charsToRemove)
 {
-	LPWSTR cpy = s;
-	LPWSTR temp = s;
+	LPWSTR cpy = s.get();
+	LPWSTR temp = s.get();
 
 	for (size_t i = 0; i < wcslen(s); i++)
 	{
@@ -99,10 +98,10 @@ void RemoveChars(LPWSTR &s, const wchar_t *charsToRemove)
 	*temp = 0;
 }
 
-void ReplaceChars(LPWSTR &s, const wchar_t *charPairsToReplace)
+void ReplaceChars(SecureArrayT<WCHAR> &s, const WCHAR *charPairsToReplace)
 {
-	LPWSTR cpy = s;
-	LPWSTR temp = s;
+	LPWSTR cpy = s.get();
+	LPWSTR temp = s.get();
 
 	for (size_t i = 0; i < wcslen(s); i++)
 	{

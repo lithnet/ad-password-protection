@@ -16,14 +16,14 @@ namespace NativeUnitTests
 		{
 			SetValue(L"ValidateRawPasswordOnSet", 1);
 
-			LPWSTR password = L"password";
+			TestString password(L"password");
 			Assert::IsFalse(ProcessPasswordRaw(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
 		TEST_METHOD(TestBannedPasswordOnSetNormalized)
 		{
 			SetValue(L"ValidateNormalizedPasswordOnSet", 1);
-			LPWSTR password = L"!!$P@s sw_o+rd$#%^$";
+			TestString password(L"!!$P@s sw_o+rd$#%^$");
 			Assert::IsFalse(ProcessPasswordNormalized(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
@@ -35,8 +35,9 @@ namespace NativeUnitTests
 			HRESULT hCreateGuid = CoCreateGuid(&gidReference);
 			WCHAR* wszUuid = NULL;
 			UuidToStringW(&gidReference, (RPC_WSTR*)&wszUuid);
+			TestString password(wszUuid);
 
-			Assert::IsTrue(ProcessPasswordRaw(wszUuid, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
+			Assert::IsTrue(ProcessPasswordRaw(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
 		TEST_METHOD(TestGoodPasswordOnSetNormalized)
@@ -46,22 +47,23 @@ namespace NativeUnitTests
 			HRESULT hCreateGuid = CoCreateGuid(&gidReference);
 			WCHAR* wszUuid = NULL;
 			UuidToStringW(&gidReference, (RPC_WSTR*)&wszUuid);
+			TestString password(wszUuid);
 
-			Assert::IsTrue(ProcessPasswordNormalized(wszUuid, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
+			Assert::IsTrue(ProcessPasswordNormalized(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 		
 		TEST_METHOD(TestBannedPasswordOnChangeRaw)
 		{
 			SetValue(L"ValidateRawPasswordOnChange", 1);
 
-			LPWSTR password = L"password";
+			TestString password(L"password");
 			Assert::IsFalse(ProcessPasswordRaw(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
 		TEST_METHOD(TestBannedPasswordOnChangeNormalized)
 		{
 			SetValue(L"ValidateNormalizedPasswordOnChange", 1);
-			LPWSTR password = L"!!$P@s sw_o+rd$#%^$";
+			TestString password(L"!!$P@s sw_o+rd$#%^$");
 			Assert::IsFalse(ProcessPasswordNormalized(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
@@ -73,8 +75,9 @@ namespace NativeUnitTests
 			HRESULT hCreateGuid = CoCreateGuid(&gidReference);
 			WCHAR* wszUuid = NULL;
 			UuidToStringW(&gidReference, (RPC_WSTR*)&wszUuid);
+			TestString password(wszUuid);
 
-			Assert::IsTrue(ProcessPasswordRaw(wszUuid, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
+			Assert::IsTrue(ProcessPasswordRaw(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
 		TEST_METHOD(TestGoodPasswordOnChangeNormalized)
@@ -84,8 +87,9 @@ namespace NativeUnitTests
 			HRESULT hCreateGuid = CoCreateGuid(&gidReference);
 			WCHAR* wszUuid = NULL;
 			UuidToStringW(&gidReference, (RPC_WSTR*)&wszUuid);
+			TestString password(wszUuid);
 
-			Assert::IsTrue(ProcessPasswordNormalized(wszUuid, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
+			Assert::IsTrue(ProcessPasswordNormalized(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
 		TEST_CLASS_INITIALIZE(Initialize)

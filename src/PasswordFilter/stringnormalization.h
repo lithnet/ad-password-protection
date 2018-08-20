@@ -1,15 +1,16 @@
 #pragma once
+#include "SecureArrayT.h"
 
 static LPCWSTR CHARS_TO_TRIM = L"0123456789!@#$%^&*()[]{};:'\"<>,.?\\/+=_-~`";
 static LPCWSTR CHARS_TO_REPLACE = L"$s5s0o4a3e@a^a(c6g1i7t8b2z!i";
 static LPCWSTR CHARS_TO_DELETE = L"_.+";
 
-LPWSTR ToLowerInvariant(const LPWSTR &s);
+SecureArrayT<WCHAR> ToLowerInvariant(const SecureArrayT<WCHAR> &s);
 
-__declspec(dllexport) LPWSTR NormalizePassword(const LPWSTR &password);
+SecureArrayT<WCHAR> NormalizePassword(const SecureArrayT<WCHAR> &password);
 
-void RemoveWhiteSpace(LPWSTR &s);
+void RemoveWhiteSpace(SecureArrayT<WCHAR> &s);
 
-void RemoveChars(LPWSTR &s, const wchar_t *charsToRemove);
+void RemoveChars(SecureArrayT<WCHAR> &s, const WCHAR *charsToRemove);
 
-void ReplaceChars(LPWSTR &s, const wchar_t *charPairsToReplace);
+void ReplaceChars(SecureArrayT<WCHAR> &s, const WCHAR *charPairsToReplace);

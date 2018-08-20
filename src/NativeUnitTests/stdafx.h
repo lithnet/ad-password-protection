@@ -16,3 +16,22 @@
 #include <winternl.h>
 #include <string>
 #include "TestUtils.h"
+#include "../PasswordFilter/SecureArrayT.h"
+
+class TestString : public SecureArrayT<WCHAR>
+{
+public:
+	TestString(LPWSTR str)
+		: SecureArrayT<WCHAR>((wcslen(str) + 1) * sizeof(wchar_t))
+	{
+		size_t i;
+		WCHAR* p = get();
+
+		for (i = 0; i < wcslen(str); i++)
+		{
+			p[i] = str[i];
+		}
+
+		p[i] = '\0';
+	}
+};
