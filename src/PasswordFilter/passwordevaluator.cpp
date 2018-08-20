@@ -281,8 +281,8 @@ BOOLEAN ProcessPasswordComplexityThreshold(const SecureArrayT<WCHAR> &password, 
 			bool requiresSymbol = (reg.GetRegValue(L"BelowThresholdRequiresSymbol", 0) != 0);
 			bool requiresSymbolOrNumber = (reg.GetRegValue(L"BelowThresholdRequiresSymbolOrNumber", 0) != 0);
 
-			int charSetsRequired = reg.GetRegValue(L"BelowThresholdCharSetsRequired", 0);
-			int charSetsPresent = (hasLower ? 1 : 0) + (hasUpper ? 1 : 0) + (hasSymbol ? 1 : 0) + (hasNumber ? 0 : 1);
+			int charSetsRequired = min(reg.GetRegValue(L"BelowThresholdCharSetsRequired", 0), 4);
+			int charSetsPresent = (hasLower ? 1 : 0) + (hasUpper ? 1 : 0) + (hasSymbol ? 1 : 0) + (hasNumber ? 1 : 0);
 
 			if ((charSetsPresent < charSetsRequired) || (requiresLower && !hasLower) || (requiresUpper && !hasUpper) || (requiresNumber && !hasNumber) || (requiresSymbol && !hasSymbol) || (requiresSymbolOrNumber && !(hasSymbol || hasNumber)))
 			{
@@ -301,8 +301,8 @@ BOOLEAN ProcessPasswordComplexityThreshold(const SecureArrayT<WCHAR> &password, 
 			bool requiresSymbol = (reg.GetRegValue(L"AboveThresholdRequiresSymbol", 0) != 0);
 			bool requiresSymbolOrNumber = (reg.GetRegValue(L"AboveThresholdRequiresSymbolOrNumber", 0) != 0);
 
-			int charSetsRequired = reg.GetRegValue(L"AboveThresholdCharSetsRequired", 0);
-			int charSetsPresent = (hasLower ? 1 : 0) + (hasUpper ? 1 : 0) + (hasSymbol ? 1 : 0) + (hasNumber ? 0 : 1);
+			int charSetsRequired = min(reg.GetRegValue(L"AboveThresholdCharSetsRequired", 0), 4);
+			int charSetsPresent = (hasLower ? 1 : 0) + (hasUpper ? 1 : 0) + (hasSymbol ? 1 : 0) + (hasNumber ? 1 : 0);
 
 			if ((charSetsPresent < charSetsRequired) || (requiresLower && !hasLower) || (requiresUpper && !hasUpper) || (requiresNumber && !hasNumber) || (requiresSymbol && !hasSymbol) || (requiresSymbolOrNumber && !(hasSymbol || hasNumber)))
 			{

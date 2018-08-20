@@ -18,6 +18,7 @@ namespace NativeUnitTests
 			SetValue(L"AboveThresholdRequiresSymbol", 0);
 			SetValue(L"AboveThresholdRequiresSymbolOrNumber", 0);
 			SetValue(L"AboveThresholdRequiresUpper", 0);
+			SetValue(L"AboveThresholdCharsetsRequired", 0);
 			SetValue(L"ComplexityThreshold", 7);
 
 			TestString password (L"password 0");
@@ -31,6 +32,7 @@ namespace NativeUnitTests
 			SetValue(L"AboveThresholdRequiresSymbol", 0);
 			SetValue(L"AboveThresholdRequiresSymbolOrNumber", 0);
 			SetValue(L"AboveThresholdRequiresUpper", 0);
+			SetValue(L"AboveThresholdCharsetsRequired", 0);
 			SetValue(L"ComplexityThreshold", 7);
 
 			TestString password (L"password");
@@ -44,6 +46,7 @@ namespace NativeUnitTests
 			SetValue(L"AboveThresholdRequiresSymbol", 0);
 			SetValue(L"AboveThresholdRequiresSymbolOrNumber", 0);
 			SetValue(L"AboveThresholdRequiresUpper", 0);
+			SetValue(L"AboveThresholdCharsetsRequired", 0);
 			SetValue(L"ComplexityThreshold", 7);
 
 			TestString password (L"PASSWORD p");
@@ -57,6 +60,7 @@ namespace NativeUnitTests
 			SetValue(L"AboveThresholdRequiresSymbol", 0);
 			SetValue(L"AboveThresholdRequiresSymbolOrNumber", 0);
 			SetValue(L"AboveThresholdRequiresUpper", 0);
+			SetValue(L"AboveThresholdCharsetsRequired", 0);
 			SetValue(L"ComplexityThreshold", 7);
 
 			TestString password (L"PASSWORD");
@@ -70,6 +74,7 @@ namespace NativeUnitTests
 			SetValue(L"AboveThresholdRequiresSymbol", 1);
 			SetValue(L"AboveThresholdRequiresSymbolOrNumber", 0);
 			SetValue(L"AboveThresholdRequiresUpper", 0);
+			SetValue(L"AboveThresholdCharsetsRequired", 0);
 			SetValue(L"ComplexityThreshold", 7);
 
 			TestString password (L"password !");
@@ -83,6 +88,7 @@ namespace NativeUnitTests
 			SetValue(L"AboveThresholdRequiresSymbol", 1);
 			SetValue(L"AboveThresholdRequiresSymbolOrNumber", 0);
 			SetValue(L"AboveThresholdRequiresUpper", 0);
+			SetValue(L"AboveThresholdCharsetsRequired", 0);
 			SetValue(L"ComplexityThreshold", 7);
 
 			TestString password (L"password");
@@ -96,6 +102,7 @@ namespace NativeUnitTests
 			SetValue(L"AboveThresholdRequiresSymbol", 0);
 			SetValue(L"AboveThresholdRequiresSymbolOrNumber", 1);
 			SetValue(L"AboveThresholdRequiresUpper", 0);
+			SetValue(L"AboveThresholdCharsetsRequired", 0);
 			SetValue(L"ComplexityThreshold", 7);
 
 			TestString password (L"password 1");
@@ -109,6 +116,7 @@ namespace NativeUnitTests
 			SetValue(L"AboveThresholdRequiresSymbol", 0);
 			SetValue(L"AboveThresholdRequiresSymbolOrNumber", 1);
 			SetValue(L"AboveThresholdRequiresUpper", 0);
+			SetValue(L"AboveThresholdCharsetsRequired", 0);
 			SetValue(L"ComplexityThreshold", 7);
 
 			TestString password (L"password !");
@@ -122,6 +130,7 @@ namespace NativeUnitTests
 			SetValue(L"AboveThresholdRequiresSymbol", 1);
 			SetValue(L"AboveThresholdRequiresSymbolOrNumber", 0);
 			SetValue(L"AboveThresholdRequiresUpper", 0);
+			SetValue(L"AboveThresholdCharsetsRequired", 0);
 			SetValue(L"ComplexityThreshold", 7);
 
 			TestString password (L"password");
@@ -135,6 +144,7 @@ namespace NativeUnitTests
 			SetValue(L"AboveThresholdRequiresSymbol", 0);
 			SetValue(L"AboveThresholdRequiresSymbolOrNumber", 0);
 			SetValue(L"AboveThresholdRequiresUpper", 1);
+			SetValue(L"AboveThresholdCharsetsRequired", 0);
 			SetValue(L"ComplexityThreshold", 7);
 
 			TestString password (L"password P");
@@ -148,6 +158,7 @@ namespace NativeUnitTests
 			SetValue(L"AboveThresholdRequiresSymbol", 0);
 			SetValue(L"AboveThresholdRequiresSymbolOrNumber", 0);
 			SetValue(L"AboveThresholdRequiresUpper", 1);
+			SetValue(L"AboveThresholdCharsetsRequired", 0);
 			SetValue(L"ComplexityThreshold", 7);
 
 			TestString password (L"password");
@@ -163,6 +174,7 @@ namespace NativeUnitTests
 			SetValue(L"BelowThresholdRequiresSymbol", 0);
 			SetValue(L"BelowThresholdRequiresSymbolOrNumber", 0);
 			SetValue(L"BelowThresholdRequiresUpper", 0);
+			SetValue(L"BelowThresholdCharsetsRequired", 0);
 			SetValue(L"ComplexityThreshold", 17);
 
 			TestString password (L"password 0");
@@ -176,6 +188,7 @@ namespace NativeUnitTests
 			SetValue(L"BelowThresholdRequiresSymbol", 0);
 			SetValue(L"BelowThresholdRequiresSymbolOrNumber", 0);
 			SetValue(L"BelowThresholdRequiresUpper", 0);
+			SetValue(L"BelowThresholdCharsetsRequired", 0);
 			SetValue(L"ComplexityThreshold", 17);
 
 			TestString password (L"password");
@@ -189,6 +202,7 @@ namespace NativeUnitTests
 			SetValue(L"BelowThresholdRequiresSymbol", 0);
 			SetValue(L"BelowThresholdRequiresSymbolOrNumber", 0);
 			SetValue(L"BelowThresholdRequiresUpper", 0);
+			SetValue(L"BelowThresholdCharsetsRequired", 0);
 			SetValue(L"ComplexityThreshold", 17);
 
 			TestString password (L"PASSWORD p");
@@ -202,6 +216,7 @@ namespace NativeUnitTests
 			SetValue(L"BelowThresholdRequiresSymbol", 0);
 			SetValue(L"BelowThresholdRequiresSymbolOrNumber", 0);
 			SetValue(L"BelowThresholdRequiresUpper", 0);
+			SetValue(L"BelowThresholdCharsetsRequired", 0);
 			SetValue(L"ComplexityThreshold", 17);
 
 			TestString password (L"PASSWORD");
@@ -215,6 +230,7 @@ namespace NativeUnitTests
 			SetValue(L"BelowThresholdRequiresSymbol", 1);
 			SetValue(L"BelowThresholdRequiresSymbolOrNumber", 0);
 			SetValue(L"BelowThresholdRequiresUpper", 0);
+			SetValue(L"BelowThresholdCharsetsRequired", 0);
 			SetValue(L"ComplexityThreshold", 17);
 
 			TestString password (L"password !");
@@ -228,6 +244,7 @@ namespace NativeUnitTests
 			SetValue(L"BelowThresholdRequiresSymbol", 1);
 			SetValue(L"BelowThresholdRequiresSymbolOrNumber", 0);
 			SetValue(L"BelowThresholdRequiresUpper", 0);
+			SetValue(L"BelowThresholdCharsetsRequired", 0);
 			SetValue(L"ComplexityThreshold", 17);
 
 			TestString password (L"password");
@@ -241,6 +258,7 @@ namespace NativeUnitTests
 			SetValue(L"BelowThresholdRequiresSymbol", 0);
 			SetValue(L"BelowThresholdRequiresSymbolOrNumber", 1);
 			SetValue(L"BelowThresholdRequiresUpper", 0);
+			SetValue(L"BelowThresholdCharsetsRequired", 0);
 			SetValue(L"ComplexityThreshold", 17);
 
 			TestString password (L"password 1");
@@ -254,6 +272,7 @@ namespace NativeUnitTests
 			SetValue(L"BelowThresholdRequiresSymbol", 0);
 			SetValue(L"BelowThresholdRequiresSymbolOrNumber", 1);
 			SetValue(L"BelowThresholdRequiresUpper", 0);
+			SetValue(L"BelowThresholdCharsetsRequired", 0);
 			SetValue(L"ComplexityThreshold", 17);
 
 			TestString password (L"password !");
@@ -267,6 +286,7 @@ namespace NativeUnitTests
 			SetValue(L"BelowThresholdRequiresSymbol", 1);
 			SetValue(L"BelowThresholdRequiresSymbolOrNumber", 0);
 			SetValue(L"BelowThresholdRequiresUpper", 0);
+			SetValue(L"BelowThresholdCharsetsRequired", 0);
 			SetValue(L"ComplexityThreshold", 17);
 
 			TestString password (L"password");
@@ -280,6 +300,7 @@ namespace NativeUnitTests
 			SetValue(L"BelowThresholdRequiresSymbol", 0);
 			SetValue(L"BelowThresholdRequiresSymbolOrNumber", 0);
 			SetValue(L"BelowThresholdRequiresUpper", 1);
+			SetValue(L"BelowThresholdCharsetsRequired", 0);
 			SetValue(L"ComplexityThreshold", 17);
 
 			TestString password (L"password P");
@@ -293,9 +314,80 @@ namespace NativeUnitTests
 			SetValue(L"BelowThresholdRequiresSymbol", 0);
 			SetValue(L"BelowThresholdRequiresSymbolOrNumber", 0);
 			SetValue(L"BelowThresholdRequiresUpper", 1);
+			SetValue(L"BelowThresholdCharsetsRequired", 0);
 			SetValue(L"ComplexityThreshold", 17);
 
 			TestString password (L"password");
+			Assert::IsFalse(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
+		}
+
+		TEST_METHOD(BelowThresholdCharsetsRequiredPass1)
+		{
+			SetValue(L"BelowThresholdRequiresLower", 0);
+			SetValue(L"BelowThresholdRequiresNumber", 0);
+			SetValue(L"BelowThresholdRequiresSymbol", 0);
+			SetValue(L"BelowThresholdRequiresSymbolOrNumber", 0);
+			SetValue(L"BelowThresholdRequiresUpper", 0);
+			SetValue(L"BelowThresholdCharsetsRequired", 1);
+			SetValue(L"ComplexityThreshold", 17);
+
+			TestString password(L"password");
+			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
+		}
+
+		TEST_METHOD(BelowThresholdCharsetsRequiredPass2)
+		{
+			SetValue(L"BelowThresholdRequiresLower", 0);
+			SetValue(L"BelowThresholdRequiresNumber", 0);
+			SetValue(L"BelowThresholdRequiresSymbol", 0);
+			SetValue(L"BelowThresholdRequiresSymbolOrNumber", 0);
+			SetValue(L"BelowThresholdRequiresUpper", 0);
+			SetValue(L"BelowThresholdCharsetsRequired", 2);
+			SetValue(L"ComplexityThreshold", 17);
+
+			TestString password(L"Password");
+			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
+		}
+
+		TEST_METHOD(BelowThresholdCharsetsRequiredPass3)
+		{
+			SetValue(L"BelowThresholdRequiresLower", 0);
+			SetValue(L"BelowThresholdRequiresNumber", 0);
+			SetValue(L"BelowThresholdRequiresSymbol", 0);
+			SetValue(L"BelowThresholdRequiresSymbolOrNumber", 0);
+			SetValue(L"BelowThresholdRequiresUpper", 0);
+			SetValue(L"BelowThresholdCharsetsRequired", 3);
+			SetValue(L"ComplexityThreshold", 17);
+
+			TestString password(L"Password!");
+			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
+		}
+
+		TEST_METHOD(BelowThresholdCharsetsRequiredPass4)
+		{
+			SetValue(L"BelowThresholdRequiresLower", 0);
+			SetValue(L"BelowThresholdRequiresNumber", 0);
+			SetValue(L"BelowThresholdRequiresSymbol", 0);
+			SetValue(L"BelowThresholdRequiresSymbolOrNumber", 0);
+			SetValue(L"BelowThresholdRequiresUpper", 0);
+			SetValue(L"BelowThresholdCharsetsRequired", 4);
+			SetValue(L"ComplexityThreshold", 17);
+
+			TestString password(L"Password!1");
+			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
+		}
+
+		TEST_METHOD(BelowThresholdCharsetsRequiredFail4)
+		{
+			SetValue(L"BelowThresholdRequiresLower", 0);
+			SetValue(L"BelowThresholdRequiresNumber", 0);
+			SetValue(L"BelowThresholdRequiresSymbol", 0);
+			SetValue(L"BelowThresholdRequiresSymbolOrNumber", 0);
+			SetValue(L"BelowThresholdRequiresUpper", 0);
+			SetValue(L"BelowThresholdCharsetsRequired", 4);
+			SetValue(L"ComplexityThreshold", 17);
+
+			TestString password(L"Password!");
 			Assert::IsFalse(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 	};
