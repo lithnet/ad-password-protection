@@ -110,3 +110,86 @@ SecureArrayT<BYTE> GetSha1HashBytes(const SecureArrayT<char> &input)
 		throw;
 	}
 }
+
+SecureArrayT<BYTE> GetNtlmHashBytes(const SecureArrayT<WCHAR> &input)
+{
+	HCRYPTPROV hProv = 0;
+	HCRYPTHASH hHash = 0;
+
+	try
+	{
+		DWORD dwHashLen;
+		DWORD dwCount = sizeof(DWORD);
+
+		if (!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL, 0))
+		{
+			DWORD result = GetLastError();
+			if (result == NTE_BAD_KEYSET)
+			{
+				// No default container was found. Attempt to create it.
+				if (!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL, CRYPT_NEWKEYSET))
+				{
+					throw std::system_error(GetLastError(), std::system_category(), "CryptAcquireContext create container failed");
+				}
+			}
+			else
+			{
+				throw std::system_error(GetLastError(), std::system_category(), "CryptAcquireContext failed");
+			}
+		}
+
+		if (!CryptCreateHash(hProv, CALG_MD4, 0, 0, &hHash))
+		{
+			throw std::system_error(GetLastError(), std::system_category(), "CryptCreateHash failed");
+		}
+
+		if (!CryptHashData(hHash, (BYTE*)input.get(), static_cast<DWORD>(wcslen(input.get()) * sizeof(wchar_t)), 0))
+		{
+			throw std::system_error(GetLastError(), std::system_category(), "CryptHashData failed");
+		}
+
+		if (!CryptGetHashParam(hHash, HP_HASHSIZE, (BYTE *)&dwHashLen, &dwCount, 0))
+		{
+			throw std::system_error(GetLastError(), std::system_category(), "CryptGetHashParam failed");
+		}
+
+		if (dwHashLen != 16)
+		{
+			throw std::system_error(GetLastError(), std::system_category(), "CryptGetHashParam returned an invalid hash length");
+		}
+
+		SecureArrayT<BYTE> hashBytes(16);
+
+		if (!CryptGetHashParam(hHash, HP_HASHVAL, hashBytes.get(), &dwHashLen, 0))
+		{
+			throw std::system_error(GetLastError(), std::system_category(), "CryptGetHashParam failed");
+		}
+
+		if (hHash)
+		{
+			CryptDestroyHash(hHash);
+		}
+
+		if (hProv)
+		{
+			CryptReleaseContext(hProv, 0);
+		}
+
+		return hashBytes;
+	}
+	catch (...)
+	{
+		if (hHash)
+		{
+			CryptDestroyHash(hHash);
+		}
+
+		if (hProv)
+		{
+			CryptReleaseContext(hProv, 0);
+		}
+
+		throw;
+	}
+}
+

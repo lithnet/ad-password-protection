@@ -2,15 +2,15 @@
 #include "binarystore.h"
 #include "SecureArrayT.h"
 
-class v1store :
+class v3store :
 	public binarystore
 {
-protected: 
+protected:
 	std::wstring GetRangeFromHash(const SecureArrayT<BYTE> &hash);
 	SecureArrayT<BYTE> GetHashFromPassword(const SecureArrayT<WCHAR> &password);
 
 public:
-	v1store(const std::wstring &basePath);
-	~v1store();
+	v3store(const std::wstring &basePath);
+	~v3store();
 };
 

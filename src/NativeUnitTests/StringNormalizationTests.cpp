@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
 #include "../PasswordFilter/stringnormalization.h"
-
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace NativeUnitTests

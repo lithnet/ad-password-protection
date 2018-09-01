@@ -72,7 +72,8 @@ BOOLEAN ProcessPassword(const SecureArrayT<WCHAR> &password, const std::wstring 
 
 BOOLEAN ProcessPasswordRaw(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
 {
-	if ((setOperation && reg.GetRegValue(L"ValidateRawPasswordOnSet", 1) != 0) || (!setOperation && reg.GetRegValue(L"ValidateRawPasswordOnChange", 1) != 0))
+	if ((setOperation && reg.GetRegValue(L"ValidateRawPasswordOnSet", 1) != 0) || 
+		(!setOperation && reg.GetRegValue(L"ValidateRawPasswordOnChange", 1) != 0))
 	{
 		OutputDebugString(L"Checking raw password");
 

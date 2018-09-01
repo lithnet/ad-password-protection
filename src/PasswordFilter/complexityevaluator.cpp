@@ -22,7 +22,7 @@ BOOLEAN ProcessPasswordComplexityThreshold(const SecureArrayT<WCHAR> &password, 
 	bool hasUpper = false;
 	bool hasSymbol = false;
 	bool hasNumber = false;
-	int pwdlength = wcslen(password);
+	size_t pwdlength = wcslen(password);
 
 	for (size_t i = 0; i < pwdlength; i++)
 	{

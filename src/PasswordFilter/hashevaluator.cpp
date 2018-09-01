@@ -16,7 +16,6 @@
 
 registry reg;
 
-
 bool IsPasswordInStore(const SecureArrayT<WCHAR> &password)
 {
 	int hashCheckMode = reg.GetRegValue(L"HashCheckMode", 2);

@@ -12,12 +12,12 @@
 #include <atlconv.h>
 #include "SecureArrayT.h"
 
-binarystore::binarystore(std::wstring storeBasePath, std::wstring storeSubPath, int hashSize)
+binarystore::binarystore(std::wstring storeBasePath, std::wstring storeSubPath, int hashSize, int hashOffset)
 {
 	this->hashSize = hashSize;
 	this->storeSubPath = storeSubPath;
 	this->storeBasePath = storeBasePath;
-	this->hashOffset = SHA1_HASH_LENGTH - hashSize;
+	this->hashOffset = hashOffset;
 
 	WCHAR path[MAX_PATH] = L"";
 
@@ -47,7 +47,7 @@ binarystore::~binarystore()
 
 bool binarystore::IsPasswordInStore(const SecureArrayT<WCHAR> &password)
 {
-	SecureArrayT<BYTE> hash = GetSha1HashBytes(password);
+	SecureArrayT<BYTE> hash = GetHashFromPassword(password);
 
 	return IsHashInStore(hash);
 }
@@ -95,16 +95,16 @@ bool binarystore::IsHashInBinaryFile(const std::wstring &filename, const SecureA
 
 	long lastRow = length / this->hashSize;
 
-	BYTE rowData[SHA1_HASH_LENGTH] = { 0 };
+	SecureArrayT<BYTE> rowData(this->hashSize);
 
 	while (firstRow <= lastRow)
 	{
 		currentRow = (firstRow + lastRow) / 2;
 		file.seekg((currentRow * this->hashSize), std::ios::beg);
 
-		file.read((char*)rowData, this->hashSize);
+		file.read((char*)rowData.get(), this->hashSize);
 
-		int result = memcmp(rowData, toFind, this->hashSize);
+		int result = memcmp(rowData.get(), toFind, this->hashSize);
 
 		if (result < 0)
 		{
