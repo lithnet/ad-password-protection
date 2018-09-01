@@ -1,5 +1,3 @@
- // ***** Sample.mc *****
- // This is the header section.
  // The following are message definitions.
 //
 //  Values are 32 bit values laid out as follows:
@@ -191,4 +189,13 @@
 // The password %1 request for %2 (%3) was rejected because it contained at least part of the display name
 //
 #define MSG_PASSWORD_REJECTED_CONTAINS_DISPLAYNAME ((DWORD)0x8000200BL)
+
+//
+// MessageId: MSG_PASSWORD_REJECTED_THRESHOLD_COMPLEXITY
+//
+// MessageText:
+//
+// The password %1 request for %2 (%3) was rejected because it did not meet the complexity requirements of a password of %4 characters.
+//
+#define MSG_PASSWORD_REJECTED_THRESHOLD_COMPLEXITY ((DWORD)0x8000200CL)
 

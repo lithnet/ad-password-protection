@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
+#include "../PasswordFilter/complexityevaluator.h"
 #include "../PasswordFilter/passwordevaluator.h"
 #include "../PasswordFilter/registry.h"
 

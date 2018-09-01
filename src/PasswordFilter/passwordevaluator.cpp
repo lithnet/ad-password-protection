@@ -10,6 +10,7 @@
 #include <cwctype>
 #include <shlwapi.h>
 #include "utils.h"
+#include "complexityevaluator.h"
 
 BOOLEAN ProcessPassword(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation)
 {
@@ -90,7 +91,8 @@ BOOLEAN ProcessPasswordRaw(const SecureArrayT<WCHAR> &password, const std::wstri
 
 BOOLEAN ProcessPasswordNormalized(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
 {
-	if ((setOperation && reg.GetRegValue(L"ValidateNormalizedPasswordOnSet", 1) != 0) || (!setOperation && reg.GetRegValue(L"ValidateNormalizedPasswordOnChange", 1) != 0))
+	if ((setOperation && reg.GetRegValue(L"ValidateNormalizedPasswordOnSet", 1) != 0) ||
+		(!setOperation && reg.GetRegValue(L"ValidateNormalizedPasswordOnChange", 1) != 0))
 	{
 		bool result = TRUE;
 
@@ -162,7 +164,6 @@ BOOLEAN ProcessPasswordDoesntContainAccountName(const SecureArrayT<WCHAR> &passw
 	return TRUE;
 }
 
-
 BOOLEAN ProcessPasswordDoesntContainFullName(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
 {
 	int flag = reg.GetRegValue(L"ValidatePasswordDoesntContainFullName", 0);
@@ -231,178 +232,6 @@ BOOLEAN ProcessPasswordRegexReject(const SecureArrayT<WCHAR> &password, const st
 		}
 
 		OutputDebugString(L"Password not did match the rejection regular expression");
-	}
-
-	return TRUE;
-}
-
-BOOLEAN ProcessPasswordComplexityThreshold(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
-{
-	int threshold = reg.GetRegValue(L"ComplexityThreshold", 0);
-
-	if (threshold > 0)
-	{
-		OutputDebugString(L"Checking for complexity threshold");
-		bool hasLower = false;
-		bool hasUpper = false;
-		bool hasSymbol = false;
-		bool hasNumber = false;
-
-		for (size_t i = 0; i < wcslen(password); i++)
-		{
-			WCHAR c = password[i];
-
-			if (std::iswdigit(c))
-			{
-				hasNumber = true;
-				continue;
-			}
-
-			if (std::iswupper(c))
-			{
-				hasUpper = true;
-				continue;
-			}
-
-			if (std::iswlower(c))
-			{
-				hasLower = true;
-				continue;
-			}
-
-			hasSymbol = true;
-		}
-
-		if (wcslen(password) < threshold)
-		{
-			bool requiresLower = (reg.GetRegValue(L"BelowThresholdRequiresLower", 0) != 0);
-			bool requiresUpper = (reg.GetRegValue(L"BelowThresholdRequiresUpper", 0) != 0);
-			bool requiresNumber = (reg.GetRegValue(L"BelowThresholdRequiresNumber", 0) != 0);
-			bool requiresSymbol = (reg.GetRegValue(L"BelowThresholdRequiresSymbol", 0) != 0);
-			bool requiresSymbolOrNumber = (reg.GetRegValue(L"BelowThresholdRequiresSymbolOrNumber", 0) != 0);
-
-			int charSetsRequired = min(reg.GetRegValue(L"BelowThresholdCharSetsRequired", 0), 4);
-			int charSetsPresent = (hasLower ? 1 : 0) + (hasUpper ? 1 : 0) + (hasSymbol ? 1 : 0) + (hasNumber ? 1 : 0);
-
-			if ((charSetsPresent < charSetsRequired) || (requiresLower && !hasLower) || (requiresUpper && !hasUpper) || (requiresNumber && !hasNumber) || (requiresSymbol && !hasSymbol) || (requiresSymbolOrNumber && !(hasSymbol || hasNumber)))
-			{
-				OutputDebugString(L"Password did not meet the below-threshold complexity requirements");
-				eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_BELOW_THRESHOLD, 3, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
-				return FALSE;
-			}
-
-			OutputDebugString(L"Password met the below threshold complexity requirements");
-		}
-		else
-		{
-			bool requiresLower = (reg.GetRegValue(L"AboveThresholdRequiresLower", 0) != 0);
-			bool requiresUpper = (reg.GetRegValue(L"AboveThresholdRequiresUpper", 0) != 0);
-			bool requiresNumber = (reg.GetRegValue(L"AboveThresholdRequiresNumber", 0) != 0);
-			bool requiresSymbol = (reg.GetRegValue(L"AboveThresholdRequiresSymbol", 0) != 0);
-			bool requiresSymbolOrNumber = (reg.GetRegValue(L"AboveThresholdRequiresSymbolOrNumber", 0) != 0);
-
-			int charSetsRequired = min(reg.GetRegValue(L"AboveThresholdCharSetsRequired", 0), 4);
-			int charSetsPresent = (hasLower ? 1 : 0) + (hasUpper ? 1 : 0) + (hasSymbol ? 1 : 0) + (hasNumber ? 1 : 0);
-
-			if ((charSetsPresent < charSetsRequired) || (requiresLower && !hasLower) || (requiresUpper && !hasUpper) || (requiresNumber && !hasNumber) || (requiresSymbol && !hasSymbol) || (requiresSymbolOrNumber && !(hasSymbol || hasNumber)))
-			{
-				OutputDebugString(L"Password did not meet the above-threshold complexity requirements");
-				eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_ABOVE_THRESHOLD, 3, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
-				return FALSE;
-			}
-
-			OutputDebugString(L"Password met the above threshold complexity requirements");
-		}
-	}
-
-	return TRUE;
-}
-
-BOOLEAN ProcessPasswordComplexityPoints(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
-{
-	int requiredPoints = reg.GetRegValue(L"ComplexityPointsRequired", 0);
-
-	if (requiredPoints > 0)
-	{
-		OutputDebugString(L"Checking for complexity points");
-
-		int perChar = reg.GetRegValue(L"ComplexityPointsPerCharacter", 2);
-
-		int perNumber = reg.GetRegValue(L"ComplexityPointsPerNumber", 0);
-		int perSymbol = reg.GetRegValue(L"ComplexityPointsPerSymbol", 0);
-		int perUpper = reg.GetRegValue(L"ComplexityPointsPerUpper", 0);
-		int perLower = reg.GetRegValue(L"ComplexityPointsPerLower", 0);
-
-		int useNumber = reg.GetRegValue(L"ComplexityPointsUseOfNumber", 1);
-		int useSymbol = reg.GetRegValue(L"ComplexityPointsUseOfSymbol", 1);
-		int useUpper = reg.GetRegValue(L"ComplexityPointsUseOfUpper", 1);
-		int useLower = reg.GetRegValue(L"ComplexityPointsUseOfLower", 1);
-
-		bool hasLower = false;
-		bool hasUpper = false;
-		bool hasSymbol = false;
-		bool hasNumber = false;
-
-		int pointCount = 0;
-
-		for (size_t i = 0; i < wcslen(password); i++)
-		{
-			WCHAR c = password[i];
-			pointCount += perChar;
-
-			if (std::iswdigit(c))
-			{
-				hasNumber = true;
-				pointCount += perNumber;
-				continue;
-			}
-
-			if (std::iswupper(c))
-			{
-				pointCount += perUpper;
-				hasUpper = true;
-				continue;
-			}
-
-			if (std::iswlower(c))
-			{
-				pointCount += perLower;
-				hasLower = true;
-				continue;
-			}
-
-			pointCount += perSymbol;
-			hasSymbol = true;
-		}
-
-		if (hasLower)
-		{
-			pointCount += useLower;
-		}
-
-		if (hasUpper)
-		{
-			pointCount += useUpper;
-		}
-
-		if (hasSymbol)
-		{
-			pointCount += useSymbol;
-		}
-
-		if (hasNumber)
-		{
-			pointCount += useNumber;
-		}
-
-		if (pointCount < requiredPoints)
-		{
-			OutputDebugString(L"Password did not meet the required number of points");
-			eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_NOT_ENOUGH_POINTS, 5, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str(), std::to_wstring(pointCount).c_str(), std::to_wstring(requiredPoints).c_str());
-			return FALSE;
-		}
-
-		OutputDebugString(L"Password met the required number of points");
 	}
 
 	return TRUE;

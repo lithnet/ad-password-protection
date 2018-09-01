@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
+#include "../PasswordFilter/complexityevaluator.h"
 #include "../PasswordFilter/passwordevaluator.h"
 #include "../PasswordFilter/registry.h"
 
@@ -11,384 +12,203 @@ namespace NativeUnitTests
 	{
 	public:
 		registry reg;
-		TEST_METHOD(AboveThresholdRequiresNumberPass)
-		{
-			SetValue(L"AboveThresholdRequiresLower", 0);
-			SetValue(L"AboveThresholdRequiresNumber", 1);
-			SetValue(L"AboveThresholdRequiresSymbol", 0);
-			SetValue(L"AboveThresholdRequiresSymbolOrNumber", 0);
-			SetValue(L"AboveThresholdRequiresUpper", 0);
-			SetValue(L"AboveThresholdCharsetsRequired", 0);
-			SetValue(L"ComplexityThreshold", 7);
 
-			TestString password (L"password 0");
-			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
+		void ResetValues()
+		{
+			SetValue(L"Threshold1RequiresLower", 0);
+			SetValue(L"Threshold1RequiresNumber", 0);
+			SetValue(L"Threshold1RequiresSymbol", 0);
+			SetValue(L"Threshold1RequiresSymbolOrNumber", 0);
+			SetValue(L"Threshold1RequiresUpper", 0);
+			SetValue(L"Threshold1CharsetsRequired", 0);
+			SetValue(L"ComplexityThreshold1", 0);
+
+			SetValue(L"Threshold2RequiresLower", 0);
+			SetValue(L"Threshold2RequiresNumber", 0);
+			SetValue(L"Threshold2RequiresSymbol", 0);
+			SetValue(L"Threshold2RequiresSymbolOrNumber", 0);
+			SetValue(L"Threshold2RequiresUpper", 0);
+			SetValue(L"Threshold2CharsetsRequired", 0);
+			SetValue(L"ComplexityThreshold2", 0);
+
+
+			SetValue(L"Threshold3RequiresLower", 0);
+			SetValue(L"Threshold3RequiresNumber", 0);
+			SetValue(L"Threshold3RequiresSymbol", 0);
+			SetValue(L"Threshold3RequiresSymbolOrNumber", 0);
+			SetValue(L"Threshold3RequiresUpper", 0);
+			SetValue(L"Threshold3CharsetsRequired", 0);
+			SetValue(L"ComplexityThreshold3", 0);
 		}
 
-		TEST_METHOD(AboveThresholdRequiresNumberFail)
+		TEST_METHOD_INITIALIZE(Init)
 		{
-			SetValue(L"AboveThresholdRequiresLower", 0);
-			SetValue(L"AboveThresholdRequiresNumber", 1);
-			SetValue(L"AboveThresholdRequiresSymbol", 0);
-			SetValue(L"AboveThresholdRequiresSymbolOrNumber", 0);
-			SetValue(L"AboveThresholdRequiresUpper", 0);
-			SetValue(L"AboveThresholdCharsetsRequired", 0);
-			SetValue(L"ComplexityThreshold", 7);
-
-			TestString password (L"password");
-			Assert::IsFalse(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
+			ResetValues();
 		}
 
-		TEST_METHOD(AboveThresholdRequiresLowerPass)
-		{
-			SetValue(L"AboveThresholdRequiresLower", 1);
-			SetValue(L"AboveThresholdRequiresNumber", 0);
-			SetValue(L"AboveThresholdRequiresSymbol", 0);
-			SetValue(L"AboveThresholdRequiresSymbolOrNumber", 0);
-			SetValue(L"AboveThresholdRequiresUpper", 0);
-			SetValue(L"AboveThresholdCharsetsRequired", 0);
-			SetValue(L"ComplexityThreshold", 7);
 
-			TestString password (L"PASSWORD p");
-			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE,reg));
+		void TestThreshold(std::wstring passwordPass, std::wstring passwordFail)
+		{
+			TestString pwdPass(passwordPass);
+			Assert::IsTrue(ProcessPasswordComplexityThreshold(pwdPass, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
+
+			TestString pwdFail(passwordFail);
+			Assert::IsFalse(ProcessPasswordComplexityThreshold(pwdFail, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 		}
 
-		TEST_METHOD(AboveThresholdRequiresLowerFail)
+		TEST_METHOD(ThresholdRequiresNumber)
 		{
-			SetValue(L"AboveThresholdRequiresLower", 1);
-			SetValue(L"AboveThresholdRequiresNumber", 0);
-			SetValue(L"AboveThresholdRequiresSymbol", 0);
-			SetValue(L"AboveThresholdRequiresSymbolOrNumber", 0);
-			SetValue(L"AboveThresholdRequiresUpper", 0);
-			SetValue(L"AboveThresholdCharsetsRequired", 0);
-			SetValue(L"ComplexityThreshold", 7);
+			SetValue(L"ComplexityThreshold1", 7);
+			SetValue(L"Threshold1RequiresNumber", 1);
+			TestThreshold(L"passworddddd 0", L"passwordddd");
 
-			TestString password (L"PASSWORD");
-			Assert::IsFalse(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE,reg));
+
+			SetValue(L"ComplexityThreshold2", 8);
+			SetValue(L"Threshold2RequiresNumber", 1);
+			TestThreshold( L"passworddddd 0", L"passwordddd");
+
+			SetValue(L"ComplexityThreshold3", 9);
+			SetValue(L"Threshold3RequiresNumber", 1);
+			TestThreshold(L"passworddddd 0", L"passwordddd");
 		}
 
-		TEST_METHOD(AboveThresholdRequiresSymbolPass)
-		{
-			SetValue(L"AboveThresholdRequiresLower", 0);
-			SetValue(L"AboveThresholdRequiresNumber", 0);
-			SetValue(L"AboveThresholdRequiresSymbol", 1);
-			SetValue(L"AboveThresholdRequiresSymbolOrNumber", 0);
-			SetValue(L"AboveThresholdRequiresUpper", 0);
-			SetValue(L"AboveThresholdCharsetsRequired", 0);
-			SetValue(L"ComplexityThreshold", 7);
 
-			TestString password (L"password !");
-			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
+		TEST_METHOD(ThresholdRequiresLower)
+		{
+			SetValue(L"ComplexityThreshold1", 7);
+			SetValue(L"Threshold1RequiresLower", 1);
+			TestThreshold(L"PASSWORDDDDDDd", L"PASSWORDDDDDD");
+
+			SetValue(L"ComplexityThreshold2", 8);
+			SetValue(L"Threshold2RequiresLower", 1);
+			TestThreshold(L"PASSWORDDDDDDd", L"PASSWORDDDDDD");
+
+			SetValue(L"ComplexityThreshold3", 9);
+			SetValue(L"Threshold3RequiresLower", 1);		
+			TestThreshold(L"PASSWORDDDDDDd", L"PASSWORDDDDDD");
 		}
 
-		TEST_METHOD(AboveThresholdRequiresSymbolFail)
+		TEST_METHOD(ThresholdRequiresSymbol)
 		{
-			SetValue(L"AboveThresholdRequiresLower", 0);
-			SetValue(L"AboveThresholdRequiresNumber", 0);
-			SetValue(L"AboveThresholdRequiresSymbol", 1);
-			SetValue(L"AboveThresholdRequiresSymbolOrNumber", 0);
-			SetValue(L"AboveThresholdRequiresUpper", 0);
-			SetValue(L"AboveThresholdCharsetsRequired", 0);
-			SetValue(L"ComplexityThreshold", 7);
+			SetValue(L"ComplexityThreshold1", 7);
+			SetValue(L"Threshold1RequiresSymbol", 1);
+			TestThreshold(L"PASSWORDDDDDD!", L"PASSWORDDDDDD");
 
-			TestString password (L"password");
-			Assert::IsFalse(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
+			SetValue(L"ComplexityThreshold2", 8);
+			SetValue(L"Threshold2RequiresSymbol", 1);
+			TestThreshold(L"PASSWORDDDDDD!", L"PASSWORDDDDDD");
+
+			SetValue(L"ComplexityThreshold3", 9);
+			SetValue(L"Threshold3RequiresSymbol", 1);
+			TestThreshold(L"PASSWORDDDDDD!", L"PASSWORDDDDDD");
 		}
 
-		TEST_METHOD(AboveThresholdRequiresSymbolOrNumberNumberPass)
-		{
-			SetValue(L"AboveThresholdRequiresLower", 0);
-			SetValue(L"AboveThresholdRequiresNumber", 0);
-			SetValue(L"AboveThresholdRequiresSymbol", 0);
-			SetValue(L"AboveThresholdRequiresSymbolOrNumber", 1);
-			SetValue(L"AboveThresholdRequiresUpper", 0);
-			SetValue(L"AboveThresholdCharsetsRequired", 0);
-			SetValue(L"ComplexityThreshold", 7);
 
-			TestString password (L"password 1");
-			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
+		TEST_METHOD(ThresholdRequiresSymbolOrNumber_Number)
+		{
+			SetValue(L"ComplexityThreshold1", 7);
+			SetValue(L"Threshold1RequiresSymbolOrNumber", 1);
+			TestThreshold(L"PASSWORDDDDDD1", L"PASSWORDDDDDD");
+
+			SetValue(L"ComplexityThreshold2", 8);
+			SetValue(L"Threshold2RequiresSymbolOrNumber", 1);
+			TestThreshold(L"PASSWORDDDDDD1", L"PASSWORDDDDDD");
+
+			SetValue(L"ComplexityThreshold3", 9);
+			SetValue(L"Threshold3RequiresSymbolOrNumber", 1);
+			TestThreshold(L"PASSWORDDDDDD1", L"PASSWORDDDDDD");
 		}
 
-		TEST_METHOD(AboveThresholdRequiresSymbolOrNumberSymbolPass)
+		TEST_METHOD(ThresholdRequiresSymbolOrNumber_Symbol)
 		{
-			SetValue(L"AboveThresholdRequiresLower", 0);
-			SetValue(L"AboveThresholdRequiresNumber", 0);
-			SetValue(L"AboveThresholdRequiresSymbol", 0);
-			SetValue(L"AboveThresholdRequiresSymbolOrNumber", 1);
-			SetValue(L"AboveThresholdRequiresUpper", 0);
-			SetValue(L"AboveThresholdCharsetsRequired", 0);
-			SetValue(L"ComplexityThreshold", 7);
+			SetValue(L"ComplexityThreshold1", 7);
+			SetValue(L"Threshold1RequiresSymbolOrNumber", 1);
+			TestThreshold(L"PASSWORDDDDDD!", L"PASSWORDDDDDD");
 
-			TestString password (L"password !");
-			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
+			SetValue(L"ComplexityThreshold2", 8);
+			SetValue(L"Threshold2RequiresSymbolOrNumber", 1);
+			TestThreshold(L"PASSWORDDDDDD!", L"PASSWORDDDDDD");
+
+			SetValue(L"ComplexityThreshold3", 9);
+			SetValue(L"Threshold3RequiresSymbolOrNumber", 1);
+			TestThreshold(L"PASSWORDDDDDD!", L"PASSWORDDDDDD");
 		}
 
-		TEST_METHOD(AboveThresholdRequiresSymbolOrNumberFail)
+		TEST_METHOD(ThresholdRequiresUpper)
 		{
-			SetValue(L"AboveThresholdRequiresLower", 0);
-			SetValue(L"AboveThresholdRequiresNumber", 0);
-			SetValue(L"AboveThresholdRequiresSymbol", 1);
-			SetValue(L"AboveThresholdRequiresSymbolOrNumber", 0);
-			SetValue(L"AboveThresholdRequiresUpper", 0);
-			SetValue(L"AboveThresholdCharsetsRequired", 0);
-			SetValue(L"ComplexityThreshold", 7);
+			SetValue(L"ComplexityThreshold1", 7);
+			SetValue(L"Threshold1RequiresUpper", 1);
+			TestThreshold(L"passworddddd P", L"passwordddd");
 
-			TestString password (L"password");
-			Assert::IsFalse(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
+
+			SetValue(L"ComplexityThreshold2", 8);
+			SetValue(L"Threshold2RequiresUpper", 1);
+			TestThreshold(L"passworddddd P", L"passwordddd");
+
+
+			SetValue(L"ComplexityThreshold3", 9);
+			SetValue(L"Threshold3RequiresUpper", 1);
+			TestThreshold(L"passworddddd P", L"passwordddd");
 		}
 
-		TEST_METHOD(AboveThresholdRequiresUpperPass)
+		TEST_METHOD(ThresholdRequires1Charset)
 		{
-			SetValue(L"AboveThresholdRequiresLower", 0);
-			SetValue(L"AboveThresholdRequiresNumber", 0);
-			SetValue(L"AboveThresholdRequiresSymbol", 0);
-			SetValue(L"AboveThresholdRequiresSymbolOrNumber", 0);
-			SetValue(L"AboveThresholdRequiresUpper", 1);
-			SetValue(L"AboveThresholdCharsetsRequired", 0);
-			SetValue(L"ComplexityThreshold", 7);
+			SetValue(L"ComplexityThreshold1", 7);
+			SetValue(L"Threshold1CharsetsRequired", 1);
+			TestThreshold(L"passworddddd", L"");
 
-			TestString password (L"password P");
-			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
+			SetValue(L"ComplexityThreshold2", 8);
+			SetValue(L"Threshold2CharsetsRequired", 1);
+			TestThreshold(L"passworddddd", L"");
+
+			SetValue(L"ComplexityThreshold3", 9);
+			SetValue(L"Threshold3CharsetsRequired", 1);
+			TestThreshold(L"passworddddd", L"");
 		}
 
-		TEST_METHOD(AboveThresholdRequiresUpperFail)
+		TEST_METHOD(ThresholdRequires2Charset)
 		{
-			SetValue(L"AboveThresholdRequiresLower", 0);
-			SetValue(L"AboveThresholdRequiresNumber", 0);
-			SetValue(L"AboveThresholdRequiresSymbol", 0);
-			SetValue(L"AboveThresholdRequiresSymbolOrNumber", 0);
-			SetValue(L"AboveThresholdRequiresUpper", 1);
-			SetValue(L"AboveThresholdCharsetsRequired", 0);
-			SetValue(L"ComplexityThreshold", 7);
+			SetValue(L"ComplexityThreshold1", 7);
+			SetValue(L"Threshold1CharsetsRequired", 2);
+			TestThreshold(L"passwordddddD", L"passworddddd");
 
-			TestString password (L"password");
-			Assert::IsFalse(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
+			SetValue(L"ComplexityThreshold2", 8);
+			SetValue(L"Threshold2CharsetsRequired", 2);
+			TestThreshold(L"passwordddddD", L"passworddddd");
+
+			SetValue(L"ComplexityThreshold3", 9);
+			SetValue(L"Threshold3CharsetsRequired", 2);
+			TestThreshold(L"passwordddddD", L"passworddddd");
 		}
 
-// Below Threshold
-
-		TEST_METHOD(BelowThresholdRequiresNumberPass)
+		TEST_METHOD(ThresholdRequires3Charset)
 		{
-			SetValue(L"BelowThresholdRequiresLower", 0);
-			SetValue(L"BelowThresholdRequiresNumber", 1);
-			SetValue(L"BelowThresholdRequiresSymbol", 0);
-			SetValue(L"BelowThresholdRequiresSymbolOrNumber", 0);
-			SetValue(L"BelowThresholdRequiresUpper", 0);
-			SetValue(L"BelowThresholdCharsetsRequired", 0);
-			SetValue(L"ComplexityThreshold", 17);
+			SetValue(L"ComplexityThreshold1", 7);
+			SetValue(L"Threshold1CharsetsRequired", 3);
+			TestThreshold(L"passwordddddD1", L"passwordddddD");
 
-			TestString password (L"password 0");
-			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
+			SetValue(L"ComplexityThreshold2", 8);
+			SetValue(L"Threshold2CharsetsRequired", 3);
+			TestThreshold(L"passwordddddD1", L"passwordddddD");
+
+			SetValue(L"ComplexityThreshold3", 9);
+			SetValue(L"Threshold3CharsetsRequired", 3);
+			TestThreshold(L"passwordddddD1", L"passwordddddD");
 		}
 
-		TEST_METHOD(BelowThresholdRequiresNumberFail)
+		TEST_METHOD(ThresholdRequires4Charset)
 		{
-			SetValue(L"BelowThresholdRequiresLower", 0);
-			SetValue(L"BelowThresholdRequiresNumber", 1);
-			SetValue(L"BelowThresholdRequiresSymbol", 0);
-			SetValue(L"BelowThresholdRequiresSymbolOrNumber", 0);
-			SetValue(L"BelowThresholdRequiresUpper", 0);
-			SetValue(L"BelowThresholdCharsetsRequired", 0);
-			SetValue(L"ComplexityThreshold", 17);
+			SetValue(L"ComplexityThreshold1", 7);
+			SetValue(L"Threshold1CharsetsRequired", 4);
+			TestThreshold(L"passwordddddD1!", L"passwordddddD1");
 
-			TestString password (L"password");
-			Assert::IsFalse(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
-		}
+			SetValue(L"ComplexityThreshold2", 8);
+			SetValue(L"Threshold2CharsetsRequired", 4);
+			TestThreshold(L"passwordddddD1!", L"passwordddddD1");
 
-		TEST_METHOD(BelowThresholdRequiresLowerPass)
-		{
-			SetValue(L"BelowThresholdRequiresLower", 1);
-			SetValue(L"BelowThresholdRequiresNumber", 0);
-			SetValue(L"BelowThresholdRequiresSymbol", 0);
-			SetValue(L"BelowThresholdRequiresSymbolOrNumber", 0);
-			SetValue(L"BelowThresholdRequiresUpper", 0);
-			SetValue(L"BelowThresholdCharsetsRequired", 0);
-			SetValue(L"ComplexityThreshold", 17);
-
-			TestString password (L"PASSWORD p");
-			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
-		}
-
-		TEST_METHOD(BelowThresholdRequiresLowerFail)
-		{
-			SetValue(L"BelowThresholdRequiresLower", 1);
-			SetValue(L"BelowThresholdRequiresNumber", 0);
-			SetValue(L"BelowThresholdRequiresSymbol", 0);
-			SetValue(L"BelowThresholdRequiresSymbolOrNumber", 0);
-			SetValue(L"BelowThresholdRequiresUpper", 0);
-			SetValue(L"BelowThresholdCharsetsRequired", 0);
-			SetValue(L"ComplexityThreshold", 17);
-
-			TestString password (L"PASSWORD");
-			Assert::IsFalse(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
-		}
-
-		TEST_METHOD(BelowThresholdRequiresSymbolPass)
-		{
-			SetValue(L"BelowThresholdRequiresLower", 0);
-			SetValue(L"BelowThresholdRequiresNumber", 0);
-			SetValue(L"BelowThresholdRequiresSymbol", 1);
-			SetValue(L"BelowThresholdRequiresSymbolOrNumber", 0);
-			SetValue(L"BelowThresholdRequiresUpper", 0);
-			SetValue(L"BelowThresholdCharsetsRequired", 0);
-			SetValue(L"ComplexityThreshold", 17);
-
-			TestString password (L"password !");
-			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
-		}
-
-		TEST_METHOD(BelowThresholdRequiresSymbolFail)
-		{
-			SetValue(L"BelowThresholdRequiresLower", 0);
-			SetValue(L"BelowThresholdRequiresNumber", 0);
-			SetValue(L"BelowThresholdRequiresSymbol", 1);
-			SetValue(L"BelowThresholdRequiresSymbolOrNumber", 0);
-			SetValue(L"BelowThresholdRequiresUpper", 0);
-			SetValue(L"BelowThresholdCharsetsRequired", 0);
-			SetValue(L"ComplexityThreshold", 17);
-
-			TestString password (L"password");
-			Assert::IsFalse(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
-		}
-
-		TEST_METHOD(BelowThresholdRequiresSymbolOrNumberNumberPass)
-		{
-			SetValue(L"BelowThresholdRequiresLower", 0);
-			SetValue(L"BelowThresholdRequiresNumber", 0);
-			SetValue(L"BelowThresholdRequiresSymbol", 0);
-			SetValue(L"BelowThresholdRequiresSymbolOrNumber", 1);
-			SetValue(L"BelowThresholdRequiresUpper", 0);
-			SetValue(L"BelowThresholdCharsetsRequired", 0);
-			SetValue(L"ComplexityThreshold", 17);
-
-			TestString password (L"password 1");
-			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
-		}
-
-		TEST_METHOD(BelowThresholdRequiresSymbolOrNumberSymbolPass)
-		{
-			SetValue(L"BelowThresholdRequiresLower", 0);
-			SetValue(L"BelowThresholdRequiresNumber", 0);
-			SetValue(L"BelowThresholdRequiresSymbol", 0);
-			SetValue(L"BelowThresholdRequiresSymbolOrNumber", 1);
-			SetValue(L"BelowThresholdRequiresUpper", 0);
-			SetValue(L"BelowThresholdCharsetsRequired", 0);
-			SetValue(L"ComplexityThreshold", 17);
-
-			TestString password (L"password !");
-			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
-		}
-
-		TEST_METHOD(BelowThresholdRequiresSymbolOrNumberFail)
-		{
-			SetValue(L"BelowThresholdRequiresLower", 0);
-			SetValue(L"BelowThresholdRequiresNumber", 0);
-			SetValue(L"BelowThresholdRequiresSymbol", 1);
-			SetValue(L"BelowThresholdRequiresSymbolOrNumber", 0);
-			SetValue(L"BelowThresholdRequiresUpper", 0);
-			SetValue(L"BelowThresholdCharsetsRequired", 0);
-			SetValue(L"ComplexityThreshold", 17);
-
-			TestString password (L"password");
-			Assert::IsFalse(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
-		}
-
-		TEST_METHOD(BelowThresholdRequiresUpperPass)
-		{
-			SetValue(L"BelowThresholdRequiresLower", 0);
-			SetValue(L"BelowThresholdRequiresNumber", 0);
-			SetValue(L"BelowThresholdRequiresSymbol", 0);
-			SetValue(L"BelowThresholdRequiresSymbolOrNumber", 0);
-			SetValue(L"BelowThresholdRequiresUpper", 1);
-			SetValue(L"BelowThresholdCharsetsRequired", 0);
-			SetValue(L"ComplexityThreshold", 17);
-
-			TestString password (L"password P");
-			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
-		}
-
-		TEST_METHOD(BelowThresholdRequiresUpperFail)
-		{
-			SetValue(L"BelowThresholdRequiresLower", 0);
-			SetValue(L"BelowThresholdRequiresNumber", 0);
-			SetValue(L"BelowThresholdRequiresSymbol", 0);
-			SetValue(L"BelowThresholdRequiresSymbolOrNumber", 0);
-			SetValue(L"BelowThresholdRequiresUpper", 1);
-			SetValue(L"BelowThresholdCharsetsRequired", 0);
-			SetValue(L"ComplexityThreshold", 17);
-
-			TestString password (L"password");
-			Assert::IsFalse(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
-		}
-
-		TEST_METHOD(BelowThresholdCharsetsRequiredPass1)
-		{
-			SetValue(L"BelowThresholdRequiresLower", 0);
-			SetValue(L"BelowThresholdRequiresNumber", 0);
-			SetValue(L"BelowThresholdRequiresSymbol", 0);
-			SetValue(L"BelowThresholdRequiresSymbolOrNumber", 0);
-			SetValue(L"BelowThresholdRequiresUpper", 0);
-			SetValue(L"BelowThresholdCharsetsRequired", 1);
-			SetValue(L"ComplexityThreshold", 17);
-
-			TestString password(L"password");
-			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
-		}
-
-		TEST_METHOD(BelowThresholdCharsetsRequiredPass2)
-		{
-			SetValue(L"BelowThresholdRequiresLower", 0);
-			SetValue(L"BelowThresholdRequiresNumber", 0);
-			SetValue(L"BelowThresholdRequiresSymbol", 0);
-			SetValue(L"BelowThresholdRequiresSymbolOrNumber", 0);
-			SetValue(L"BelowThresholdRequiresUpper", 0);
-			SetValue(L"BelowThresholdCharsetsRequired", 2);
-			SetValue(L"ComplexityThreshold", 17);
-
-			TestString password(L"Password");
-			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
-		}
-
-		TEST_METHOD(BelowThresholdCharsetsRequiredPass3)
-		{
-			SetValue(L"BelowThresholdRequiresLower", 0);
-			SetValue(L"BelowThresholdRequiresNumber", 0);
-			SetValue(L"BelowThresholdRequiresSymbol", 0);
-			SetValue(L"BelowThresholdRequiresSymbolOrNumber", 0);
-			SetValue(L"BelowThresholdRequiresUpper", 0);
-			SetValue(L"BelowThresholdCharsetsRequired", 3);
-			SetValue(L"ComplexityThreshold", 17);
-
-			TestString password(L"Password!");
-			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
-		}
-
-		TEST_METHOD(BelowThresholdCharsetsRequiredPass4)
-		{
-			SetValue(L"BelowThresholdRequiresLower", 0);
-			SetValue(L"BelowThresholdRequiresNumber", 0);
-			SetValue(L"BelowThresholdRequiresSymbol", 0);
-			SetValue(L"BelowThresholdRequiresSymbolOrNumber", 0);
-			SetValue(L"BelowThresholdRequiresUpper", 0);
-			SetValue(L"BelowThresholdCharsetsRequired", 4);
-			SetValue(L"ComplexityThreshold", 17);
-
-			TestString password(L"Password!1");
-			Assert::IsTrue(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
-		}
-
-		TEST_METHOD(BelowThresholdCharsetsRequiredFail4)
-		{
-			SetValue(L"BelowThresholdRequiresLower", 0);
-			SetValue(L"BelowThresholdRequiresNumber", 0);
-			SetValue(L"BelowThresholdRequiresSymbol", 0);
-			SetValue(L"BelowThresholdRequiresSymbolOrNumber", 0);
-			SetValue(L"BelowThresholdRequiresUpper", 0);
-			SetValue(L"BelowThresholdCharsetsRequired", 4);
-			SetValue(L"ComplexityThreshold", 17);
-
-			TestString password(L"Password!");
-			Assert::IsFalse(ProcessPasswordComplexityThreshold(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
+			SetValue(L"ComplexityThreshold3", 9);
+			SetValue(L"Threshold3CharsetsRequired", 4);
+			TestThreshold(L"passwordddddD1!", L"passwordddddD1");
 		}
 	};
 }

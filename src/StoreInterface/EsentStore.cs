@@ -231,11 +231,11 @@ namespace StoreInterface
             }
         }
 
-        protected override void StartBatch()
+         public override void StartBatch()
         {
         }
 
-        protected override void EndBatch(ref int hashesAdded, ref int hashesDiscarded)
+        public override void EndBatch(ref int hashesAdded, ref int hashesDiscarded)
         {
         }
       

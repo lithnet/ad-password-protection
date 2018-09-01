@@ -31,7 +31,7 @@ DWORD registry::GetRegValue(const std::wstring & valueName, DWORD defaultValue) 
 
 registry registry::GetRegistryForUser(const std::wstring & user)
 {
-	return registry();
+	return registry(L"default");
 }
 
 DWORD registry::GetPolicyOrSettingsValue(const std::wstring & valueName, DWORD defaultValue) const

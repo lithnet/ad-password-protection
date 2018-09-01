@@ -1,6 +1,3 @@
-; // ***** Sample.mc *****
-; // This is the header section.
-
 MessageIdTypedef=DWORD
 
 SeverityNames=(Success=0x0:STATUS_SEVERITY_SUCCESS
@@ -149,3 +146,12 @@ SymbolicName=MSG_PASSWORD_REJECTED_CONTAINS_DISPLAYNAME
 Language=English
 The password %1 request for %2 (%3) was rejected because it contained at least part of the display name
 .
+
+MessageId=0x200C
+Severity=Warning
+Facility=System
+SymbolicName=MSG_PASSWORD_REJECTED_THRESHOLD_COMPLEXITY
+Language=English
+The password %1 request for %2 (%3) was rejected because it did not meet the complexity requirements of a password of %4 characters.
+.
+
