@@ -100,12 +100,12 @@ namespace StoreInterface
             }
         }
 
-        protected override void StartBatch()
+        public override void StartBatch()
         {
             this.IsInBatch = true;
         }
 
-        protected override void EndBatch(ref int hashesAdded, ref int hashesDiscarded)
+        public override void EndBatch(ref int hashesAdded, ref int hashesDiscarded)
         {
             this.ConsolidateAndSort(ref hashesAdded, ref hashesDiscarded);
             this.IsInBatch = false;

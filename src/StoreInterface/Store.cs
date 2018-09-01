@@ -369,9 +369,9 @@ namespace StoreInterface
 
         protected abstract void AddHashRangeToStore(HashSet<byte[]> hashes, string range, ref int hashesAdded, ref int hashesDiscarded);
 
-        protected abstract void StartBatch();
+        public abstract void StartBatch();
 
-        protected abstract void EndBatch(ref int hashesAdded, ref int hashesDiscarded);
+        public abstract void EndBatch(ref int hashesAdded, ref int hashesDiscarded);
 
         public bool IsPasswordInStore(string password, bool normalize = false)
         {
