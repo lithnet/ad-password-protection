@@ -44,12 +44,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ByteArrayComparer.cs" />
+    <Compile Include="CryptoLib\NativeMethods.cs" />
     <Compile Include="EsentStore.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="FilterInterface.cs" />
     <Compile Include="IStore.cs" />
+    <Compile Include="CryptoLib\MD4.cs" />
     <Compile Include="NativeMethods.cs" />
-    <Compile Include="NtlmHash.cs" />
+    <Compile Include="CryptoLib\MD4CryptoServiceProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Store.cs" />
     <Compile Include="StringNormalizer.cs" />
