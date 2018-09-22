@@ -12,7 +12,7 @@
 #include "utils.h"
 #include "complexityevaluator.h"
 
-BOOLEAN ProcessPassword(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation)
+int ProcessPassword(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation)
 {
 	eventlog::getInstance().logw(EVENTLOG_INFORMATION_TYPE, MSG_PROCESSING_REQUEST, 3, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
 
@@ -20,54 +20,54 @@ BOOLEAN ProcessPassword(const SecureArrayT<WCHAR> &password, const std::wstring 
 
 	if (!ProcessPasswordLength(password, accountName, fullName, setOperation, reg))
 	{
-		return FALSE;
+		return PASSWORD_REJECTED_LENGTH;
 	}
 
 	if (!ProcessPasswordComplexityThreshold(password, accountName, fullName, setOperation, reg))
 	{
-		return FALSE;
+		return PASSWORD_REJECTED_COMPLEXITY_THRESHOLD;
 	}
 
 	if (!ProcessPasswordComplexityPoints(password, accountName, fullName, setOperation, reg))
 	{
-		return FALSE;
+		return PASSWORD_REJECTED_COMPLEXITY_POINTS;
 	}
 
 	if (!ProcessPasswordRegexApprove(password, accountName, fullName, setOperation, reg))
 	{
-		return FALSE;
+		return PASSWORD_REJECTED_REGEX_APPROVE;
 	}
 
 	if (!ProcessPasswordRegexReject(password, accountName, fullName, setOperation, reg))
 	{
-		return FALSE;
+		return PASSWORD_REJECTED_REGEX_APPROVE;
 	}
 
 	if (!ProcessPasswordDoesntContainAccountName(password, accountName, fullName, setOperation, reg))
 	{
-		return FALSE;
+		return PASSWORD_REJECTED_CONTAINS_ACCOUNT_NAME;
 	}
 
 	if (!ProcessPasswordDoesntContainFullName(password, accountName, fullName, setOperation, reg))
 	{
-		return FALSE;
+		return PASSWORD_REJECTED_CONTAINS_FULL_NAME;
 	}
 
 	if (!ProcessPasswordRaw(password, accountName, fullName, setOperation, reg))
 	{
-		return FALSE;
+		return PASSWORD_REJECTED_BANNED;
 	}
 
 	if (!ProcessPasswordNormalized(password, accountName, fullName, setOperation, reg))
 	{
-		return FALSE;
+		return PASSWORD_REJECTED_BANNED_NORMALIZED;
 	}
 
 	OutputDebugString(L"Password was approved by all modules");
 
 	eventlog::getInstance().logw(EVENTLOG_SUCCESS, MSG_PASSWORD_APPROVED, 3, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
 
-	return TRUE;
+	return PASSWORD_APPROVED;
 }
 
 BOOLEAN ProcessPasswordRaw(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)

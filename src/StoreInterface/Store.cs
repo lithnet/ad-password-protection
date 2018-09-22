@@ -4,22 +4,26 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace StoreInterface
 {
     public abstract class Store : IStore
     {
-        protected internal static SHA1 Encoder = SHA1.Create();
+        protected internal HashAlgorithm Encoder { get; }
 
-        protected int HashSize { get; }
+        protected int StoredHashLength { get; }
 
-        protected int HashOffset => 20 - this.HashSize;
+        protected int HashLength { get; }
 
-        protected Store(int hashSize)
+        protected int HashOffset { get; }
+
+        protected Store(HashAlgorithm encoder, int hashLength, int hashOffset)
         {
-            this.HashSize = hashSize;
+            this.StoredHashLength = hashLength - hashOffset;
+            this.HashLength = hashLength;
+            this.HashOffset = hashOffset;
+            this.Encoder = encoder;
         }
 
         public static void ImportPasswordsFromFile(Store store, string sourceFile, bool addExact, bool addNormalized, int batchSize = 5000000)
@@ -32,7 +36,7 @@ namespace StoreInterface
 
             if (!(addExact || addNormalized))
             {
-                throw new ArgumentException("You must specify to at least of option of adding exact passwords or add normalized passwords");
+                throw new ArgumentException("You must specify at least one option of adding exact passwords or adding normalized passwords");
             }
 
             Stopwatch timer = new Stopwatch();
@@ -54,7 +58,7 @@ namespace StoreInterface
 
                 if (addExact)
                 {
-                    hash = Store.Encoder.ComputeHash(line);
+                    hash = store.Encoder.ComputeHash(line);
 
                     if (hashes.Add(hash))
                     {
@@ -67,7 +71,7 @@ namespace StoreInterface
                     string normalized = StringNormalizer.Normalize(line);
                     if (!string.IsNullOrEmpty(normalized))
                     {
-                        byte[] newhash = Store.Encoder.ComputeHash(normalized);
+                        byte[] newhash = store.Encoder.ComputeHash(normalized);
 
                         if (!ByteArrayComparer.Comparer.Equals(newhash, hash))
                         {
@@ -311,13 +315,13 @@ namespace StoreInterface
 
         public void AddPasswordToStore(string password, bool normalize)
         {
-            byte[] hash = Store.Encoder.ComputeHash(password);
+            byte[] hash = this.Encoder.ComputeHash(password);
 
             this.AddHashToStore(hash);
 
             if (normalize)
             {
-                byte[] newhash = Store.Encoder.ComputeHash(StringNormalizer.Normalize(password));
+                byte[] newhash = this.Encoder.ComputeHash(StringNormalizer.Normalize(password));
 
                 if (ByteArrayComparer.Comparer.Equals(newhash, hash))
                 {
@@ -358,7 +362,7 @@ namespace StoreInterface
             hashesDiscarded += discarded;
         }
 
-        private void AddHashesToStore(IGrouping<string, byte[]> group,  ref int hashesAdded, ref int hashesDiscarded)
+        private void AddHashesToStore(IGrouping<string, byte[]> group, ref int hashesAdded, ref int hashesDiscarded)
         {
             string range = group.Key;
             HashSet<byte[]> set = new HashSet<byte[]>(group, ByteArrayComparer.Comparer);
@@ -380,7 +384,7 @@ namespace StoreInterface
                 password = StringNormalizer.Normalize(password);
             }
 
-            byte[] hash = Store.Encoder.ComputeHash(password);
+            byte[] hash = this.Encoder.ComputeHash(password);
 
             return this.IsHashInStore(hash);
         }

@@ -12,6 +12,8 @@ std::vector<std::wstring> SplitString(const std::wstring &text, const wchar_t se
 
 SecureArrayT<WCHAR> UnicodeStringToWcharArray(const UNICODE_STRING &str);
 
+SecureArrayT<WCHAR> StringToWcharArray(const LPCWSTR str);
+
 bool DirectoryExists(const std::wstring& dirName_in);
 
 template<typename T>

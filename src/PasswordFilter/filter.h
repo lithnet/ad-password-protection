@@ -12,3 +12,9 @@ extern "C" __declspec(dllexport) NTSTATUS __stdcall PasswordChangeNotify(
 	PUNICODE_STRING UserName,
 	ULONG RelativeId,
 	PUNICODE_STRING NewPassword);
+
+extern "C" __declspec(dllexport) int __stdcall PasswordFilterEx(
+	LPCWSTR AccountName,
+	LPCWSTR FullName,
+	LPCWSTR Password,
+	BOOLEAN SetOperation);

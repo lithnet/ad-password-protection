@@ -14,8 +14,8 @@ namespace StoreInterface
 
         public string StorePath { get; }
 
-        protected BinaryStore(string storeBasePath, string storeSubPath, int hashSize)
-        : base(hashSize)
+        protected BinaryStore(string storeBasePath, string storeSubPath, System.Security.Cryptography.HashAlgorithm encoder, int hashLength, int hashOffset)
+        : base(encoder, hashLength, hashOffset)
         {
             if (!Directory.Exists(storeBasePath))
             {
@@ -172,7 +172,7 @@ namespace StoreInterface
 
             long size = fileInfo.Length;
 
-            if (size % this.HashSize != 0)
+            if (size % this.StoredHashLength != 0)
             {
                 throw new DataMisalignedException($"The store file {file} was corrupted");
             }
@@ -194,7 +194,7 @@ namespace StoreInterface
             {
                 while (reader.BaseStream.Position < reader.BaseStream.Length)
                 {
-                    byte[] raw = reader.ReadBytes(this.HashSize);
+                    byte[] raw = reader.ReadBytes(this.StoredHashLength);
 
                     if (rangeBytes != null)
                     {
@@ -222,7 +222,7 @@ namespace StoreInterface
             {
                 long length = reader.BaseStream.Length;
 
-                if (length % this.HashSize != 0)
+                if (length % this.StoredHashLength != 0)
                 {
                     throw new DataMisalignedException($"The store file {file} was corrupted");
                 }
@@ -231,22 +231,22 @@ namespace StoreInterface
 
                 if (this.HashOffset > 0)
                 {
-                    toFind = new byte[this.HashSize];
-                    Buffer.BlockCopy(hash, 2, toFind, 0, this.HashSize);
+                    toFind = new byte[this.StoredHashLength];
+                    Buffer.BlockCopy(hash, 2, toFind, 0, this.StoredHashLength);
                 }
                 else
                 {
                     toFind = hash;
                 }
 
-                long lastRow = length / this.HashSize;
+                long lastRow = length / this.StoredHashLength;
 
                 while (firstRow <= lastRow)
                 {
                     long currentRow = (firstRow + lastRow) / 2;
-                    reader.BaseStream.Position = currentRow * this.HashSize;
+                    reader.BaseStream.Position = currentRow * this.StoredHashLength;
 
-                    byte[] data = reader.ReadBytes(this.HashSize);
+                    byte[] data = reader.ReadBytes(this.StoredHashLength);
 
                     int result = ByteArrayComparer.Comparer.Compare(data, toFind);
 
@@ -314,7 +314,7 @@ namespace StoreInterface
                             throw new InvalidDataException("The hash was not of the correct length");
                         }
 
-                        writer.Write(item, this.HashOffset, this.HashSize);
+                        writer.Write(item, this.HashOffset, this.StoredHashLength);
                     }
                 }
 

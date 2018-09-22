@@ -26,6 +26,18 @@ std::vector<std::wstring> SplitString(const std::wstring &text, const wchar_t se
 	return tokens;
 }
 
+SecureArrayT<WCHAR> StringToWcharArray(const LPCWSTR str)
+{
+	int charCount = wcslen(str);
+	int len = charCount + 1;
+
+	SecureArrayT<WCHAR> ar(len);
+
+	wcsncpy_s(ar.get(), len, str, charCount);
+
+	return ar;
+}
+
 SecureArrayT<WCHAR> UnicodeStringToWcharArray(const UNICODE_STRING& str)
 {
 	int charCount = str.Length / sizeof(wchar_t);

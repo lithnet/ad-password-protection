@@ -69,7 +69,7 @@ namespace StoreInterface
         private JET_TABLEID tableid;
 
         public EsentStore(string storeBasePath)
-        : base(20)
+        : base(System.Security.Cryptography.SHA1.Create(), 20, 0)
         {
             this.OpenDB(storeBasePath);
         }

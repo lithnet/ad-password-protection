@@ -10,7 +10,7 @@ namespace StoreInterface
     public class V2Store : BinaryStore
     {
         public V2Store(string storeBasePath)
-        : base(storeBasePath, "v2", 18)
+        : base(storeBasePath, "v2", SHA1.Create(), 20, 2)
         {
         }
 
