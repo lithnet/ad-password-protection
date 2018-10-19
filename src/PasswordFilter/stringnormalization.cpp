@@ -1,13 +1,7 @@
 #include "stdafx.h"
-#include <iostream>
-#include <fstream>
-#include <algorithm>
-#include <cctype>
 #include "utils.h"
 #include "stringnormalization.h"
-#include "registry.h"
 #include <cwctype>
-#include <iterator>
 #include "shlwapi.h"
 #include "SecureArrayT.h"
 
@@ -24,7 +18,7 @@ SecureArrayT<WCHAR> ToLowerInvariant(const SecureArrayT<WCHAR> &s)
 
 	SecureArrayT<WCHAR> buf(sizeRequired);
 
-	int sizeAllocated = LCMapString(LOCALE_INVARIANT, LCMAP_LOWERCASE, s.get(), -1, buf.get(), sizeRequired);
+	const int sizeAllocated = LCMapString(LOCALE_INVARIANT, LCMAP_LOWERCASE, s.get(), -1, buf.get(), sizeRequired);
 
 	if (sizeAllocated == 0)
 	{

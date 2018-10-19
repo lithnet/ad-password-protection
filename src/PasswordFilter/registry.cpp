@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "registry.h"
-#include "settings.h"
 
 registry::registry()
 {
@@ -16,8 +15,7 @@ registry::registry(std::wstring policyGroup)
 }
 
 registry::~registry()
-{
-}
+= default;
 
 std::wstring registry::GetRegValue(const std::wstring & valueName, const std::wstring & defaultValue) const
 {

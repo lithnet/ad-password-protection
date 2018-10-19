@@ -51,6 +51,8 @@ namespace Microsoft.Protocols.TestTools.StackSdk.Security.Cryptographic
                     throw new CryptographicException(Marshal.GetLastWin32Error());
                 }
             }
+
+            this.Initialize();
         }
 
 

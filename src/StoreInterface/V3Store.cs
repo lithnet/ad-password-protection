@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using Microsoft.Protocols.TestTools.StackSdk.Security.Cryptographic;
+using System.Text;
 
 namespace StoreInterface
 {
@@ -15,6 +16,11 @@ namespace StoreInterface
         {
         }
 
+        public override byte[] ComputeHash(string text)
+        {
+            return this.Encoder.ComputeHash(Encoding.Unicode.GetBytes(text));
+        }
+        
         protected override string GetRangeFromHash(string hash)
         {
             return hash.Substring(0, 4);

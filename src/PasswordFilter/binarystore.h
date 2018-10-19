@@ -13,8 +13,8 @@ private:
 	std::wstring storePath;
 
 public:
-	binarystore(std::wstring storeBasePath, std::wstring storeSubPath, int hashSize, int hashOffset);
-	~binarystore();
+	binarystore(const std::wstring& storeBasePath, const std::wstring& storeSubPath, int hashSize, int hashOffset);
+	virtual ~binarystore();
 	bool IsPasswordInStore(const SecureArrayT<WCHAR> &password);
 
 protected:
@@ -23,6 +23,6 @@ protected:
 
 private:
 	bool IsHashInStore(const SecureArrayT<BYTE> &hash);
-	std::wstring GetStoreFileName(const std::wstring &range);
-	bool IsHashInBinaryFile(const std::wstring &filename, const SecureArrayT<BYTE> &hash);
+	std::wstring GetStoreFileName(const std::wstring &range) const;
+	bool IsHashInBinaryFile(const std::wstring &filename, const SecureArrayT<BYTE> & hashBytes) const;
 };

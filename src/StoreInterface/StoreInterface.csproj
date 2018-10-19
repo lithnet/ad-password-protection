@@ -52,6 +52,7 @@
     <Compile Include="CryptoLib\MD4.cs" />
     <Compile Include="NativeMethods.cs" />
     <Compile Include="CryptoLib\MD4CryptoServiceProvider.cs" />
+    <Compile Include="PasswordTestResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Store.cs" />
     <Compile Include="StringNormalizer.cs" />

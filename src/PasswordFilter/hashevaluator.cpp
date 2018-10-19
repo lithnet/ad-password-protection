@@ -1,12 +1,8 @@
 #include "stdafx.h"
 #include "hasher.h"
-#include <fstream>
 #include "registry.h"
 #include "hashevaluator.h"
-#include "shlwapi.h"
-#include <sstream>
-#include <iostream>
-#include <sstream>
+#include "Shlwapi.h"
 #include <iomanip>
 #include "esestore.h"
 #include "v1store.h"
@@ -41,4 +37,6 @@ bool IsPasswordInStore(const SecureArrayT<WCHAR> &password)
 		v2store v2s(storePath);
 		return v2s.IsPasswordInStore(password);
 	}
+
+	return false;
 }

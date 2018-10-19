@@ -14,7 +14,7 @@ SecureArrayT<WCHAR> UnicodeStringToWcharArray(const UNICODE_STRING &str);
 
 SecureArrayT<WCHAR> StringToWcharArray(const LPCWSTR str);
 
-bool DirectoryExists(const std::wstring& dirName_in);
+bool DirectoryExists(const std::wstring& dirName);
 
 template<typename T>
 std::wstring ToHexString(T first, T last, bool use_uppercase = true, bool insert_spaces = false)

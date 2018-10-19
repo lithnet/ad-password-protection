@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "eventlog.h"
-#include "messages.h"
 #include <vector>
 
 HANDLE hlog;

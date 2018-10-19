@@ -1,13 +1,7 @@
 #include "stdafx.h"
 #include "hasher.h"
 #include <wincrypt.h>
-#include "malloc.h"
-#include <iostream>
-#include <sstream>
-#include <iomanip>
-#include <bcrypt.h>
 #include <locale>
-#include "utils.h"
 #include "SecureArrayT.h"
 
 SecureArrayT<BYTE> GetSha1HashBytes(const SecureArrayT<WCHAR> &input)

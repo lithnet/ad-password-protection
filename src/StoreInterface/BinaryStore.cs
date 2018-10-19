@@ -198,7 +198,7 @@ namespace StoreInterface
 
                     if (rangeBytes != null)
                     {
-                        byte[] hash = new byte[20];
+                        byte[] hash = new byte[this.HashLength];
                         Buffer.BlockCopy(rangeBytes, 0, hash, 0, this.HashOffset);
                         Buffer.BlockCopy(raw, 0, hash, this.HashOffset, raw.Length);
                         raw = hash;
@@ -309,7 +309,7 @@ namespace StoreInterface
                 {
                     foreach (byte[] item in hashes.OrderBy(t => t, ByteArrayComparer.Comparer))
                     {
-                        if (item.Length != 20)
+                        if (item.Length != this.HashLength)
                         {
                             throw new InvalidDataException("The hash was not of the correct length");
                         }

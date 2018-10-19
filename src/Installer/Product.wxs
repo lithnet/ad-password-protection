@@ -14,11 +14,11 @@
              Platform="x64"/>
 
     <MajorUpgrade Schedule="afterInstallExecute"
-                  DowngradeErrorMessage="A later version of [ProductName] is already installed" 
+                  DowngradeErrorMessage="A later version of [ProductName] is already installed"
                   AllowSameVersionUpgrades="yes"/>
     <Media Id="1" Cabinet="Cab1.cab" EmbedCab="yes" />
 
-    
+
     <Property Id="STOREDIR" Secure="yes">
       <RegistrySearch Id="r152002c8c7b14f7f9d56a3129a68cac3"
                       Root="HKLM"
@@ -28,28 +28,34 @@
                       Win64="yes" />
     </Property>
 
+    <Property Id="INSTALLLEVEL" Value="2" />
+
     <UI>
-      <UIRef Id="WixUI_Common" />
-      <Property Id="WixUI_Mode" Value="Custom" />
-
-      <TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8" />
-      <TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="9" Bold="yes" />
-      <TextStyle Id="WixUI_Font_Title"  FaceName="Tahoma" Size="9" Bold="yes" />
-
-      <Property Id="DefaultUIFont" Value="WixUI_Font_Normal" />
+      <UIRef Id="WixUI_FeatureTree" />
+      
       <DialogRef Id="ProgressDlg" />
       <DialogRef Id="ErrorDlg" />
       <DialogRef Id="FilesInUse" />
       <DialogRef Id="FatalError" />
       <DialogRef Id="UserExit" />
 
-      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="StoreDialog">NOT Installed</Publish>
+      <Publish Dialog="WelcomeDlg"
+               Control="Next"
+               Event="NewDialog"
+               Value="CustomizeDlg"
+               Order="2">1</Publish>
+      <Publish Dialog="CustomizeDlg"
+               Control="Back"
+               Event="NewDialog"
+               Value="WelcomeDlg"
+               Order="3">1</Publish>
 
-      <Publish Dialog="StoreDialog" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="1"></Publish>
-      <Publish Dialog="StoreDialog" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Order="1"></Publish>
+      <Publish Dialog="CustomizeDlg" Control="Next" Event="NewDialog" Value="StoreDialog" Order="1">1</Publish>
 
-      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="StoreDialog" Order="1"></Publish>
-      <Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999">1</Publish>
+      <Publish Dialog="StoreDialog" Control="Back" Event="NewDialog" Value="CustomizeDlg" Order="1">1</Publish>
+      <Publish Dialog="StoreDialog" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Order="1">1</Publish>
+
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="StoreDialog" Order="1">1</Publish>
       <Publish Dialog="WelcomeDlg" Control="Next" Event="EndDialog" Value="Return" Order="2"></Publish>
     </UI>
 
@@ -64,23 +70,31 @@
       </Directory>
     </Directory>
 
-    <Feature Id="Filter" Title="Lithnet Active Directory Password Filter" Level="1">
+    <Feature Id="Filter" Title="Lithnet Active Directory Password Filter" Level="1" AllowAdvertise="no" Display="expand" TypicalDefault="install">
+      <Feature Id="FeatureNotificationPackage" Title="Enable password filtering on this computer" Level="2" AllowAdvertise="no" TypicalDefault="install" Description="This feature registers the password filter with the Windows LSASS process, so password changes processed by this computer are evaluated by the password filter. On domain controllers, this means user password changes are processed by the filter. On workstations and member services, this only impacts passwords set for local users">
+        <ComponentRef Id="cmp6339c3e064764797a0b4d747e655cb0e"/>
+      </Feature>
+      <!--<Feature Id="FeatureDLL" Title="Password filter DLL" Level="1" AllowAdvertise="no"  TypicalDefault="install">
+      </Feature>-->
       <ComponentGroupRef Id="FilterDLL" />
+
     </Feature>
 
     <DirectoryRef Id="System64Folder">
       <Component Id="cmpa437d95c32f74a17b1b7537b38cd382a" Win64="yes" Guid="*">
         <File Id="fil8af462b935f3462f99441454d9154d51" KeyPath="yes" Source="$(var.PasswordFilter.TargetPath)" />
       </Component>
+
       <Component Id="cmp6339c3e064764797a0b4d747e655cb0e" Guid="*">
         <RegistryKey Root="HKLM"
                      Key="System\CurrentControlSet\Control\Lsa">
           <RegistryValue Type="multiString" Action="append" Name="Notification Packages" Value="lithnetpwdf"/>
         </RegistryKey>
       </Component>
+
       <Component Id="cmp35ae4dbf6f7143f39ff05a2bbe7b4abf" Guid="*">
         <RegistryKey Root="HKLM"
-                     Key="Software\Lithnet\PasswordFilter" 
+                     Key="Software\Lithnet\PasswordFilter"
                      ForceDeleteOnUninstall="yes">
           <RegistryValue Type="integer" Action="write" Name="Disabled" Value="0"/>
           <RegistryValue Type="string" Action="write" Name="Store" Value="[STOREDIR]"/>
@@ -99,9 +113,12 @@
       </Component>
     </DirectoryRef>
 
+    <ComponentGroup Id="NotificationPackage">
+      <ComponentRef Id="cmp6339c3e064764797a0b4d747e655cb0e"/>
+    </ComponentGroup>
+
     <ComponentGroup Id="FilterDLL">
       <ComponentRef Id="cmpa437d95c32f74a17b1b7537b38cd382a"/>
-      <ComponentRef Id="cmp6339c3e064764797a0b4d747e655cb0e"/>
       <ComponentRef Id="cmp35ae4dbf6f7143f39ff05a2bbe7b4abf"/>
       <ComponentRef Id="cmpbdb687be91364145aa7b44287c14be38"/>
       <ComponentRef Id="cmp3d41c57e8c89436994a394bf0b01c885"/>

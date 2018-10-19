@@ -1,11 +1,5 @@
-﻿#include "utils.h"
-#include "stdafx.h"
-#include "filter.h"
-#include "registry.h"
-#include <iostream>
-#include "eventlog.h"
-#include "messages.h"
-#include "esestore.h"
+﻿#include "stdafx.h"
+#include "utils.h"
 #include <vector>
 #include "SecureArrayT.h"
 
@@ -28,8 +22,8 @@ std::vector<std::wstring> SplitString(const std::wstring &text, const wchar_t se
 
 SecureArrayT<WCHAR> StringToWcharArray(const LPCWSTR str)
 {
-	int charCount = wcslen(str);
-	int len = charCount + 1;
+	const int charCount = wcslen(str);
+	const int len = charCount + 1;
 
 	SecureArrayT<WCHAR> ar(len);
 
@@ -40,8 +34,8 @@ SecureArrayT<WCHAR> StringToWcharArray(const LPCWSTR str)
 
 SecureArrayT<WCHAR> UnicodeStringToWcharArray(const UNICODE_STRING& str)
 {
-	int charCount = str.Length / sizeof(wchar_t);
-	int len = charCount + 1;
+	const int charCount = str.Length / sizeof(wchar_t);
+	const int len = charCount + 1;
 
 	SecureArrayT<WCHAR> ar (len);
 
@@ -50,19 +44,14 @@ SecureArrayT<WCHAR> UnicodeStringToWcharArray(const UNICODE_STRING& str)
 	return ar;
 }
 
-bool DirectoryExists(const std::wstring& dirName_in)
+bool DirectoryExists(const std::wstring& dirName)
 {
-	DWORD attributes = GetFileAttributes(dirName_in.c_str());
+	const DWORD attributes = GetFileAttributes(dirName.c_str());
 
 	if (attributes == INVALID_FILE_ATTRIBUTES)
 	{
 		return false;
 	}
 
-	if (attributes & FILE_ATTRIBUTE_DIRECTORY)
-	{
-		return true;  
-	}
-
-	return false;
+	return (attributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
 }

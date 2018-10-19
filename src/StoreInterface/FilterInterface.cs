@@ -8,7 +8,7 @@ namespace StoreInterface
 {
     public static class FilterInterface
     {
-        public static int TestPassword(string username, string fullname, string password, bool isSetOperation)
+        public static PasswordTestResult TestPassword(string username, string fullname, string password, bool isSetOperation)
         {
             return NativeMethods.TestPassword(username, fullname, password, isSetOperation);
         }

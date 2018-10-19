@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace StoreInterface
 {
@@ -13,7 +14,12 @@ namespace StoreInterface
         : base(storeBasePath, "v1", SHA1.Create(), 20, 0)
         {
         }
-        
+
+        public override byte[] ComputeHash(string text)
+        {
+            return this.Encoder.ComputeHash(Encoding.UTF8.GetBytes(text));
+        }
+
         protected override string GetRangeFromHash(string hash)
         {
             return hash.Substring(0, 5);

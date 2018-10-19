@@ -9,18 +9,7 @@ namespace StoreInterface
 {
     public static class Extensions
     {
-        public static byte[] ComputeHash(this HashAlgorithm hash, string text)
-        {
-            return hash.ComputeHash(Encoding.UTF8.GetBytes(text));
-        }
-
-        public static string ComputeHashString(this HashAlgorithm hash, string text)
-        {
-            return hash.ComputeHash(text).GetHexString();
-        }
-
-
-        public static string GetHexString(this byte[] hash)
+       public static string GetHexString(this byte[] hash)
         {
             return hash.GetHexString(0, hash.Length);
         }
@@ -37,16 +26,18 @@ namespace StoreInterface
             return sb.ToString();
         }
 
-        public static byte[] GetSha1HashBytes(this string hexHash)
+        public static byte[] HexStringToBytes(this string hexHash)
         {
-            if (hexHash.Length != 40)
+            if (hexHash.Length % 2 != 0)
             {
-                throw new ArgumentException("The value supplied must be a 40-character long hexadecimal representation of a SHA1 hash");
+                throw new ArgumentException($"The value supplied must be a hexadecimal representation of the hash");
             }
 
-            byte[] hash = new byte[20];
+            int binaryLength = hexHash.Length / 2;
 
-            for (int i = 0; i < 20; i++)
+            byte[] hash = new byte[binaryLength];
+
+            for (int i = 0; i < binaryLength; i++)
             {
                 hash[i] = Convert.ToByte(hexHash.Substring((i * 2), 2), 16);
             }

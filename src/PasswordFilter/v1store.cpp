@@ -9,8 +9,7 @@ v1store::v1store(const std::wstring &basePath)
 }
 
 v1store::~v1store()
-{
-}
+= default;
 
 std::wstring v1store::GetRangeFromHash(const SecureArrayT<BYTE> &hash)
 {

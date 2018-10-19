@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.Isam.Esent.Interop;
 using System.IO;
+using System.Text;
 
 namespace StoreInterface
 {
@@ -142,6 +143,11 @@ namespace StoreInterface
         ~EsentStore()
         {
             this.ReleaseUnmanagedResources();
+        }
+
+        public override byte[] ComputeHash(string text)
+        {
+            return this.Encoder.ComputeHash(Encoding.UTF8.GetBytes(text));
         }
 
         protected override string GetRangeFromHash(string hash)

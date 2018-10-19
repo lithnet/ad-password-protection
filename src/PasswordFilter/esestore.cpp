@@ -114,6 +114,7 @@ esestore::esestore()
 	}
 
 	columnid = column->columnid;
+	closed = false;
 }
 
 bool esestore::IsHashInDb(const SecureArrayT<BYTE> &hash) const

@@ -7,8 +7,7 @@
 #include "hashevaluator.h"
 #include "passwordevaluator.h"
 #include <regex>
-#include <cwctype>
-#include <shlwapi.h>
+#include <Shlwapi.h>
 #include "utils.h"
 #include "complexityevaluator.h"
 
@@ -16,7 +15,7 @@ int ProcessPassword(const SecureArrayT<WCHAR> &password, const std::wstring &acc
 {
 	eventlog::getInstance().logw(EVENTLOG_INFORMATION_TYPE, MSG_PROCESSING_REQUEST, 3, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
 
-	registry reg = registry::GetRegistryForUser(accountName);
+	const registry reg = registry::GetRegistryForUser(accountName);
 
 	if (!ProcessPasswordLength(password, accountName, fullName, setOperation, reg))
 	{

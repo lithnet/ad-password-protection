@@ -9,12 +9,12 @@ namespace StoreInterface
 {
     internal static class NativeMethods
     {
-        [DllImport("D:\\github\\lithnet\\ad-password-filter\\src\\x64\\Debug\\lithnetpwdf.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
+        [DllImport("lithnetpwdf.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode)]
         private static extern int PasswordFilterEx(string accountName, string fullName, string password, bool isSetOperation);
 
-        public static int TestPassword(string accountName, string fullName, string password, bool isSetOperation)
+        public static PasswordTestResult TestPassword(string accountName, string fullName, string password, bool isSetOperation)
         {
-            return PasswordFilterEx(accountName, fullName, password, isSetOperation);
+            return (PasswordTestResult)PasswordFilterEx(accountName, fullName, password, isSetOperation);
         }
     }
 }

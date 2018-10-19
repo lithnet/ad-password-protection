@@ -1,18 +1,15 @@
 #include "stdafx.h"
 #include "binarystore.h"
 #include <fstream>
-#include "registry.h"
-#include "shlwapi.h"
+#include "Shlwapi.h"
 #include <sstream>
-#include "hasher.h"
-#include <iostream>
 #include <sstream>
 #include <iomanip>
 #include "utils.h"
 #include <atlconv.h>
 #include "SecureArrayT.h"
 
-binarystore::binarystore(std::wstring storeBasePath, std::wstring storeSubPath, int hashSize, int hashOffset)
+binarystore::binarystore(const std::wstring& storeBasePath, const std::wstring& storeSubPath, int hashSize, int hashOffset)
 {
 	this->hashSize = hashSize;
 	this->storeSubPath = storeSubPath;
@@ -42,8 +39,7 @@ binarystore::binarystore(std::wstring storeBasePath, std::wstring storeSubPath, 
 }
 
 binarystore::~binarystore()
-{
-}
+= default;
 
 bool binarystore::IsPasswordInStore(const SecureArrayT<WCHAR> &password)
 {
@@ -65,7 +61,7 @@ bool binarystore::IsHashInStore(const SecureArrayT<BYTE> &hash)
 	return IsHashInBinaryFile(path, hash);
 }
 
-std::wstring binarystore::GetStoreFileName(const std::wstring &range)
+std::wstring binarystore::GetStoreFileName(const std::wstring &range) const
 {
 	std::wstring path = this->storePath;
 	path += range;
@@ -73,7 +69,7 @@ std::wstring binarystore::GetStoreFileName(const std::wstring &range)
 	return path;
 }
 
-bool binarystore::IsHashInBinaryFile(const std::wstring &filename, const SecureArrayT<BYTE> &hashBytes)
+bool binarystore::IsHashInBinaryFile(const std::wstring &filename, const SecureArrayT<BYTE> &hashBytes) const
 {
 	std::ifstream file(filename, std::ios::binary | std::ios::ate | std::ios::in);
 

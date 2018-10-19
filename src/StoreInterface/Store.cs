@@ -58,7 +58,7 @@ namespace StoreInterface
 
                 if (addExact)
                 {
-                    hash = store.Encoder.ComputeHash(line);
+                    hash = store.ComputeHash(line);
 
                     if (hashes.Add(hash))
                     {
@@ -71,7 +71,7 @@ namespace StoreInterface
                     string normalized = StringNormalizer.Normalize(line);
                     if (!string.IsNullOrEmpty(normalized))
                     {
-                        byte[] newhash = store.Encoder.ComputeHash(normalized);
+                        byte[] newhash = store.ComputeHash(normalized);
 
                         if (!ByteArrayComparer.Comparer.Equals(newhash, hash))
                         {
@@ -118,6 +118,8 @@ namespace StoreInterface
             Trace.WriteLine("Done");
         }
 
+        public abstract byte[] ComputeHash(string text);
+
         public static void ImportHexHashesFromSortedFile(Store store, string sourceFile)
         {
             string lastRange = null;
@@ -131,7 +133,7 @@ namespace StoreInterface
 
             Trace.WriteLine($"Loading hexadecimal hashes from {sourceFile}");
 
-            foreach (byte[] hash in Store.GetHexHashesFromFile(sourceFile))
+            foreach (byte[] hash in Store.GetHexHashesFromFile(sourceFile, store.HashLength))
             {
                 totalProcessed++;
 
@@ -224,7 +226,7 @@ namespace StoreInterface
 
             HashSet<byte[]> hashes = new HashSet<byte[]>(ByteArrayComparer.Comparer);
 
-            foreach (byte[] hash in Store.GetHexHashesFromFile(sourceFile))
+            foreach (byte[] hash in Store.GetHexHashesFromFile(sourceFile, store.HashLength))
             {
                 totalProcessed++;
 
@@ -264,22 +266,24 @@ namespace StoreInterface
             Trace.WriteLine("Done");
         }
 
-        private static IEnumerable<byte[]> GetHexHashesFromFile(string sourceFile)
+        private static IEnumerable<byte[]> GetHexHashesFromFile(string sourceFile, int hashBinaryLength)
         {
             if (!File.Exists(sourceFile))
             {
                 throw new FileNotFoundException("The source file was not found", sourceFile);
             }
 
+            int hashStringLength = hashBinaryLength * 2;
+
             foreach (string line in Store.GetLinesFromFile(sourceFile))
             {
-                if (line.Length < 40)
+                if (line.Length < hashStringLength)
                 {
                     // not a SHA1 hash
                     continue;
                 }
 
-                yield return line.Substring(0, 40).GetSha1HashBytes();
+                yield return line.Substring(0, hashStringLength).HexStringToBytes();
             }
         }
 
@@ -315,13 +319,13 @@ namespace StoreInterface
 
         public void AddPasswordToStore(string password, bool normalize)
         {
-            byte[] hash = this.Encoder.ComputeHash(password);
+            byte[] hash = this.ComputeHash(password);
 
             this.AddHashToStore(hash);
 
             if (normalize)
             {
-                byte[] newhash = this.Encoder.ComputeHash(StringNormalizer.Normalize(password));
+                byte[] newhash = this.ComputeHash(StringNormalizer.Normalize(password));
 
                 if (ByteArrayComparer.Comparer.Equals(newhash, hash))
                 {
@@ -384,7 +388,7 @@ namespace StoreInterface
                 password = StringNormalizer.Normalize(password);
             }
 
-            byte[] hash = this.Encoder.ComputeHash(password);
+            byte[] hash = this.ComputeHash(password);
 
             return this.IsHashInStore(hash);
         }

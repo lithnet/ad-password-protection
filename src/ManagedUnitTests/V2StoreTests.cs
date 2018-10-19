@@ -9,7 +9,7 @@ using System.Linq;
 namespace ManagedUnitTests
 {
     [TestClass]
-    public class V2StoreTests : BinaryStoreTests
+    public class V2StoreTests : Sha1StoreTests
     {
         public V2StoreTests()
         {

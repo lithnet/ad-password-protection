@@ -51,6 +51,7 @@
     <Reference Include="System.DirectoryServices.AccountManagement" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Sha1StoreTests.cs" />
     <Compile Include="EseStoreTests.cs" />
     <Compile Include="LsassTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -59,6 +60,7 @@
     <Compile Include="FilterTests.cs" />
     <Compile Include="V1StoreTests.cs" />
     <Compile Include="BinaryStoreTests.cs" />
+    <Compile Include="V3StoreTests.cs" />
     <Compile Include="V2StoreTests.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,14 +1,10 @@
 #include "stdafx.h"
-#include "hasher.h"
 #include "filter.h"
 #include "utils.h"
-#include "hashevaluator.h"
 #include "registry.h"
 #include "eventlog.h"
 #include "messages.h"
 #include "passwordevaluator.h"
-#include "esestore.h"
-#include <cstring>
 #include "SecureArrayT.h"
 
 extern "C" __declspec(dllexport)  BOOLEAN __stdcall InitializeChangeNotify(void)

@@ -9,7 +9,7 @@ public:
 		static esestore instance; 
 		if (instance.closed)
 		{
-			static esestore instance;
+			esestore instance;
 		}
 
 		return instance;

@@ -28,7 +28,7 @@ namespace ManagedUnitTests
         public void TestAddHashToStore()
         {
             string hash = "000000005AD76BD555C1D6D771DE417A4B87E4B4";
-            byte[] hashBytes = hash.GetSha1HashBytes();
+            byte[] hashBytes = hash.HexStringToBytes();
             Assert.IsFalse(this.store.IsHashInStore(hashBytes));
             this.store.AddHashToStore(hashBytes);
             Assert.IsTrue(this.store.IsHashInStore(hashBytes));
@@ -50,21 +50,21 @@ namespace ManagedUnitTests
                 "000000000000000000000000000000000000000A",
             };
 
-            List<byte[]> hashBytes = hashes.Select(t => t.GetSha1HashBytes()).ToList();
+            List<byte[]> hashBytes = hashes.Select(t => t.HexStringToBytes()).ToList();
             int added = 0;
             int discarded = 0;
 
             this.store.AddHashesToStore(
-                new HashSet<byte[]>(hashBytes, new ByteArrayComparer()), 
-                ref added, 
+                new HashSet<byte[]>(hashBytes, new ByteArrayComparer()),
+                ref added,
                 ref discarded);
 
             foreach (string hash in hashes)
             {
-                Assert.IsTrue(this.store.IsHashInStore(hash.GetSha1HashBytes()));
+                Assert.IsTrue(this.store.IsHashInStore(hash.HexStringToBytes()));
             }
 
-            Assert.IsFalse(this.store.IsHashInStore("000000000000000000000000000000000000000B".GetSha1HashBytes()));
+            Assert.IsFalse(this.store.IsHashInStore("000000000000000000000000000000000000000B".HexStringToBytes()));
         }
     }
 }
