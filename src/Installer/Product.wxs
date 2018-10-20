@@ -71,7 +71,7 @@
     </Directory>
 
     <Feature Id="Filter" Title="Lithnet Active Directory Password Filter" Level="1" AllowAdvertise="no" Display="expand" TypicalDefault="install">
-      <Feature Id="FeatureNotificationPackage" Title="Enable password filtering on this computer" Level="2" AllowAdvertise="no" TypicalDefault="install" Description="This feature registers the password filter with the Windows LSASS process, so password changes processed by this computer are evaluated by the password filter. On domain controllers, this means user password changes are processed by the filter. On workstations and member services, this only impacts passwords set for local users">
+      <Feature Id="FeatureNotificationPackage" Title="Enable password filtering on this computer" Level="2" AllowAdvertise="no" TypicalDefault="install" Description="This feature registers the password filter with the Windows LSASS process. On domain controllers, this means all user password changes are processed by the filter. On workstations and member services, this only impacts passwords set for local users">
         <ComponentRef Id="cmp6339c3e064764797a0b4d747e655cb0e"/>
       </Feature>
       <!--<Feature Id="FeatureDLL" Title="Password filter DLL" Level="1" AllowAdvertise="no"  TypicalDefault="install">
@@ -111,6 +111,10 @@
         <Util:EventSource xmlns:Util="http://schemas.microsoft.com/wix/UtilExtension"
                           Name="LithnetPasswordFilter" Log="Application" EventMessageFile="[APPROOTDIR]messages.dll" SupportsErrors="yes" SupportsInformationals="yes" SupportsWarnings="yes" KeyPath="yes"/>
       </Component>
+
+      <Component Id="cmp5aebe5a182914904ad6fe7ced1dfc5d6" Guid="*" Win64="yes" >
+          <File Id="fil0094ab6a8db643d2b6bcd01c42b88ca1" KeyPath="yes" Source="$(var.StoreInterface.TargetDir)StoreInterface.dll" />
+      </Component>
     </DirectoryRef>
 
     <ComponentGroup Id="NotificationPackage">
@@ -121,6 +125,7 @@
       <ComponentRef Id="cmpa437d95c32f74a17b1b7537b38cd382a"/>
       <ComponentRef Id="cmp35ae4dbf6f7143f39ff05a2bbe7b4abf"/>
       <ComponentRef Id="cmpbdb687be91364145aa7b44287c14be38"/>
+      <ComponentRef Id="cmp5aebe5a182914904ad6fe7ced1dfc5d6"/>
       <ComponentRef Id="cmp3d41c57e8c89436994a394bf0b01c885"/>
     </ComponentGroup>
   </Product>
