@@ -13,7 +13,7 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace NativeUnitTests
 {
-	TEST_CLASS(Storev2Tests)
+	TEST_CLASS(Storev3Tests)
 	{
 		registry reg;
 
@@ -107,7 +107,7 @@ namespace NativeUnitTests
 
 		TEST_CLASS_INITIALIZE(Initialize)
 		{
-			SetValue(L"HashCheckMode", 2);
+			SetValue(L"HashCheckMode", 3);
 		}
 	};
 }

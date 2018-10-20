@@ -101,7 +101,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <AdditionalLibraryDirectories>$(SolutionDir)PasswordFilter\$(Platform)\$(Configuration);$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ntdll.lib;advapi32.lib;Rpcrt4.lib;shlwapi.lib;esent.lib;v1store.obj;v2store.obj;binarystore.obj;registry.obj;passwordevaluator.obj;complexityevaluator.obj;eventlog.obj;hashevaluator.obj;esestore.obj;hasher.obj;utils.obj;stringnormalization.obj;filter.obj;stdafx.obj;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ntdll.lib;advapi32.lib;Rpcrt4.lib;shlwapi.lib;esent.lib;authz.lib;v3store.obj;groups.obj;binarystore.obj;registry.obj;passwordevaluator.obj;complexityevaluator.obj;eventlog.obj;hashevaluator.obj;hasher.obj;utils.obj;stringnormalization.obj;filter.obj;stdafx.obj;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -161,6 +161,7 @@
     <ClInclude Include="TestUtils.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="GroupLookupTests.cpp" />
     <ClCompile Include="HashTests.cpp" />
     <ClCompile Include="PasswordEvaluatorComplexityPointsTests.cpp" />
     <ClCompile Include="PasswordEvaluatorComplexityThresholdTests.cpp" />
@@ -173,13 +174,11 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="StoreEseTests.cpp" />
     <ClCompile Include="StorePerformanceTests.cpp" />
-    <ClCompile Include="Storev1Tests.cpp" />
-    <ClCompile Include="Storev2Tests.cpp" />
     <ClCompile Include="StringNormalizationTests.cpp" />
     <ClCompile Include="FilterTests.cpp" />
     <ClCompile Include="TestUtils.cpp" />
+    <ClCompile Include="v3StoreTests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PasswordFilter\PasswordFilter.vcxproj">

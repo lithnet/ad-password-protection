@@ -56,16 +56,13 @@
     <ClCompile Include="StorePerformanceTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="StoreEseTests.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Storev1Tests.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Storev2Tests.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="HashTests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="v3StoreTests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GroupLookupTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

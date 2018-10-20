@@ -55,5 +55,10 @@
     <Compile Include="BinaryStore.cs" />
     <Compile Include="V3Store.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="PolicyDefinitions\en-US\lithnet.activedirectory.passwordfilter.adml" />
+    <None Include="PolicyDefinitions\lithnet.activedirectory.passwordfilter.admx" />
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
