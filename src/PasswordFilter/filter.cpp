@@ -133,7 +133,6 @@ extern "C" __declspec(dllexport) int __stdcall PasswordFilterEx(
 
 		std::wstring accountName = AccountName;
 		std::wstring fullName = FullName;
-		WCHAR* pwd;
 
 		SecureArrayT<WCHAR> password = StringToWcharArray(Password);
 

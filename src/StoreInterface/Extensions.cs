@@ -9,12 +9,12 @@ namespace StoreInterface
 {
     public static class Extensions
     {
-       public static string GetHexString(this byte[] hash)
+       public static string ToHexString(this byte[] hash)
         {
-            return hash.GetHexString(0, hash.Length);
+            return hash.ToHexString(0, hash.Length);
         }
 
-        public static string GetHexString(this byte[] hash, int offset, int count)
+        public static string ToHexString(this byte[] hash, int offset, int count)
         {
             StringBuilder sb = new StringBuilder(hash.Length * 2);
 

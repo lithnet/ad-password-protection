@@ -204,7 +204,10 @@ namespace ManagedUnitTests
         {
             int add = 0;
             int del = 0;
-            this.Store.ConsolidateAndSort(ref add, ref del);
+
+            string path = Path.Combine(TestHelpers.TestStorePath, "merged");
+            var target = new V3Store(path);
+            target.ConsolidateAndSort(ref add, ref del);
         }
 
         [TestMethod]
@@ -381,7 +384,7 @@ namespace ManagedUnitTests
             Assert.AreEqual(0, discarded);
             Assert.AreEqual(hashes.Length, added);
 
-            CollectionAssert.AreEqual(hashes.OrderBy(t => t).ToList(), this.Store.GetHashesFromStore(this.GetPrefixFromHash("00000")).Select(t => t.GetHexString()).ToList());
+            CollectionAssert.AreEqual(hashes.OrderBy(t => t).ToList(), this.Store.GetHashesFromStore(this.GetPrefixFromHash("00000")).Select(t => t.ToHexString()).ToList());
         }
 
         [TestMethod]
@@ -411,7 +414,7 @@ namespace ManagedUnitTests
             Assert.AreEqual(0, discarded);
             Assert.AreEqual(hashes.Length, added);
 
-            CollectionAssert.AreEqual(hashes.OrderBy(t => t).ToList(), this.Store.GetHashesFromStore(this.GetPrefixFromHash("00000")).Select(t => t.GetHexString()).ToList());
+            CollectionAssert.AreEqual(hashes.OrderBy(t => t).ToList(), this.Store.GetHashesFromStore(this.GetPrefixFromHash("00000")).Select(t => t.ToHexString()).ToList());
 
             this.Store.AddHashToStore("00000000000000000000000000000006".HexStringToBytes());
             this.Store.AddHashToStore("00000000000000000000000000000007".HexStringToBytes());
@@ -433,7 +436,7 @@ namespace ManagedUnitTests
                 "0000000000000000000000000000000C",
             };
 
-            CollectionAssert.AreEqual(expectedHashes, this.Store.GetHashesFromStore(this.GetPrefixFromHash("00000")).Select(t => t.GetHexString()).ToList());
+            CollectionAssert.AreEqual(expectedHashes, this.Store.GetHashesFromStore(this.GetPrefixFromHash("00000")).Select(t => t.ToHexString()).ToList());
         }
     }
 }

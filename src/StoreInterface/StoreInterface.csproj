@@ -45,7 +45,6 @@
   <ItemGroup>
     <Compile Include="ByteArrayComparer.cs" />
     <Compile Include="CryptoLib\NativeMethods.cs" />
-    <Compile Include="EsentStore.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="FilterInterface.cs" />
     <Compile Include="IStore.cs" />
@@ -58,8 +57,6 @@
     <Compile Include="StringNormalizer.cs" />
     <Compile Include="BinaryStore.cs" />
     <Compile Include="V3Store.cs" />
-    <Compile Include="V2Store.cs" />
-    <Compile Include="V1Store.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

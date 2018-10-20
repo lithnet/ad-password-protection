@@ -28,7 +28,7 @@ namespace StoreInterface
 
         protected override string GetRangeFromHash(byte[] hash)
         {
-            return hash.GetHexString(0, 2);
+            return hash.ToHexString(0, 2);
         }
     }
 }
