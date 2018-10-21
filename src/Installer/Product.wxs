@@ -32,7 +32,7 @@
 
     <UI>
       <UIRef Id="WixUI_FeatureTree" />
-      
+
       <DialogRef Id="ProgressDlg" />
       <DialogRef Id="ErrorDlg" />
       <DialogRef Id="FilesInUse" />
@@ -60,11 +60,21 @@
     </UI>
 
     <Directory Id="TARGETDIR" Name="SourceDir">
-      <Directory Id="System64Folder" Name="System64Folder" />
-      <Directory Id="ProgramFiles64Folder" >
-        <Directory Id="LITHNETROOTDIR" Name="Lithnet">
-          <Directory Id="APPROOTDIR" Name="Active Directory Password Filter">
-            <Directory Id="STOREDIR" Name="Store"/>
+      <Directory Id="System64Folder" Name="System64Folder" >
+        <Directory Id="PSROOT" Name="WindowsPowerShell">
+          <Directory Id="PSV1ROOT" Name ="v1.0">
+            <Directory Id ="PSMODULESROOT" Name="Modules">
+              <Directory Id="PSMODULEFOLDER" Name="PasswordFilterPS">
+                <Directory Id="ENUSHELPFOLDER" Name="en-us"/>
+              </Directory>
+            </Directory>
+          </Directory>
+        </Directory>
+        <Directory Id="ProgramFiles64Folder" >
+          <Directory Id="LITHNETROOTDIR" Name="Lithnet">
+            <Directory Id="APPROOTDIR" Name="Active Directory Password Filter">
+              <Directory Id="STOREDIR" Name="Store"/>
+            </Directory>
           </Directory>
         </Directory>
       </Directory>
@@ -74,8 +84,9 @@
       <Feature Id="FeatureNotificationPackage" Title="Enable password filtering on this computer" Level="2" AllowAdvertise="no" TypicalDefault="install" Description="This feature registers the password filter with the Windows LSASS process. On domain controllers, this means all user password changes are processed by the filter. On workstations and member services, this only impacts passwords set for local users">
         <ComponentRef Id="cmp6339c3e064764797a0b4d747e655cb0e"/>
       </Feature>
-      <!--<Feature Id="FeatureDLL" Title="Password filter DLL" Level="1" AllowAdvertise="no"  TypicalDefault="install">
-      </Feature>-->
+      <Feature Id="FeaturePSModule" Title="PowerShell module" Level="2" AllowAdvertise="no" TypicalDefault="install" Description="Installs the PowerShell module on this computer which allows you to manage the password store and test passwords">
+        <ComponentGroupRef Id="PSModule"/>
+      </Feature>
       <ComponentGroupRef Id="FilterDLL" />
 
     </Feature>
@@ -113,9 +124,36 @@
       </Component>
 
       <Component Id="cmp5aebe5a182914904ad6fe7ced1dfc5d6" Guid="*" Win64="yes" >
-          <File Id="fil0094ab6a8db643d2b6bcd01c42b88ca1" KeyPath="yes" Source="$(var.StoreInterface.TargetDir)StoreInterface.dll" />
+        <File Id="fil0094ab6a8db643d2b6bcd01c42b88ca1" KeyPath="yes" Source="$(var.StoreInterface.TargetDir)StoreInterface.dll" />
       </Component>
     </DirectoryRef>
+
+    <DirectoryRef Id="PSMODULEFOLDER">
+      <Component Id="cmp7204cbc85cbc4d3faa2cfcb4907fa761" Guid="*">
+        <File Id="fil650e290b77764952889587db5d4d020d" KeyPath="yes" Source="$(var.PasswordFilterPS.TargetDir)\PasswordFilterPS.dll" />
+      </Component>
+      <Component Id="cmp5b3dadeab922498faa0fbf7ee16f954b" Guid="*">
+        <File Id="fil76e935b6b7f440508759f53a80340367" KeyPath="yes" Source="$(var.PasswordFilterPS.TargetDir)\PasswordFilterPS.pdb" />
+      </Component>
+      <Component Id="cmp8fd1ec557ac5456aa990cfc6992d7054" Guid="*">
+        <File Id="fil21165ac6460349989add43fe3ecc4e39" KeyPath="yes" Source="$(var.PasswordFilterPS.TargetDir)\PasswordFilterPS.psd1" />
+      </Component>
+      <Component Id="cmp1fd70d1ed9384b2089e7419192ca41f7" Guid="*">
+        <File Id="filedb8d7c74f7f44bdb56b64fe3742eca1" KeyPath="yes" Source="$(var.PasswordFilterPS.TargetDir)\StoreInterface.dll" />
+      </Component>
+      <!--<Directory Id="dir8459fd46db3f4caf9bc3123af22f87a3" Name="en-us">
+        <Component Id="cmp413ea4412fee4931a3d7b34e97f04b87" Guid="*">
+          <File Id="filfdba194a56e5425681d7f54895170698" KeyPath="yes" Source="$(var.PasswordFilterPS.TargetDir)\en-us\PasswordFilterPS-help.xml" />
+        </Component>
+      </Directory>-->
+    </DirectoryRef>
+
+    <ComponentGroup Id="PSModule">
+      <ComponentRef Id="cmp7204cbc85cbc4d3faa2cfcb4907fa761"/>
+      <ComponentRef Id="cmp5b3dadeab922498faa0fbf7ee16f954b"/>
+      <ComponentRef Id="cmp8fd1ec557ac5456aa990cfc6992d7054"/>
+      <ComponentRef Id="cmp1fd70d1ed9384b2089e7419192ca41f7"/>
+    </ComponentGroup>
 
     <ComponentGroup Id="NotificationPackage">
       <ComponentRef Id="cmp6339c3e064764797a0b4d747e655cb0e"/>

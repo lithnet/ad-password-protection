@@ -7,8 +7,8 @@ using System.Management.Automation;
 
 namespace PasswordFilterPS
 {
-    [Cmdlet(VerbsData.Import, "HashesToPasswordStore")]
-    public class ImportHashesToPasswordStore : Cmdlet
+    [Cmdlet(VerbsData.Import, "BannedWordHashes")]
+    public class ImportBannedWordHashes : Cmdlet
     {
         [Parameter(Mandatory = true, Position = 1, ValueFromPipeline = true), ValidateNotNullOrEmpty]
         public string Filename { get; set; }
@@ -37,11 +37,11 @@ namespace PasswordFilterPS
         {
             if (this.Sorted)
             {
-                StoreInterface.Store.ImportHexHashesFromSortedFile(Global.Store, StoreInterface.StoreType.Password, this.Filename, this.progress);
+                StoreInterface.Store.ImportHexHashesFromSortedFile(Global.Store, StoreInterface.StoreType.Word, this.Filename, this.progress);
             }
             else
             {
-                StoreInterface.Store.ImportHexHashesFromFile(Global.Store, StoreInterface.StoreType.Password, this.Filename, progress: this.progress);
+                StoreInterface.Store.ImportHexHashesFromFile(Global.Store, StoreInterface.StoreType.Word, this.Filename, progress: this.progress);
 
             }
         }

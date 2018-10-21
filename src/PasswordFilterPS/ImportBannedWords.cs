@@ -7,11 +7,13 @@ using System.Management.Automation;
 
 namespace PasswordFilterPS
 {
-    [Cmdlet(VerbsCommon.Add, "ValueToWordStore")]
-    public class AddValueToWordStore : Cmdlet
+    [Cmdlet(VerbsData.Import, "BannedWords")]
+    public class ImportBannedWords : Cmdlet
     {
         [Parameter(Mandatory = true, Position = 1, ValueFromPipeline = true), ValidateNotNullOrEmpty]
-        public string Value { get; set; }
+        public string Filename { get; set; }
+
+        [Parameter(Mandatory = false, Position = 2)]
 
         private StoreInterface.OperationProgress progress;
 
@@ -19,20 +21,17 @@ namespace PasswordFilterPS
         {
             Global.OpenExistingDefaultOrThrow();
             this.progress = new StoreInterface.OperationProgress();
-
-            Global.Store.StartBatch(StoreInterface.StoreType.Word);
             base.BeginProcessing();
         }
 
         protected override void EndProcessing()
         {
-            Global.Store.EndBatch(StoreInterface.StoreType.Word, this.progress);
             base.EndProcessing();
         }
 
         protected override void ProcessRecord()
         {
-            Global.Store.AddToStore(this.Value, StoreInterface.StoreType.Word);
+            StoreInterface.Store.ImportPasswordsFromFile(Global.Store, StoreInterface.StoreType.Word, this.Filename, progress: this.progress);
         }
     }
 }

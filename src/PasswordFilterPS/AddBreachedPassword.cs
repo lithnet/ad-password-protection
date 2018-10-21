@@ -7,8 +7,8 @@ using System.Management.Automation;
 
 namespace PasswordFilterPS
 {
-    [Cmdlet(VerbsCommon.Add, "ValueToPasswordStore")]
-    public class AddValueToPasswordStore : Cmdlet
+    [Cmdlet(VerbsCommon.Add, "BreachedPassword")]
+    public class AddBreachedPassword : Cmdlet
     {
         [Parameter(Mandatory = true, Position = 1, ValueFromPipeline = true), ValidateNotNullOrEmpty]
         public string Password { get; set; }
