@@ -2,8 +2,7 @@
 #include "binarystore.h"
 #include "SecureArrayT.h"
 
-class v3store :
-	public binarystore
+class v3store : public binarystore
 {
 protected:
 	std::wstring GetRangeFromHash(const SecureArrayT<BYTE> &hash) override;

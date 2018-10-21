@@ -20,18 +20,18 @@ namespace ManagedUnitTests
         public void TestAddPasswordToStore()
         {
             string password = "password";
-            Assert.IsFalse(this.store.IsPasswordInStore(password));
-            this.store.AddPasswordToStore(password, false);
-            Assert.IsTrue(this.store.IsPasswordInStore(password));
+            Assert.IsFalse(this.store.IsInStore(password, StoreType.Password));
+            this.store.AddToStore(password,  StoreType.Password);
+            Assert.IsTrue(this.store.IsInStore(password, StoreType.Password));
         }
 
         public void TestAddHashToStore()
         {
             string hash = "000000005AD76BD555C1D6D771DE417A4B87E4B4";
             byte[] hashBytes = hash.HexStringToBytes();
-            Assert.IsFalse(this.store.IsHashInStore(hashBytes));
-            this.store.AddHashToStore(hashBytes);
-            Assert.IsTrue(this.store.IsHashInStore(hashBytes));
+            Assert.IsFalse(this.store.IsInStore(hashBytes, StoreType.Password));
+            this.store.AddToStore(hashBytes, StoreType.Password);
+            Assert.IsTrue(this.store.IsInStore(hashBytes, StoreType.Password));
         }
 
         public void TestAllHashesAreFoundInStore()
@@ -54,17 +54,15 @@ namespace ManagedUnitTests
             int added = 0;
             int discarded = 0;
 
-            this.store.AddHashesToStore(
-                new HashSet<byte[]>(hashBytes, new ByteArrayComparer()),
-                ref added,
-                ref discarded);
+            this.store.AddToStore(
+                new HashSet<byte[]>(hashBytes, new ByteArrayComparer()), StoreType.Password);
 
             foreach (string hash in hashes)
             {
-                Assert.IsTrue(this.store.IsHashInStore(hash.HexStringToBytes()));
+                Assert.IsTrue(this.store.IsInStore(hash.HexStringToBytes(), StoreType.Password));
             }
 
-            Assert.IsFalse(this.store.IsHashInStore("000000000000000000000000000000000000000B".HexStringToBytes()));
+            Assert.IsFalse(this.store.IsInStore("000000000000000000000000000000000000000B".HexStringToBytes(), StoreType.Password));
         }
     }
 }

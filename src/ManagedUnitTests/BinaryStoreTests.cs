@@ -27,13 +27,15 @@ namespace ManagedUnitTests
         [TestInitialize]
         public void Initialize()
         {
-            this.Store.ClearStore();
+            this.Store.ClearStore(StoreType.Password);
+            this.Store.ClearStore(StoreType.Word);
         }
 
         [TestCleanup]
-        public void Cleaup()
+        public void Cleanup()
         {
-            this.Store.ClearStore();
+            this.Store.ClearStore(StoreType.Password);
+            this.Store.ClearStore(StoreType.Word);
         }
     }
 }

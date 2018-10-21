@@ -17,7 +17,8 @@ namespace StoreInterface
         ContainsAccountName = 6,
         ContainsFullName = 7,
         Banned = 8,
-        BannedNormalized = 9,
-        PasswordWasBlank = 10
+        BannedNormalizedPassword = 9,
+        BannedNormalizedWord = 10,
+        PasswordWasBlank = 11
     }
 }

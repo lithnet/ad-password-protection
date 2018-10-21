@@ -14,7 +14,7 @@ namespace PasswordFilterPS
 
         public static void OpenStore(string path)
         {
-            Global.Store = new V2Store(path);
+            Global.Store = new V3Store(path);
         }
 
         public static void OpenStore()

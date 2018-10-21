@@ -119,13 +119,13 @@
 #define MSG_PASSWORD_REJECTED_BANNED     ((DWORD)0x80002003L)
 
 //
-// MessageId: MSG_PASSWORD_REJECTED_BANNED_NORMALIZED
+// MessageId: MSG_PASSWORD_REJECTED_BANNED_NORMALIZED_PASSWORD
 //
 // MessageText:
 //
 // The password %1 request for %2 (%3) was rejected after being normalized because it matched a password in the banned password store.
 //
-#define MSG_PASSWORD_REJECTED_BANNED_NORMALIZED ((DWORD)0x80002004L)
+#define MSG_PASSWORD_REJECTED_BANNED_NORMALIZED_PASSWORD ((DWORD)0x80002004L)
 
 //
 // MessageId: MSG_PASSWORD_REJECTED_APPROVAL_REGEX
@@ -198,4 +198,13 @@
 // The password %1 request for %2 (%3) was rejected because it did not meet the complexity requirements of a password of %4 characters.
 //
 #define MSG_PASSWORD_REJECTED_THRESHOLD_COMPLEXITY ((DWORD)0x8000200CL)
+
+//
+// MessageId: MSG_PASSWORD_REJECTED_BANNED_NORMALIZED_WORD
+//
+// MessageText:
+//
+// The password %1 request for %2 (%3) was rejected after being normalized because it matched a password in the banned word store.
+//
+#define MSG_PASSWORD_REJECTED_BANNED_NORMALIZED_WORD ((DWORD)0x8000200DL)
 

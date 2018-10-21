@@ -26,23 +26,18 @@ namespace StoreInterface
             this.Encoder = encoder;
         }
 
-        public static void ImportPasswordsFromFile(Store store, string sourceFile, bool addExact, bool addNormalized, int batchSize = 5000000)
+        public static void ImportPasswordsFromFile(Store store, StoreType storeType, string sourceFile, int batchSize = 5000000, OperationProgress progress = null)
         {
-            long totalProcesssed = 0;
-            int hashesAdded = 0;
-            int hashesDiscarded = 0;
-            long hashesCreated = 0;
             bool batched = false;
-
-            if (!(addExact || addNormalized))
-            {
-                throw new ArgumentException("You must specify at least one option of adding exact passwords or adding normalized passwords");
-            }
 
             Stopwatch timer = new Stopwatch();
             timer.Start();
 
             Trace.WriteLine($"Loading plain-text passwords from {sourceFile}");
+            if (progress == null)
+            {
+                progress = new OperationProgress();
+            }
 
             HashSet<byte[]> hashes = new HashSet<byte[]>(ByteArrayComparer.Comparer);
 
@@ -54,38 +49,25 @@ namespace StoreInterface
                 }
 
                 byte[] hash = null;
-                totalProcesssed++;
+                progress?.IncrementTotalProcessed();
 
-                if (addExact)
+                if (storeType == StoreType.Word)
+                {
+                    hash = store.ComputeHash(StringNormalizer.Normalize(line));
+                }
+                else
                 {
                     hash = store.ComputeHash(line);
-
-                    if (hashes.Add(hash))
-                    {
-                        hashesCreated++;
-                    }
                 }
 
-                if (addNormalized)
+                if (!hashes.Add(hash))
                 {
-                    string normalized = StringNormalizer.Normalize(line);
-                    if (!string.IsNullOrEmpty(normalized))
-                    {
-                        byte[] newhash = store.ComputeHash(normalized);
-
-                        if (!ByteArrayComparer.Comparer.Equals(newhash, hash))
-                        {
-                            if (hashes.Add(newhash))
-                            {
-                                hashesCreated++;
-                            }
-                        }
-                    }
+                    progress?.IncrementHashesDiscarded();
                 }
 
                 if (timer.Elapsed.TotalSeconds > 5)
                 {
-                    Trace.WriteLine($"Processed {totalProcesssed} passwords into {hashesCreated} hashes");
+                    Trace.WriteLine($"Processed {progress.TotalProcessed} passwords");
                     timer.Restart();
                 }
 
@@ -94,54 +76,54 @@ namespace StoreInterface
                     if (!batched)
                     {
                         batched = true;
-                        store.StartBatch();
+                        store.StartBatch(storeType);
                     }
 
                     Trace.WriteLine("Flushing batch to store");
-                    store.AddHashesToStore(hashes, ref hashesAdded, ref hashesDiscarded);
+                    store.AddToStore(hashes, storeType, progress);
                     hashes.Clear();
                 }
             }
 
             if (hashes.Count > 0)
             {
-                store.AddHashesToStore(hashes, ref hashesAdded, ref hashesDiscarded);
+                store.AddToStore(hashes, storeType, progress);
             }
 
             if (batched)
             {
                 Trace.WriteLine("Sorting hashes into store");
-                store.EndBatch(ref hashesAdded, ref hashesDiscarded);
+                store.EndBatch(storeType, progress);
             }
 
-            Trace.WriteLine($"Processed {totalProcesssed} passwords. Added {hashesAdded} new hashes. Discarded {hashesDiscarded} duplicates. Duration: {timer.Elapsed}");
+            Trace.WriteLine($"Processed {progress.TotalProcessed} passwords. Added {progress.HashesAdded} new hashes. Discarded {progress.HashesDiscarded} duplicates. Duration: {timer.Elapsed}");
             Trace.WriteLine("Done");
         }
 
-        public abstract byte[] ComputeHash(string text);
-
-        public static void ImportHexHashesFromSortedFile(Store store, string sourceFile)
+        public static void ImportHexHashesFromSortedFile(Store store, StoreType storeType, string sourceFile, OperationProgress progress = null)
         {
             string lastRange = null;
-            int totalProcessed = 0;
-            int hashesAdded = 0;
-            int hashesDiscarded = 0;
             HashSet<byte[]> hashes = new HashSet<byte[]>(ByteArrayComparer.Comparer);
 
             Stopwatch timer = new Stopwatch();
             timer.Start();
 
+            if (progress == null)
+            {
+                progress = new OperationProgress();
+            }
+
             Trace.WriteLine($"Loading hexadecimal hashes from {sourceFile}");
 
             foreach (byte[] hash in Store.GetHexHashesFromFile(sourceFile, store.HashLength))
             {
-                totalProcessed++;
+                progress.IncrementTotalProcessed();
 
                 string range = store.GetRangeFromHash(hash);
 
                 if (range != lastRange && hashes.Count > 0)
                 {
-                    store.AddHashRangeToStore(hashes, lastRange, ref hashesAdded, ref hashesDiscarded);
+                    store.AddToStore(hashes, lastRange, storeType, progress);
                     hashes.Clear();
                 }
 
@@ -151,43 +133,45 @@ namespace StoreInterface
 
                 if (timer.Elapsed.TotalSeconds > 5)
                 {
-                    Trace.WriteLine($"Processed {totalProcessed} passwords. Added {hashesAdded} new hashes. Discarded {hashesDiscarded} duplicates. Duration: {timer.Elapsed}");
+                    Trace.WriteLine($"Processed {progress.TotalProcessed} passwords. Added {progress.HashesAdded} new hashes. Discarded {progress.HashesDiscarded} duplicates. Duration: {timer.Elapsed}");
                     timer.Restart();
                 }
             }
 
             if (hashes.Count > 0)
             {
-                store.AddHashRangeToStore(hashes, lastRange, ref hashesAdded, ref hashesDiscarded);
+                store.AddToStore(hashes, lastRange, storeType, progress);
                 hashes.Clear();
             }
 
-            Trace.WriteLine($"Processed {totalProcessed} passwords. Added {hashesAdded} new hashes. Discarded {hashesDiscarded} duplicates. Duration: {timer.Elapsed}");
+            Trace.WriteLine($"Processed {progress.TotalProcessed} passwords. Added {progress.HashesAdded} new hashes. Discarded {progress.HashesDiscarded} duplicates. Duration: {timer.Elapsed}");
             Trace.WriteLine($"Done");
         }
 
-        public static void ImportFromStore(Store targetStore, Store sourceStore)
+        public static void ImportFromStore(Store targetStore, Store sourceStore, StoreType sourceStoreType, StoreType destinationStoreType, OperationProgress progress = null)
         {
             string lastRange = null;
-            int totalProcessed = 0;
-            int hashesAdded = 0;
-            int hashesDiscarded = 0;
+
             HashSet<byte[]> hashes = new HashSet<byte[]>(ByteArrayComparer.Comparer);
 
             Stopwatch timer = new Stopwatch();
             timer.Start();
 
             Trace.WriteLine($"Merging hashes from source store");
-
-            foreach (byte[] hash in sourceStore.GetHashes())
+            if (progress == null)
             {
-                totalProcessed++;
+                progress = new OperationProgress();
+            }
+
+            foreach (byte[] hash in sourceStore.GetHashes(sourceStoreType))
+            {
+                progress.IncrementTotalProcessed();
 
                 string range = targetStore.GetRangeFromHash(hash);
 
                 if (range != lastRange && hashes.Count > 0)
                 {
-                    targetStore.AddHashRangeToStore(hashes, lastRange, ref hashesAdded, ref hashesDiscarded);
+                    targetStore.AddToStore(hashes, lastRange, destinationStoreType, progress);
                     hashes.Clear();
                 }
 
@@ -197,38 +181,39 @@ namespace StoreInterface
 
                 if (timer.Elapsed.TotalSeconds > 5)
                 {
-                    Trace.WriteLine($"Processed {totalProcessed} passwords. Added {hashesAdded} new hashes. Discarded {hashesDiscarded} duplicates. Duration: {timer.Elapsed}");
+                    Trace.WriteLine($"Processed {progress.TotalProcessed} passwords. Added {progress.HashesAdded} new hashes. Discarded {progress.HashesDiscarded} duplicates. Duration: {timer.Elapsed}");
                     timer.Restart();
                 }
             }
 
             if (hashes.Count > 0)
             {
-                targetStore.AddHashRangeToStore(hashes, lastRange, ref hashesAdded, ref hashesDiscarded);
+                targetStore.AddToStore(hashes, lastRange, destinationStoreType, progress);
                 hashes.Clear();
             }
 
-            Trace.WriteLine($"Processed {totalProcessed} passwords. Added {hashesAdded} new hashes. Discarded {hashesDiscarded} duplicates. Duration: {timer.Elapsed}");
+            Trace.WriteLine($"Processed {progress.TotalProcessed} passwords. Added {progress.HashesAdded} new hashes. Discarded {progress.HashesDiscarded} duplicates. Duration: {timer.Elapsed}");
             Trace.WriteLine($"Done");
         }
 
-        public static void ImportHexHashesFromFile(Store store, string sourceFile, int batchSize = 100000)
+        public static void ImportHexHashesFromFile(Store store, StoreType storeType, string sourceFile, int batchSize = 100000, OperationProgress progress = null)
         {
-            int totalProcessed = 0;
-            int hashesAdded = 0;
-            int hashesDiscarded = 0;
             bool batched = false;
 
             Trace.WriteLine($"Loading hexadecimal hashes from {sourceFile}");
 
             Stopwatch timer = new Stopwatch();
             timer.Start();
+            if (progress == null)
+            {
+                progress = new OperationProgress();
+            }
 
             HashSet<byte[]> hashes = new HashSet<byte[]>(ByteArrayComparer.Comparer);
 
             foreach (byte[] hash in Store.GetHexHashesFromFile(sourceFile, store.HashLength))
             {
-                totalProcessed++;
+                progress.IncrementTotalProcessed();
 
                 hashes.Add(hash);
 
@@ -237,32 +222,32 @@ namespace StoreInterface
                     if (!batched)
                     {
                         batched = true;
-                        store.StartBatch();
+                        store.StartBatch(storeType);
                     }
 
-                    store.AddHashesToStore(hashes, ref hashesAdded, ref hashesDiscarded);
+                    store.AddToStore(hashes, storeType, progress);
                     hashes.Clear();
                 }
 
                 if (timer.Elapsed.TotalSeconds > 5)
                 {
-                    Trace.WriteLine($"Processed {totalProcessed} passwords. Added {hashesAdded} new hashes. Discarded {hashesDiscarded} duplicates. Duration: {timer.Elapsed}");
+                    Trace.WriteLine($"Processed {progress.TotalProcessed} passwords. Added {progress.HashesAdded} new hashes. Discarded {progress.HashesDiscarded} duplicates. Duration: {timer.Elapsed}");
                     timer.Restart();
                 }
             }
 
             if (hashes.Count > 0)
             {
-                store.AddHashesToStore(hashes, ref hashesAdded, ref hashesDiscarded);
+                store.AddToStore(hashes, storeType, progress);
             }
 
             if (batched)
             {
                 Trace.WriteLine("Sorting hashes into store");
-                store.EndBatch(ref hashesAdded, ref hashesDiscarded);
+                store.EndBatch(storeType, progress);
             }
 
-            Trace.WriteLine($"Processed {totalProcessed} passwords. Added {hashesAdded} new hashes. Discarded {hashesDiscarded} duplicates. Duration: {timer.Elapsed}");
+            Trace.WriteLine($"Processed {progress.TotalProcessed} passwords. Added {progress.HashesAdded} new hashes. Discarded {progress.HashesDiscarded} duplicates. Duration: {timer.Elapsed}");
             Trace.WriteLine("Done");
         }
 
@@ -310,89 +295,70 @@ namespace StoreInterface
             }
         }
 
-
         protected abstract string GetRangeFromHash(string hash);
 
         protected abstract string GetRangeFromHash(byte[] hash);
 
-        public abstract void ClearStore();
+        public abstract IEnumerable<byte[]> GetHashes(StoreType storeType);
 
-        public void AddPasswordToStore(string password, bool normalize)
+        public abstract void ClearStore(StoreType storeType);
+
+        public void AddToStore(string password, StoreType storeType)
         {
-            byte[] hash = this.ComputeHash(password);
-
-            this.AddHashToStore(hash);
-
-            if (normalize)
-            {
-                byte[] newhash = this.ComputeHash(StringNormalizer.Normalize(password));
-
-                if (ByteArrayComparer.Comparer.Equals(newhash, hash))
-                {
-                    return;
-                }
-
-                this.AddHashToStore(newhash);
-            }
-        }
-
-        public void AddHashToStore(byte[] hash)
-        {
-            HashSet<byte[]> hashset = new HashSet<byte[]>(ByteArrayComparer.Comparer);
-            hashset.Add(hash);
-            int added = 0;
-            int discarded = 0;
-            this.AddHashesToStore(hashset, ref added, ref discarded);
-        }
-
-        public void AddHashesToStore(HashSet<byte[]> hashes, ref int hashesAdded, ref int hashesDiscarded)
-        {
-            int added = 0;
-            int discarded = 0;
-
-            Parallel.ForEach(
-                hashes
-                  .OrderBy(t => t, ByteArrayComparer.Comparer)
-                 .GroupBy(this.GetRangeFromHash, StringComparer.OrdinalIgnoreCase),
-                (group) =>
-                {
-                    this.AddHashesToStore(
-                        group,
-                        ref added,
-                        ref discarded);
-                });
-
-            hashesAdded += added;
-            hashesDiscarded += discarded;
-        }
-
-        private void AddHashesToStore(IGrouping<string, byte[]> group, ref int hashesAdded, ref int hashesDiscarded)
-        {
-            string range = group.Key;
-            HashSet<byte[]> set = new HashSet<byte[]>(group, ByteArrayComparer.Comparer);
-            this.AddHashRangeToStore(set, range, ref hashesAdded, ref hashesDiscarded);
-        }
-
-        protected abstract IEnumerable<byte[]> GetHashes();
-
-        protected abstract void AddHashRangeToStore(HashSet<byte[]> hashes, string range, ref int hashesAdded, ref int hashesDiscarded);
-
-        public abstract void StartBatch();
-
-        public abstract void EndBatch(ref int hashesAdded, ref int hashesDiscarded);
-
-        public bool IsPasswordInStore(string password, bool normalize = false)
-        {
-            if (normalize)
+            if (storeType == StoreType.Word)
             {
                 password = StringNormalizer.Normalize(password);
             }
 
-            byte[] hash = this.ComputeHash(password);
-
-            return this.IsHashInStore(hash);
+            this.AddToStore(this.ComputeHash(password), storeType);
         }
 
-        public abstract bool IsHashInStore(byte[] hash);
+        public void AddToStore(byte[] hash, StoreType storeType)
+        {
+            HashSet<byte[]> hashset = new HashSet<byte[]>(ByteArrayComparer.Comparer);
+            hashset.Add(hash);
+            this.AddToStore(hashset, storeType, null);
+        }
+
+        public void AddToStore(HashSet<byte[]> hashes, StoreType storeType, OperationProgress progress = null)
+        {
+            Parallel.ForEach(
+                hashes
+                    .OrderBy(t => t, ByteArrayComparer.Comparer)
+                    .GroupBy(this.GetRangeFromHash, StringComparer.OrdinalIgnoreCase),
+                (group) =>
+                {
+                    this.AddToStore(group, storeType, progress);
+                });
+        }
+
+        public bool IsInStore(string password, StoreType storeType)
+        {
+            if (storeType == StoreType.Word)
+            {
+                password = StringNormalizer.Normalize(password);
+            }
+
+            return this.IsInStore(this.ComputeHash(password), storeType);
+        }
+
+        private void AddToStore(IGrouping<string, byte[]> group, StoreType storeType, OperationProgress progress)
+        {
+            string range = group.Key;
+            HashSet<byte[]> set = new HashSet<byte[]>(group, ByteArrayComparer.Comparer);
+            this.AddToStore(set, range, storeType, progress);
+        }
+
+        public abstract bool IsInStore(byte[] hash, StoreType storeType);
+
+        protected abstract void AddToStore(HashSet<byte[]> hashes, string range, StoreType storeType, OperationProgress progress);
+
+        public abstract void StartBatch(StoreType storeType);
+
+        public abstract byte[] ComputeHash(string text);
+
+        public abstract void EndBatch(StoreType storeType, OperationProgress progress);
+
+        public abstract HashSet<byte[]> GetHashes(string range, StoreType storeType);
     }
 }

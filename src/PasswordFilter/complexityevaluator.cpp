@@ -8,9 +8,8 @@
 
 BOOLEAN ProcessPasswordComplexityThreshold(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
 {
-	int threshold1 = reg.GetRegValue(L"ComplexityThreshold1", 0);
-	int threshold2 = reg.GetRegValue(L"ComplexityThreshold2", 0);
-	int threshold3 = reg.GetRegValue(L"ComplexityThreshold3", 0);
+	const int threshold1 = reg.GetRegValue(REG_VALUE_CT1, 0);
+	const int threshold2 = reg.GetRegValue(REG_VALUE_CT2, 0);
 
 	if (threshold1 <= 0)
 	{
@@ -22,7 +21,7 @@ BOOLEAN ProcessPasswordComplexityThreshold(const SecureArrayT<WCHAR> &password, 
 	bool hasUpper = false;
 	bool hasSymbol = false;
 	bool hasNumber = false;
-	size_t pwdlength = wcslen(password);
+	const size_t pwdlength = wcslen(password);
 
 	for (size_t i = 0; i < pwdlength; i++)
 	{
@@ -52,25 +51,25 @@ BOOLEAN ProcessPasswordComplexityThreshold(const SecureArrayT<WCHAR> &password, 
 	std::wstring thresholdID;
 	if (pwdlength < threshold1 || threshold2 <= 0)
 	{
-		thresholdID = L"Threshold1";
+		thresholdID = REG_VALUE_CT1;
 	}
-	else if (pwdlength < threshold2 || threshold3 <= 0)
+	else if (pwdlength < threshold2)
 	{
-		thresholdID = L"Threshold2";
+		thresholdID = REG_VALUE_CT2;
 	}
 	else
 	{
-		thresholdID = L"Threshold3";
+		thresholdID = REG_VALUE_CT3;
 	}
 
-	bool requiresLower = (reg.GetRegValue(thresholdID + L"RequiresLower", 0) != 0);
-	bool requiresUpper = (reg.GetRegValue(thresholdID + L"RequiresUpper", 0) != 0);
-	bool requiresNumber = (reg.GetRegValue(thresholdID + L"RequiresNumber", 0) != 0);
-	bool requiresSymbol = (reg.GetRegValue(thresholdID + L"RequiresSymbol", 0) != 0);
-	bool requiresSymbolOrNumber = (reg.GetRegValue(thresholdID + L"RequiresSymbolOrNumber", 0) != 0);
+	const bool requiresLower = (reg.GetRegValue(thresholdID + REG_VALUE_CTREQUIRESLOWER, 0) != 0);
+	const 	bool requiresUpper = (reg.GetRegValue(thresholdID + REG_VALUE_CTREQUIRESUPPER, 0) != 0);
+	const bool requiresNumber = (reg.GetRegValue(thresholdID + REG_VALUE_CTREQUIRESNUMBER, 0) != 0);
+	const bool requiresSymbol = (reg.GetRegValue(thresholdID + REG_VALUE_CTREQUIRESSYMBOL, 0) != 0);
+	const bool requiresSymbolOrNumber = (reg.GetRegValue(thresholdID + REG_VALUE_CTREQUIRESSYMBOLORNUMBER, 0) != 0);
 
-	int charSetsRequired = min(reg.GetRegValue(thresholdID + L"CharSetsRequired", 0), 4);
-	int charSetsPresent = (hasLower ? 1 : 0) + (hasUpper ? 1 : 0) + (hasSymbol ? 1 : 0) + (hasNumber ? 1 : 0);
+	const int charSetsRequired = min(reg.GetRegValue(thresholdID + REG_VALUE_CTCHARSETSREQUIRED, 0), 4);
+	const int charSetsPresent = (hasLower ? 1 : 0) + (hasUpper ? 1 : 0) + (hasSymbol ? 1 : 0) + (hasNumber ? 1 : 0);
 
 	if ((charSetsPresent < charSetsRequired) || (requiresLower && !hasLower) || (requiresUpper && !hasUpper) || (requiresNumber && !hasNumber) || (requiresSymbol && !hasSymbol) || (requiresSymbolOrNumber && !(hasSymbol || hasNumber)))
 	{
@@ -87,23 +86,23 @@ BOOLEAN ProcessPasswordComplexityThreshold(const SecureArrayT<WCHAR> &password, 
 
 BOOLEAN ProcessPasswordComplexityPoints(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
 {
-	int requiredPoints = reg.GetRegValue(L"ComplexityPointsRequired", 0);
+	int requiredPoints = reg.GetRegValue(REG_VALUE_COMPLEXITYPOINTSREQUIRED, 0);
 
 	if (requiredPoints > 0)
 	{
 		OutputDebugString(L"Checking for complexity points");
 
-		int perChar = reg.GetRegValue(L"ComplexityPointsPerCharacter", 2);
+		int perChar = reg.GetRegValue(REG_VALUE_COMPLEXITYPOINTSPERCHAR, 2);
 
-		int perNumber = reg.GetRegValue(L"ComplexityPointsPerNumber", 0);
-		int perSymbol = reg.GetRegValue(L"ComplexityPointsPerSymbol", 0);
-		int perUpper = reg.GetRegValue(L"ComplexityPointsPerUpper", 0);
-		int perLower = reg.GetRegValue(L"ComplexityPointsPerLower", 0);
+		int perNumber = reg.GetRegValue(REG_VALUE_COMPLEXITYPOINTSPERNUMBER, 0);
+		int perSymbol = reg.GetRegValue(REG_VALUE_COMPLEXITYPOINTSPERSYMBOL, 0);
+		int perUpper = reg.GetRegValue(REG_VALUE_COMPLEXITYPOINTSPERUPPER, 0);
+		int perLower = reg.GetRegValue(REG_VALUE_COMPLEXITYPOINTSPERLOWER, 0);
 
-		int useNumber = reg.GetRegValue(L"ComplexityPointsUseOfNumber", 1);
-		int useSymbol = reg.GetRegValue(L"ComplexityPointsUseOfSymbol", 1);
-		int useUpper = reg.GetRegValue(L"ComplexityPointsUseOfUpper", 1);
-		int useLower = reg.GetRegValue(L"ComplexityPointsUseOfLower", 1);
+		int useNumber = reg.GetRegValue(REG_VALUE_COMPLEXITYPOINTSUSEOFNUMBER, 1);
+		int useSymbol = reg.GetRegValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 1);
+		int useUpper = reg.GetRegValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 1);
+		int useLower = reg.GetRegValue(REG_VALUE_COMPLEXITYPOINTSUSEOFLOWER, 1);
 
 		bool hasLower = false;
 		bool hasUpper = false;

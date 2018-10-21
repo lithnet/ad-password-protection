@@ -86,7 +86,7 @@ The password %1 request for %2 (%3) was rejected because it matched a password i
 MessageId=0x2004
 Severity=Warning
 Facility=System
-SymbolicName=MSG_PASSWORD_REJECTED_BANNED_NORMALIZED
+SymbolicName=MSG_PASSWORD_REJECTED_BANNED_NORMALIZED_PASSWORD
 Language=English
 The password %1 request for %2 (%3) was rejected after being normalized because it matched a password in the banned password store.
 .
@@ -155,3 +155,10 @@ Language=English
 The password %1 request for %2 (%3) was rejected because it did not meet the complexity requirements of a password of %4 characters.
 .
 
+MessageId=0x200D
+Severity=Warning
+Facility=System
+SymbolicName=MSG_PASSWORD_REJECTED_BANNED_NORMALIZED_WORD
+Language=English
+The password %1 request for %2 (%3) was rejected after being normalized because it matched a password in the banned word store.
+.

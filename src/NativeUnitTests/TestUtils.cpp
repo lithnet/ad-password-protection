@@ -1,10 +1,14 @@
 #include "stdafx.h"
 #include "TestUtils.h"
+#include "../PasswordFilter/registry.h"
 
 HKEY OpenSettingsKeyWritable()
 {
+	std::wstring key = REG_BASE_POLICY_KEY;
+	key += L"\\UnitTests";
+
 	HKEY hKey;
-	LSTATUS result = RegCreateKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Lithnet\\PasswordFilter", 0, NULL, NULL, KEY_WRITE | KEY_WOW64_64KEY, NULL, &hKey, NULL);
+	LSTATUS result = RegCreateKeyEx(HKEY_LOCAL_MACHINE, key.c_str(), 0, NULL, NULL, KEY_WRITE | KEY_WOW64_64KEY, NULL, &hKey, NULL);
 
 	if (result == ERROR_FILE_NOT_FOUND)
 	{

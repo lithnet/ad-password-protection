@@ -7,36 +7,32 @@ using System.Management.Automation;
 
 namespace PasswordFilterPS
 {
-    [Cmdlet(VerbsCommon.Add, "PasswordToStore")]
-    public class AddPasswordToStore : Cmdlet
+    [Cmdlet(VerbsCommon.Add, "ValueToPasswordStore")]
+    public class AddValueToPasswordStore : Cmdlet
     {
         [Parameter(Mandatory = true, Position = 1, ValueFromPipeline = true), ValidateNotNullOrEmpty]
         public string Password { get; set; }
 
-
-        [Parameter(Mandatory = false, Position = 2, ValueFromPipeline = false, ValueFromPipelineByPropertyName = true)]
-        public bool Normalize { get; set; }
+        private StoreInterface.OperationProgress progress;
 
         protected override void BeginProcessing()
         {
             Global.OpenExistingDefaultOrThrow();
+            this.progress = new StoreInterface.OperationProgress();
 
-            Global.Store.StartBatch();
+            Global.Store.StartBatch(StoreInterface.StoreType.Password);
             base.BeginProcessing();
         }
 
         protected override void EndProcessing()
         {
-            int added = 0;
-            int discarded = 0;
-
-            Global.Store.EndBatch(ref added, ref discarded);
+            Global.Store.EndBatch(StoreInterface.StoreType.Password, this.progress);
             base.EndProcessing();
         }
 
         protected override void ProcessRecord()
         {
-            Global.Store.AddPasswordToStore(this.Password, this.Normalize);
+            Global.Store.AddToStore(this.Password, StoreInterface.StoreType.Password);
         }
     }
 }

@@ -62,30 +62,10 @@ namespace NativeUnitTests
 		}
 
 	public:
-		
-		TEST_METHOD(TestBadPasswordEseStore)
+
+		TEST_METHOD(TestBadPasswordv3Store)
 		{
-			SetValue(L"HashCheckMode", 0);
-
 			TestBannedPassword();
-		}
-
-		TEST_METHOD(TestBadPasswordv1Store)
-		{
-			SetValue(L"HashCheckMode", 1);
-
-			TestBannedPassword();
-
-			SetValue(L"HashCheckMode", 0);
-		}
-
-		TEST_METHOD(TestBadPasswordv2Store)
-		{
-			SetValue(L"HashCheckMode", 2);
-
-			TestBannedPassword();
-
-			SetValue(L"HashCheckMode", 0);
 		}
 	};
 }

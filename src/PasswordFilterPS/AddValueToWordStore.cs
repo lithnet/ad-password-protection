@@ -7,31 +7,32 @@ using System.Management.Automation;
 
 namespace PasswordFilterPS
 {
-    [Cmdlet(VerbsData.Import, "PasswordHashesFromFile")]
-    public class AddHashesToStore : Cmdlet
+    [Cmdlet(VerbsCommon.Add, "ValueToWordStore")]
+    public class AddValueToWordStore : Cmdlet
     {
         [Parameter(Mandatory = true, Position = 1, ValueFromPipeline = true), ValidateNotNullOrEmpty]
-        public string Filename { get; set; }
-        
+        public string Value { get; set; }
+
+        private StoreInterface.OperationProgress progress;
+
         protected override void BeginProcessing()
         {
             Global.OpenExistingDefaultOrThrow();
+            this.progress = new StoreInterface.OperationProgress();
 
-            Global.Store.StartBatch();
+            Global.Store.StartBatch(StoreInterface.StoreType.Word);
             base.BeginProcessing();
         }
 
         protected override void EndProcessing()
         {
-            int added = 0;
-            int discarded = 0;
-
-            Global.Store.EndBatch(ref added, ref discarded);
+            Global.Store.EndBatch(StoreInterface.StoreType.Word, this.progress);
             base.EndProcessing();
         }
 
         protected override void ProcessRecord()
         {
+            Global.Store.AddToStore(this.Value, StoreInterface.StoreType.Word);
         }
     }
 }

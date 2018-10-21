@@ -8,21 +8,27 @@ class binarystore
 private:
 	int hashSize;
 	int hashOffset;
-	std::wstring storeSubPath;
+	std::wstring storeSubPathPasswordStore;
+	std::wstring storeSubPathWordStore;
 	std::wstring storeBasePath;
-	std::wstring storePath;
+	std::wstring storePathPasswordStore;
+	std::wstring storePathWordStore;
 
 public:
-	binarystore(const std::wstring& storeBasePath, const std::wstring& storeSubPath, int hashSize, int hashOffset);
+	binarystore(const std::wstring& storeBasePath, const std::wstring& storeSubPathPasswordStore, const std::wstring& storeSubPathWordStore, int hashSize, int hashOffset);
 	virtual ~binarystore();
-	bool IsPasswordInStore(const SecureArrayT<WCHAR> &password);
+	bool IsPasswordInPasswordStore(const SecureArrayT<WCHAR> &password);
+
+	bool IsPasswordInWordStore(const SecureArrayT<WCHAR>& password);
 
 protected:
 	virtual std::wstring GetRangeFromHash(const SecureArrayT<BYTE> &hash) = 0;
 	virtual SecureArrayT<BYTE> GetHashFromPassword(const SecureArrayT<WCHAR> &password) = 0;
 
 private:
-	bool IsHashInStore(const SecureArrayT<BYTE> &hash);
-	std::wstring GetStoreFileName(const std::wstring &range) const;
+	bool IsHashInPasswordStore(const SecureArrayT<BYTE> &hash);
+	bool IsHashInWordStore(const SecureArrayT<BYTE>& hash);
+	std::wstring GetPasswordStoreFileName(const std::wstring &range) const;
+	std::wstring GetWordStoreFileName(const std::wstring & range) const;
 	bool IsHashInBinaryFile(const std::wstring &filename, const SecureArrayT<BYTE> & hashBytes) const;
 };

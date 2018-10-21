@@ -33,7 +33,7 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 
 	try {
 
-		if (reg.GetRegValue(L"Disabled", 0) != 0)
+		if (reg.GetRegValue(REG_VALUE_DISABLED, 0) != 0)
 		{
 			eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_AGENT_DISABLED, 0);
 			return TRUE;
@@ -44,7 +44,7 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 			return FALSE;
 		}
 
-		simulate = reg.GetRegValue(L"Simulate", 0) != 0;
+		simulate = reg.GetRegValue(REG_VALUE_SIMULATE, 0) != 0;
 
 		std::wstring accountName(AccountName->Buffer, AccountName->Length / sizeof(WCHAR));
 		std::wstring fullName(FullName->Buffer, FullName->Length / sizeof(WCHAR));
@@ -118,7 +118,7 @@ extern "C" __declspec(dllexport) int __stdcall PasswordFilterEx(
 
 	try {
 
-		if (reg.GetRegValue(L"Disabled", 0) != 0)
+		if (reg.GetRegValue(REG_VALUE_DISABLED, 0) != 0)
 		{
 			eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_AGENT_DISABLED, 0);
 			return PASSWORD_APPROVED;
@@ -129,7 +129,7 @@ extern "C" __declspec(dllexport) int __stdcall PasswordFilterEx(
 			return PASSWORD_REJECTED_BLANK;
 		}
 
-		simulate = reg.GetRegValue(L"Simulate", 0) != 0;
+		simulate = reg.GetRegValue(REG_VALUE_SIMULATE, 0) != 0;
 
 		std::wstring accountName = AccountName;
 		std::wstring fullName = FullName;

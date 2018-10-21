@@ -11,14 +11,17 @@ static const int PASSWORD_REJECTED_REGEX_REJECT = 5;
 static const int PASSWORD_REJECTED_CONTAINS_ACCOUNT_NAME = 6;
 static const int PASSWORD_REJECTED_CONTAINS_FULL_NAME = 7;
 static const int PASSWORD_REJECTED_BANNED = 8;
-static const int PASSWORD_REJECTED_BANNED_NORMALIZED = 9;
-static const int PASSWORD_REJECTED_BLANK = 10;
+static const int PASSWORD_REJECTED_BANNED_NORMALIZED_PASSWORD = 9;
+static const int PASSWORD_REJECTED_BANNED_NORMALIZED_WORD = 10;
+static const int PASSWORD_REJECTED_BLANK = 11;
 
 int ProcessPassword(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation);
 
 BOOLEAN ProcessPasswordRaw(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg);
 
-BOOLEAN ProcessPasswordNormalized(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg);
+BOOLEAN ProcessPasswordNormalizedPasswordStore(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg);
+
+BOOLEAN ProcessPasswordNormalizedWordStore(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg);
 
 BOOLEAN ProcessPasswordLength(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg);
 

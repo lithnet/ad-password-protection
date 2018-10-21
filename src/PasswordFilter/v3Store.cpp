@@ -4,7 +4,7 @@
 #include "hasher.h"
 
 v3store::v3store(const std::wstring &basePath)
-	: binarystore(basePath, L"v3\\p\\", 14, 2)
+	: binarystore(basePath, L"v3\\p\\", L"v3\\w\\", 14, 2)
 {
 }
 

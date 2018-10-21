@@ -3,15 +3,15 @@
 
 registry::registry()
 {
-	this->settingsKeyName = BASE_SETTINGS_KEY_NAME;
-	this->policyKeyName = BASE_POLICY_KEY_NAME;
+	this->settingsKeyName = REG_BASE_SETTINGS_KEY;
+	this->policyKeyName = REG_BASE_POLICY_KEY;
 }
 
 registry::registry(std::wstring policyGroup)
 {
 	this->policyGroup = policyGroup;
-	this->settingsKeyName = GetKeyName(BASE_SETTINGS_KEY_NAME);
-	this->policyKeyName = GetKeyName(BASE_POLICY_KEY_NAME);
+	this->settingsKeyName = GetKeyName(REG_BASE_SETTINGS_KEY);
+	this->policyKeyName = GetKeyName(REG_BASE_POLICY_KEY);
 }
 
 registry::~registry()
@@ -66,7 +66,7 @@ DWORD registry::GetPolicyOrSettingsValue(const std::wstring & valueName, DWORD d
 	return defaultValue;
 }
 
-const std::wstring registry::GetKeyName(const LPWSTR & key) const
+const std::wstring registry::GetKeyName(LPCWSTR & key) const
 {
 	std::wstring name(key);
 	if (!this->policyGroup.empty())

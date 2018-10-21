@@ -31,134 +31,92 @@ namespace ManagedUnitTests
         }
 
         [TestMethod]
-        public void BuildPwnStore()
+        public void BuildUsablev3Store()
         {
             return;
+            string path = Path.Combine(TestHelpers.TestStorePath, "v3Build");
+            Directory.CreateDirectory(path);
+            V3Store store = new V3Store(path);
+
+            // Start with HIBP
             string file = @"D:\pwnedpwds\raw\pwned-passwords-ntlm-ordered-by-hash.txt";
-            StoreInterface.Store.ImportHexHashesFromSortedFile(this.Store, file);
-        }
+            StoreInterface.Store.ImportHexHashesFromSortedFile(store, StoreType.Password, file);
 
+            // add english dictionary to word store
+            file = @"D:\pwnedpwds\raw\english.txt";
+            StoreInterface.Store.ImportPasswordsFromFile(store, StoreType.Word, file);
 
-        private void BuildStore(string sourceFile)
-        {
-            string filename = Path.GetFileNameWithoutExtension(sourceFile);
+            // add more english words to word store
+            file = @"D:\pwnedpwds\raw\words.txt";
+            StoreInterface.Store.ImportPasswordsFromFile(store, StoreType.Word, file);
 
-            string path = Path.Combine(TestHelpers.TestStorePath, filename + "-f");
-            Directory.CreateDirectory(path);
+            // add rockyou breach
+            file = @"D:\pwnedpwds\raw\rockyou.txt";
+            StoreInterface.Store.ImportPasswordsFromFile(store, StoreType.Password, file);
 
-            var store = new V3Store(path);
-            StoreInterface.Store.ImportPasswordsFromFile(store, sourceFile, true, true, 2000000);
+            // add top 100000 
+            file = @"D:\pwnedpwds\raw\top1000000.txt";
+            StoreInterface.Store.ImportPasswordsFromFile(store, StoreType.Password, file);
 
-            path = Path.Combine(TestHelpers.TestStorePath, filename + "-n");
-            Directory.CreateDirectory(path);
-
-            store = new V3Store(path);
-            StoreInterface.Store.ImportPasswordsFromFile(store, sourceFile, false, true, 2000000);
-
-            path = Path.Combine(TestHelpers.TestStorePath, filename + "-r");
-            Directory.CreateDirectory(path);
-
-            store = new V3Store(path);
-            StoreInterface.Store.ImportPasswordsFromFile(store, sourceFile, true, false, 2000000);
-        }
-
-        [TestMethod]
-        public void MergeStore()
-        {
-            string path = Path.Combine(TestHelpers.TestStorePath, "merged");
-            var target = new V3Store(path);
-
-            path = Path.Combine(TestHelpers.TestStorePath, "top1000000-f");
-            var source = new V3Store(path);
-
-            StoreInterface.Store.ImportFromStore(target, source);
-
-            path = Path.Combine(TestHelpers.TestStorePath, "english-f");
-            source = new V3Store(path);
-
-            StoreInterface.Store.ImportFromStore(target, source);
-
-            path = Path.Combine(TestHelpers.TestStorePath, "words-f");
-            source = new V3Store(path);
-
-            StoreInterface.Store.ImportFromStore(target, source);
-
-            path = Path.Combine(TestHelpers.TestStorePath, "rockyou-f");
-            source = new V3Store(path);
-
-            StoreInterface.Store.ImportFromStore(target, source);
-
-            path = Path.Combine(TestHelpers.TestStorePath, "breachcompilationuniq-f");
-            source = new V3Store(path);
-
-            StoreInterface.Store.ImportFromStore(target, source);
-
-            path = Path.Combine(TestHelpers.TestStorePath, "hibp");
-            source = new V3Store(path);
-
-            StoreInterface.Store.ImportFromStore(target, source);
-
-
+            // add breach compilation
+            file = @"D:\pwnedpwds\raw\breachcompilationuniq.txt";
+            StoreInterface.Store.ImportPasswordsFromFile(store, StoreType.Password, file);
         }
 
         [TestMethod]
         public void TestBadPassword()
         {
-            string path = Path.Combine(TestHelpers.TestStorePath, "merged");
-            var target = new V3Store(path);
-
-            Assert.IsTrue(target.IsPasswordInStore("monash!!!!", true));
+            V3Store store = new V3Store(@"D:\pwnedpwds\store");
+            Assert.IsTrue(store.IsInStore("monash!!!!", StoreType.Word));
         }
 
         [TestMethod]
         public void TestBadPassword2()
         {
-            string path = Path.Combine(TestHelpers.TestStorePath, "merged");
-            var target = new V3Store(path);
-
-            Assert.IsTrue(target.IsPasswordInStore("Password345!", true));
+            V3Store store = new V3Store(@"D:\pwnedpwds\store");
+            Assert.IsTrue(store.IsInStore("Password345!", StoreType.Word));
         }
 
-        [TestMethod]
-        public void BuildStoreEnglish()
-        {
-            this.BuildStore(@"D:\pwnedpwds\raw\english.txt");
-        }
+        //[TestMethod]
+        //public void BuildStoreEnglish()
+        //{
+        //    this.BuildStore(@"D:\pwnedpwds\raw\english.txt");
+        //}
 
-        [TestMethod]
-        public void BuildStoreWords()
-        {
-            this.BuildStore(@"D:\pwnedpwds\raw\words.txt");
-        }
+        //[TestMethod]
+        //public void BuildStoreWords()
+        //{
+        //    this.BuildStore(@"D:\pwnedpwds\raw\words.txt");
+        //}
 
-        [TestMethod]
-        public void BuildStoreRockyou()
-        {
-            this.BuildStore(@"D:\pwnedpwds\raw\rockyou.txt");
-        }
+        //[TestMethod]
+        //public void BuildStoreRockyou()
+        //{
+        //    this.BuildStore(@"D:\pwnedpwds\raw\rockyou.txt");
+        //}
 
-        [TestMethod]
-        public void BuildStoreTop1000000()
-        {
-            this.BuildStore(@"D:\pwnedpwds\raw\top1000000.txt");
-        }
+        //[TestMethod]
+        //public void BuildStoreTop1000000()
+        //{
+        //    this.BuildStore(@"D:\pwnedpwds\raw\top1000000.txt");
+        //}
 
-        [TestMethod]
-        public void BuildStoreBreachCompilationUniq()
-        {
-            this.BuildStore(@"D:\pwnedpwds\raw\breachcompilationuniq.txt");
-        }
+        //[TestMethod]
+        //public void BuildStoreBreachCompilationUniq()
+        //{
+        //    this.BuildStore(@"D:\pwnedpwds\raw\breachcompilationuniq.txt");
+        //}
 
-        [TestMethod]
-        public void BuildStoreHibp()
-        {
-            string file = @"D:\pwnedpwds\raw\pwned-passwords-ntlm-ordered-by-hash.txt";
-            string path = Path.Combine(TestHelpers.TestStorePath, "hibp");
-            Directory.CreateDirectory(path);
+        //[TestMethod]
+        //public void BuildStoreHibp()
+        //{
+        //    string file = @"D:\pwnedpwds\raw\pwned-passwords-ntlm-ordered-by-hash.txt";
+        //    string path = Path.Combine(TestHelpers.TestStorePath, "hibp");
+        //    Directory.CreateDirectory(path);
 
-            var store = new V3Store(path);
-            StoreInterface.Store.ImportHexHashesFromSortedFile(store, file);
-        }
+        //    var store = new V3Store(path);
+        //    StoreInterface.Store.ImportHexHashesFromSortedFile(store, file);
+        //}
 
         [TestMethod]
         public void AddEnglishDictionaryToNewStoreAndValidate()
@@ -170,7 +128,7 @@ namespace ManagedUnitTests
             try
             {
                 var store = new V3Store(path);
-                StoreInterface.Store.ImportPasswordsFromFile(store, file, true, false, 2000000);
+                StoreInterface.Store.ImportPasswordsFromFile(store, StoreType.Word, file);
 
                 using (StreamReader reader = new StreamReader(file))
                 {
@@ -183,7 +141,7 @@ namespace ManagedUnitTests
                             continue;
                         }
 
-                        Assert.IsTrue(store.IsPasswordInStore(line));
+                        Assert.IsTrue(store.IsInStore(line, StoreType.Word));
                     }
                 }
             }
@@ -200,31 +158,20 @@ namespace ManagedUnitTests
         }
 
         [TestMethod]
-        public void ConsolidateStore()
-        {
-            int add = 0;
-            int del = 0;
-
-            string path = Path.Combine(TestHelpers.TestStorePath, "merged");
-            var target = new V3Store(path);
-            target.ConsolidateAndSort(ref add, ref del);
-        }
-
-        [TestMethod]
         public void TestAddPasswordToStore()
         {
             string password = "password"; //8846F7EAEE8FB117AD06BDD830B7586C
 
-            this.Store.AddPasswordToStore(password, false);
+            this.Store.AddToStore(password, StoreType.Password);
 
-            string rawFile = Path.Combine(this.Store.StorePath, this.GetFileNameFromHash("8846F7EAEE8FB117AD06BDD830B7586C"));
+            string rawFile = Path.Combine(this.Store.StorePathPasswordStore, this.GetFileNameFromHash("8846F7EAEE8FB117AD06BDD830B7586C"));
             TestHelpers.AssertFileIsExpectedSize(rawFile, this.StoredHashSize);
 
-            this.Store.AddPasswordToStore(password, false);
+            this.Store.AddToStore(password, StoreType.Password);
 
             TestHelpers.AssertFileIsExpectedSize(rawFile, this.StoredHashSize);
 
-            Assert.IsTrue(this.Store.IsPasswordInStore(password));
+            Assert.IsTrue(this.Store.IsInStore(password, StoreType.Password));
         }
 
         [TestMethod]
@@ -233,12 +180,12 @@ namespace ManagedUnitTests
             string hash = "8846F7EAEE8FB117AD06BDD830B7586C";
             byte[] hashBytes = hash.HexStringToBytes();
 
-            this.Store.AddHashToStore(hashBytes);
+            this.Store.AddToStore(hashBytes, StoreType.Password);
 
-            string rawFile = Path.Combine(this.Store.StorePath, this.GetFileNameFromHash(hash));
+            string rawFile = Path.Combine(this.Store.StorePathPasswordStore, this.GetFileNameFromHash(hash));
             TestHelpers.AssertFileIsExpectedSize(rawFile, this.StoredHashSize);
 
-            this.Store.AddHashToStore(hashBytes);
+            this.Store.AddToStore(hashBytes, StoreType.Password);
             TestHelpers.AssertFileIsExpectedSize(rawFile, this.StoredHashSize);
         }
 
@@ -260,22 +207,18 @@ namespace ManagedUnitTests
             };
 
             List<byte[]> hashBytes = hashes.Select(t => t.HexStringToBytes()).ToList();
-            int added = 0;
-            int discarded = 0;
 
-            this.Store.AddHashesToStore(new HashSet<byte[]>(hashBytes, new ByteArrayComparer()),
-                ref added,
-                ref discarded);
+            OperationProgress progress = new OperationProgress();
 
-            Assert.AreEqual(0, discarded);
-            Assert.AreEqual(hashes.Length, added);
+            this.Store.AddToStore(new HashSet<byte[]>(hashBytes, new ByteArrayComparer()), StoreType.Password, progress);
 
-            string rawFile = Path.Combine(this.Store.StorePath, this.GetFileNameFromHash(hashes[0]));
+            Assert.AreEqual(0, progress.HashesDiscarded);
+            Assert.AreEqual(hashes.Length, progress.HashesAdded);
+
+            string rawFile = Path.Combine(this.Store.StorePathPasswordStore, this.GetFileNameFromHash(hashes[0]));
             TestHelpers.AssertFileIsExpectedSize(rawFile, this.StoredHashSize * hashes.Length);
 
-            this.Store.AddHashesToStore(new HashSet<byte[]>(hashBytes, new ByteArrayComparer()),
-                ref added,
-                ref discarded);
+            this.Store.AddToStore(new HashSet<byte[]>(hashBytes, new ByteArrayComparer()), StoreType.Password);
             TestHelpers.AssertFileIsExpectedSize(rawFile, this.StoredHashSize * hashes.Length);
         }
 
@@ -297,19 +240,15 @@ namespace ManagedUnitTests
             };
 
             List<byte[]> hashBytes = hashes.Select(t => t.HexStringToBytes()).ToList();
-            int added = 0;
-            int discarded = 0;
 
-            this.Store.AddHashesToStore(new HashSet<byte[]>(hashBytes, new ByteArrayComparer()),
-                ref added,
-                ref discarded);
+            this.Store.AddToStore(new HashSet<byte[]>(hashBytes, new ByteArrayComparer()), StoreType.Password);
 
             foreach (string hash in hashes)
             {
-                Assert.IsTrue(this.Store.IsHashInStore(hash.HexStringToBytes()));
+                Assert.IsTrue(this.Store.IsInStore(hash.HexStringToBytes(), StoreType.Password));
             }
 
-            Assert.IsFalse(this.Store.IsHashInStore("0000000000000000000000000000000B".HexStringToBytes()));
+            Assert.IsFalse(this.Store.IsInStore("0000000000000000000000000000000B".HexStringToBytes(), StoreType.Password));
         }
 
         [TestMethod]
@@ -340,20 +279,17 @@ namespace ManagedUnitTests
             };
 
             List<byte[]> hashBytes = hashes.Select(t => t.HexStringToBytes()).Reverse().ToList();
-            int added = 0;
-            int discarded = 0;
+            OperationProgress progress = new OperationProgress();
 
-            this.Store.AddHashesToStore(new HashSet<byte[]>(hashBytes, new ByteArrayComparer()),
-                ref added,
-                ref discarded);
+            this.Store.AddToStore(new HashSet<byte[]>(hashBytes, new ByteArrayComparer()), StoreType.Password, progress);
 
-            Assert.AreEqual(0, discarded);
-            Assert.AreEqual(hashes.Length, added);
+            Assert.AreEqual(0, progress.HashesDiscarded);
+            Assert.AreEqual(hashes.Length, progress.HashesAdded);
 
-            string rawFile = Path.Combine(this.Store.StorePath, this.GetFileNameFromHash("00000"));
+            string rawFile = Path.Combine(this.Store.StorePathPasswordStore, this.GetFileNameFromHash("00000"));
             TestHelpers.AssertFileIsExpectedSize(rawFile, this.StoredHashSize * 10);
 
-            rawFile = Path.Combine(this.Store.StorePath, this.GetFileNameFromHash("10000"));
+            rawFile = Path.Combine(this.Store.StorePathPasswordStore, this.GetFileNameFromHash("10000"));
             TestHelpers.AssertFileIsExpectedSize(rawFile, this.StoredHashSize * 10);
         }
 
@@ -375,16 +311,15 @@ namespace ManagedUnitTests
             };
 
             HashSet<byte[]> hashBytes = new HashSet<byte[]>(hashes.Select(t => t.HexStringToBytes()), new ByteArrayComparer());
+            OperationProgress progress = new OperationProgress();
 
-            int added = 0;
-            int discarded = 0;
 
-            this.Store.AddHashesToStore(hashBytes, ref added, ref discarded);
+            this.Store.AddToStore(hashBytes, StoreType.Password, progress);
 
-            Assert.AreEqual(0, discarded);
-            Assert.AreEqual(hashes.Length, added);
+            Assert.AreEqual(0, progress.HashesDiscarded);
+            Assert.AreEqual(hashes.Length, progress.HashesAdded);
 
-            CollectionAssert.AreEqual(hashes.OrderBy(t => t).ToList(), this.Store.GetHashesFromStore(this.GetPrefixFromHash("00000")).Select(t => t.ToHexString()).ToList());
+            CollectionAssert.AreEqual(hashes.OrderBy(t => t).ToList(), this.Store.GetHashes(this.GetPrefixFromHash("00000"), StoreType.Password).Select(t => t.ToHexString()).ToList());
         }
 
         [TestMethod]
@@ -405,19 +340,17 @@ namespace ManagedUnitTests
             };
 
             HashSet<byte[]> hashBytes = new HashSet<byte[]>(hashes.Reverse().Select(t => t.HexStringToBytes()), new ByteArrayComparer());
+            OperationProgress progress = new OperationProgress();
 
-            int added = 0;
-            int discarded = 0;
+            this.Store.AddToStore(hashBytes, StoreType.Password, progress);
 
-            this.Store.AddHashesToStore(hashBytes, ref added, ref discarded);
+            Assert.AreEqual(0, progress.HashesDiscarded);
+            Assert.AreEqual(hashes.Length, progress.HashesAdded);
 
-            Assert.AreEqual(0, discarded);
-            Assert.AreEqual(hashes.Length, added);
+            CollectionAssert.AreEqual(hashes.OrderBy(t => t).ToList(), this.Store.GetHashes(this.GetPrefixFromHash("00000"), StoreType.Password).Select(t => t.ToHexString()).ToList());
 
-            CollectionAssert.AreEqual(hashes.OrderBy(t => t).ToList(), this.Store.GetHashesFromStore(this.GetPrefixFromHash("00000")).Select(t => t.ToHexString()).ToList());
-
-            this.Store.AddHashToStore("00000000000000000000000000000006".HexStringToBytes());
-            this.Store.AddHashToStore("00000000000000000000000000000007".HexStringToBytes());
+            this.Store.AddToStore("00000000000000000000000000000006".HexStringToBytes(), StoreType.Password);
+            this.Store.AddToStore("00000000000000000000000000000007".HexStringToBytes(), StoreType.Password);
 
 
             string[] expectedHashes = new string[]
@@ -436,7 +369,7 @@ namespace ManagedUnitTests
                 "0000000000000000000000000000000C",
             };
 
-            CollectionAssert.AreEqual(expectedHashes, this.Store.GetHashesFromStore(this.GetPrefixFromHash("00000")).Select(t => t.ToHexString()).ToList());
+            CollectionAssert.AreEqual(expectedHashes, this.Store.GetHashes(this.GetPrefixFromHash("00000"), StoreType.Password).Select(t => t.ToHexString()).ToList());
         }
     }
 }

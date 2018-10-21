@@ -10,37 +10,38 @@ namespace NativeUnitTests
 	TEST_CLASS(PasswordEvaluatorRegexApproveTests)
 	{
 	public:
-		registry reg;
+		registry reg = registry(L"UnitTests");
+
 		TEST_METHOD(RegexApprovePass)
 		{
-			SetValue(L"RegexApprove", L"approve.+");
+			SetValue(REG_VALUE_REGEXAPPROVE, L"approve.+");
 			TestString password(L"approve me");
 			Assert::IsTrue(ProcessPasswordRegexApprove(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
-			DeleteValue(L"RegexApprove");
+			DeleteValue(REG_VALUE_REGEXAPPROVE);
 		}
 
 		TEST_METHOD(RegexApproveFail)
 		{
-			SetValue(L"RegexApprove", L"approve.+");
+			SetValue(REG_VALUE_REGEXAPPROVE, L"approve.+");
 			TestString password(L"don't approve this");
 			Assert::IsFalse(ProcessPasswordRegexApprove(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
-			DeleteValue(L"RegexApprove");
+			DeleteValue(REG_VALUE_REGEXAPPROVE);
 		}
 
 		TEST_METHOD(RegexRejectPass)
 		{
-			SetValue(L"RegexReject", L"reject.+");
+			SetValue(REG_VALUE_REGEXREJECT, L"reject.+");
 			TestString password(L"don't reject me");
 			Assert::IsTrue(ProcessPasswordRegexReject(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
-			DeleteValue(L"RegexReject");
+			DeleteValue(REG_VALUE_REGEXREJECT);
 		}
 
 		TEST_METHOD(RegexRejectFail)
 		{
-			SetValue(L"RegexReject", L"reject.+");
+			SetValue(REG_VALUE_REGEXREJECT, L"reject.+");
 			TestString password(L"reject me");
 			Assert::IsFalse(ProcessPasswordRegexReject(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
-			DeleteValue(L"RegexReject");
+			DeleteValue(REG_VALUE_REGEXREJECT);
 		}
 	};
 }

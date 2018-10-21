@@ -9,16 +9,16 @@ namespace StoreInterface
 {
     public interface IStore
     {
-        void ClearStore();
+        void ClearStore(StoreType storeType);
 
-        void AddPasswordToStore(string password, bool normalize);
+        void AddToStore(string password, StoreType storeType);
+        
+        void AddToStore(byte[] hash, StoreType storeType);
+        
+        void AddToStore(HashSet<byte[]> hashes, StoreType storeType, OperationProgress progress);
+        
+        bool IsInStore(string password, StoreType storeType);
 
-        void AddHashToStore(byte[] hash);
-
-        void AddHashesToStore(HashSet<byte[]> hashes, ref int hashesAdded, ref int hashesDiscarded);
-
-        bool IsPasswordInStore(string password, bool normalize = false);
-
-        bool IsHashInStore(byte[] hash);
+        bool IsInStore(byte[] hash, StoreType storeType);
     }
 }

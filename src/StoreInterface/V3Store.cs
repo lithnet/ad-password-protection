@@ -12,7 +12,7 @@ namespace StoreInterface
     public class V3Store : BinaryStore
     {
         public V3Store(string storeBasePath)
-        : base(storeBasePath, "v3", MD4.Create(), 16, 2)
+        : base(storeBasePath, "v3\\p", "v3\\w", MD4.Create(), 16, 2)
         {
         }
 

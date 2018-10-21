@@ -11,21 +11,21 @@ namespace NativeUnitTests
 	TEST_CLASS(PasswordEvaluatorComplexityPointsTests)
 	{
 	public:
-		registry reg;
+		registry reg = registry(L"UnitTests");
 		TEST_METHOD(ComplexityPointsPerCharacterTestPass)
 		{
-			SetValue(L"ComplexityPointsRequired", 12);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSREQUIRED, 12);
 
-			SetValue(L"ComplexityPointsPerCharacter", 1);
-			SetValue(L"ComplexityPointsPerLower", 0);
-			SetValue(L"ComplexityPointsPerNumber", 0);
-			SetValue(L"ComplexityPointsPerSymbol", 0);
-			SetValue(L"ComplexityPointsPerUpper", 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERCHAR, 1);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERLOWER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERNUMBER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERSYMBOL, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERUPPER, 0);
 
-			SetValue(L"ComplexityPointsUseOfLower", 0);
-			SetValue(L"ComplexityPointsUseOfNumber", 0);
-			SetValue(L"ComplexityPointsUseOfSymbol", 0);
-			SetValue(L"ComplexityPointsUseOfUpper", 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFLOWER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFNUMBER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 0);
 
 			TestString password(L"password1@Pp");
 
@@ -34,18 +34,18 @@ namespace NativeUnitTests
 
 		TEST_METHOD(ComplexityPointsPerCharacterTestFail)
 		{
-			SetValue(L"ComplexityPointsRequired", 13);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSREQUIRED, 13);
 
-			SetValue(L"ComplexityPointsPerCharacter", 1);
-			SetValue(L"ComplexityPointsPerLower", 0);
-			SetValue(L"ComplexityPointsPerNumber", 0);
-			SetValue(L"ComplexityPointsPerSymbol", 0);
-			SetValue(L"ComplexityPointsPerUpper", 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERCHAR, 1);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERLOWER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERNUMBER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERSYMBOL, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERUPPER, 0);
 
-			SetValue(L"ComplexityPointsUseOfLower", 0);
-			SetValue(L"ComplexityPointsUseOfNumber", 0);
-			SetValue(L"ComplexityPointsUseOfSymbol", 0);
-			SetValue(L"ComplexityPointsUseOfUpper", 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFLOWER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFNUMBER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 0);
 
 			TestString password(L"password1@Pp");
 
@@ -54,18 +54,18 @@ namespace NativeUnitTests
 
 		TEST_METHOD(ComplexityPointsPerLowerTestPass)
 		{
-			SetValue(L"ComplexityPointsRequired", 9);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSREQUIRED, 9);
 
-			SetValue(L"ComplexityPointsPerCharacter", 0);
-			SetValue(L"ComplexityPointsPerLower", 1);
-			SetValue(L"ComplexityPointsPerNumber", 0);
-			SetValue(L"ComplexityPointsPerSymbol", 0);
-			SetValue(L"ComplexityPointsPerUpper", 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERCHAR, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERLOWER, 1);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERNUMBER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERSYMBOL, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERUPPER, 0);
 
-			SetValue(L"ComplexityPointsUseOfLower", 0);
-			SetValue(L"ComplexityPointsUseOfNumber", 0);
-			SetValue(L"ComplexityPointsUseOfSymbol", 0);
-			SetValue(L"ComplexityPointsUseOfUpper", 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFLOWER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFNUMBER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 0);
 
 			TestString password(L"password1@Pp");
 
@@ -74,18 +74,18 @@ namespace NativeUnitTests
 
 		TEST_METHOD(ComplexityPointsPerLowerTestFail)
 		{
-			SetValue(L"ComplexityPointsRequired", 10);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSREQUIRED, 10);
 
-			SetValue(L"ComplexityPointsPerCharacter", 0);
-			SetValue(L"ComplexityPointsPerLower", 1);
-			SetValue(L"ComplexityPointsPerNumber", 0);
-			SetValue(L"ComplexityPointsPerSymbol", 0);
-			SetValue(L"ComplexityPointsPerUpper", 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERCHAR, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERLOWER, 1);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERNUMBER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERSYMBOL, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERUPPER, 0);
 
-			SetValue(L"ComplexityPointsUseOfLower", 0);
-			SetValue(L"ComplexityPointsUseOfNumber", 0);
-			SetValue(L"ComplexityPointsUseOfSymbol", 0);
-			SetValue(L"ComplexityPointsUseOfUpper", 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFLOWER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFNUMBER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 0);
 
 			TestString password(L"password1@Pp");
 
@@ -94,18 +94,18 @@ namespace NativeUnitTests
 
 		TEST_METHOD(ComplexityPointsPerNumberTestPass)
 		{
-			SetValue(L"ComplexityPointsRequired", 2);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSREQUIRED, 2);
 
-			SetValue(L"ComplexityPointsPerCharacter", 0);
-			SetValue(L"ComplexityPointsPerLower", 0);
-			SetValue(L"ComplexityPointsPerNumber", 1);
-			SetValue(L"ComplexityPointsPerSymbol", 0);
-			SetValue(L"ComplexityPointsPerUpper", 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERCHAR, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERLOWER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERNUMBER, 1);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERSYMBOL, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERUPPER, 0);
 
-			SetValue(L"ComplexityPointsUseOfLower", 0);
-			SetValue(L"ComplexityPointsUseOfNumber", 0);
-			SetValue(L"ComplexityPointsUseOfSymbol", 0);
-			SetValue(L"ComplexityPointsUseOfUpper", 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFLOWER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFNUMBER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 0);
 
 			TestString password(L"password1@Pp3");
 
@@ -114,18 +114,18 @@ namespace NativeUnitTests
 
 		TEST_METHOD(ComplexityPointsPerNumberTestFail)
 		{
-			SetValue(L"ComplexityPointsRequired", 2);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSREQUIRED, 2);
 
-			SetValue(L"ComplexityPointsPerCharacter", 0);
-			SetValue(L"ComplexityPointsPerLower", 0);
-			SetValue(L"ComplexityPointsPerNumber", 1);
-			SetValue(L"ComplexityPointsPerSymbol", 0);
-			SetValue(L"ComplexityPointsPerUpper", 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERCHAR, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERLOWER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERNUMBER, 1);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERSYMBOL, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERUPPER, 0);
 
-			SetValue(L"ComplexityPointsUseOfLower", 0);
-			SetValue(L"ComplexityPointsUseOfNumber", 0);
-			SetValue(L"ComplexityPointsUseOfSymbol", 0);
-			SetValue(L"ComplexityPointsUseOfUpper", 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFLOWER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFNUMBER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 0);
 
 			TestString password(L"password1@Pp");
 			Assert::IsFalse(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
@@ -133,18 +133,18 @@ namespace NativeUnitTests
 
 		TEST_METHOD(ComplexityPointsPerSymbolTestPass)
 		{
-			SetValue(L"ComplexityPointsRequired", 2);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSREQUIRED, 2);
 
-			SetValue(L"ComplexityPointsPerCharacter", 0);
-			SetValue(L"ComplexityPointsPerLower", 0);
-			SetValue(L"ComplexityPointsPerNumber", 0);
-			SetValue(L"ComplexityPointsPerSymbol", 1);
-			SetValue(L"ComplexityPointsPerUpper", 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERCHAR, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERLOWER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERNUMBER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERSYMBOL, 1);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERUPPER, 0);
 
-			SetValue(L"ComplexityPointsUseOfLower", 0);
-			SetValue(L"ComplexityPointsUseOfNumber", 0);
-			SetValue(L"ComplexityPointsUseOfSymbol", 0);
-			SetValue(L"ComplexityPointsUseOfUpper", 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFLOWER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFNUMBER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 0);
 
 			TestString password(L"password1@Pp!");
 			Assert::IsTrue(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
@@ -152,18 +152,18 @@ namespace NativeUnitTests
 
 		TEST_METHOD(ComplexityPointsPerSymbolTestFail)
 		{
-			SetValue(L"ComplexityPointsRequired", 2);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSREQUIRED, 2);
 
-			SetValue(L"ComplexityPointsPerCharacter", 0);
-			SetValue(L"ComplexityPointsPerLower", 0);
-			SetValue(L"ComplexityPointsPerNumber", 0);
-			SetValue(L"ComplexityPointsPerSymbol", 1);
-			SetValue(L"ComplexityPointsPerUpper", 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERCHAR, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERLOWER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERNUMBER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERSYMBOL, 1);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERUPPER, 0);
 
-			SetValue(L"ComplexityPointsUseOfLower", 0);
-			SetValue(L"ComplexityPointsUseOfNumber", 0);
-			SetValue(L"ComplexityPointsUseOfSymbol", 0);
-			SetValue(L"ComplexityPointsUseOfUpper", 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFLOWER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFNUMBER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 0);
 
 			TestString password(L"password1@Pp");
 			Assert::IsFalse(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
@@ -171,18 +171,18 @@ namespace NativeUnitTests
 
 		TEST_METHOD(ComplexityPointsPerUpperTestPass)
 		{
-			SetValue(L"ComplexityPointsRequired", 2);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSREQUIRED, 2);
 
-			SetValue(L"ComplexityPointsPerCharacter", 0);
-			SetValue(L"ComplexityPointsPerLower", 0);
-			SetValue(L"ComplexityPointsPerNumber", 0);
-			SetValue(L"ComplexityPointsPerSymbol", 0);
-			SetValue(L"ComplexityPointsPerUpper", 1);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERCHAR, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERLOWER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERNUMBER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERSYMBOL, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERUPPER, 1);
 
-			SetValue(L"ComplexityPointsUseOfLower", 0);
-			SetValue(L"ComplexityPointsUseOfNumber", 0);
-			SetValue(L"ComplexityPointsUseOfSymbol", 0);
-			SetValue(L"ComplexityPointsUseOfUpper", 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFLOWER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFNUMBER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 0);
 
 			TestString password(L"password1@PpW");
 			Assert::IsTrue(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
@@ -190,18 +190,18 @@ namespace NativeUnitTests
 
 		TEST_METHOD(ComplexityPointsPerUpperTestFail)
 		{
-			SetValue(L"ComplexityPointsRequired", 2);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSREQUIRED, 2);
 
-			SetValue(L"ComplexityPointsPerCharacter", 0);
-			SetValue(L"ComplexityPointsPerLower", 0);
-			SetValue(L"ComplexityPointsPerNumber", 0);
-			SetValue(L"ComplexityPointsPerSymbol", 0);
-			SetValue(L"ComplexityPointsPerUpper", 1);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERCHAR, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERLOWER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERNUMBER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERSYMBOL, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERUPPER, 1);
 
-			SetValue(L"ComplexityPointsUseOfLower", 0);
-			SetValue(L"ComplexityPointsUseOfNumber", 0);
-			SetValue(L"ComplexityPointsUseOfSymbol", 0);
-			SetValue(L"ComplexityPointsUseOfUpper", 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFLOWER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFNUMBER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 0);
 
 
 			TestString password (L"password1@Pp");
@@ -210,18 +210,18 @@ namespace NativeUnitTests
 
 		TEST_METHOD(ComplexityPointsUseOfLowerTestPass)
 		{
-			SetValue(L"ComplexityPointsRequired", 100);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSREQUIRED, 100);
 
-			SetValue(L"ComplexityPointsPerCharacter", 0);
-			SetValue(L"ComplexityPointsPerLower", 0);
-			SetValue(L"ComplexityPointsPerNumber", 0);
-			SetValue(L"ComplexityPointsPerSymbol", 0);
-			SetValue(L"ComplexityPointsPerUpper", 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERCHAR, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERLOWER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERNUMBER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERSYMBOL, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERUPPER, 0);
 
-			SetValue(L"ComplexityPointsUseOfLower", 100);
-			SetValue(L"ComplexityPointsUseOfNumber", 0);
-			SetValue(L"ComplexityPointsUseOfSymbol", 0);
-			SetValue(L"ComplexityPointsUseOfUpper", 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFLOWER, 100);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFNUMBER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 0);
 
 
 			TestString password (L"password1@PpW");
@@ -230,18 +230,18 @@ namespace NativeUnitTests
 
 		TEST_METHOD(ComplexityPointsUseOfLowerTestFail)
 		{
-			SetValue(L"ComplexityPointsRequired", 100);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSREQUIRED, 100);
 
-			SetValue(L"ComplexityPointsPerCharacter", 0);
-			SetValue(L"ComplexityPointsPerLower", 0);
-			SetValue(L"ComplexityPointsPerNumber", 0);
-			SetValue(L"ComplexityPointsPerSymbol", 0);
-			SetValue(L"ComplexityPointsPerUpper", 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERCHAR, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERLOWER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERNUMBER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERSYMBOL, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERUPPER, 0);
 
-			SetValue(L"ComplexityPointsUseOfLower", 100);
-			SetValue(L"ComplexityPointsUseOfNumber", 0);
-			SetValue(L"ComplexityPointsUseOfSymbol", 0);
-			SetValue(L"ComplexityPointsUseOfUpper", 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFLOWER, 100);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFNUMBER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 0);
 
 
 			TestString password (L"PASSWORD");
@@ -251,18 +251,18 @@ namespace NativeUnitTests
 
 		TEST_METHOD(ComplexityPointsUseOfNumberTestPass)
 		{
-			SetValue(L"ComplexityPointsRequired", 100);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSREQUIRED, 100);
 
-			SetValue(L"ComplexityPointsPerCharacter", 0);
-			SetValue(L"ComplexityPointsPerLower", 0);
-			SetValue(L"ComplexityPointsPerNumber", 0);
-			SetValue(L"ComplexityPointsPerSymbol", 0);
-			SetValue(L"ComplexityPointsPerUpper", 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERCHAR, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERLOWER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERNUMBER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERSYMBOL, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERUPPER, 0);
 
-			SetValue(L"ComplexityPointsUseOfLower", 0);
-			SetValue(L"ComplexityPointsUseOfNumber", 100);
-			SetValue(L"ComplexityPointsUseOfSymbol", 0);
-			SetValue(L"ComplexityPointsUseOfUpper", 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFLOWER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFNUMBER, 100);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 0);
 
 
 			TestString password (L"password1@PpW");
@@ -271,18 +271,18 @@ namespace NativeUnitTests
 
 		TEST_METHOD(ComplexityPointsUseOfNumberTestFail)
 		{
-			SetValue(L"ComplexityPointsRequired", 100);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSREQUIRED, 100);
 
-			SetValue(L"ComplexityPointsPerCharacter", 0);
-			SetValue(L"ComplexityPointsPerLower", 0);
-			SetValue(L"ComplexityPointsPerNumber", 0);
-			SetValue(L"ComplexityPointsPerSymbol", 0);
-			SetValue(L"ComplexityPointsPerUpper", 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERCHAR, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERLOWER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERNUMBER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERSYMBOL, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERUPPER, 0);
 
-			SetValue(L"ComplexityPointsUseOfLower", 0);
-			SetValue(L"ComplexityPointsUseOfNumber", 100);
-			SetValue(L"ComplexityPointsUseOfSymbol", 0);
-			SetValue(L"ComplexityPointsUseOfUpper", 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFLOWER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFNUMBER, 100);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 0);
 
 
 			TestString password (L"PASSWORD");
@@ -292,18 +292,18 @@ namespace NativeUnitTests
 
 		TEST_METHOD(ComplexityPointsUseOfSymbolTestPass)
 		{
-			SetValue(L"ComplexityPointsRequired", 100);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSREQUIRED, 100);
 
-			SetValue(L"ComplexityPointsPerCharacter", 0);
-			SetValue(L"ComplexityPointsPerLower", 0);
-			SetValue(L"ComplexityPointsPerNumber", 0);
-			SetValue(L"ComplexityPointsPerSymbol", 0);
-			SetValue(L"ComplexityPointsPerUpper", 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERCHAR, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERLOWER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERNUMBER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERSYMBOL, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERUPPER, 0);
 
-			SetValue(L"ComplexityPointsUseOfLower", 0);
-			SetValue(L"ComplexityPointsUseOfNumber", 0);
-			SetValue(L"ComplexityPointsUseOfSymbol", 100);
-			SetValue(L"ComplexityPointsUseOfUpper", 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFLOWER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFNUMBER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 100);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 0);
 
 			TestString password (L"password1@PpW");
 			Assert::IsTrue(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
@@ -311,18 +311,18 @@ namespace NativeUnitTests
 
 		TEST_METHOD(ComplexityPointsUseOfSymbolTestFail)
 		{
-			SetValue(L"ComplexityPointsRequired", 100);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSREQUIRED, 100);
 
-			SetValue(L"ComplexityPointsPerCharacter", 0);
-			SetValue(L"ComplexityPointsPerLower", 0);
-			SetValue(L"ComplexityPointsPerNumber", 0);
-			SetValue(L"ComplexityPointsPerSymbol", 0);
-			SetValue(L"ComplexityPointsPerUpper", 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERCHAR, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERLOWER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERNUMBER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERSYMBOL, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERUPPER, 0);
 
-			SetValue(L"ComplexityPointsUseOfLower", 0);
-			SetValue(L"ComplexityPointsUseOfNumber", 0);
-			SetValue(L"ComplexityPointsUseOfSymbol", 100);
-			SetValue(L"ComplexityPointsUseOfUpper", 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFLOWER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFNUMBER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 100);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 0);
 
 			TestString password (L"PASSWORD");
 			Assert::IsFalse(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
@@ -331,18 +331,18 @@ namespace NativeUnitTests
 
 		TEST_METHOD(ComplexityPointsUseOfUpperTestPass)
 		{
-			SetValue(L"ComplexityPointsRequired", 100);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSREQUIRED, 100);
 
-			SetValue(L"ComplexityPointsPerCharacter", 0);
-			SetValue(L"ComplexityPointsPerLower", 0);
-			SetValue(L"ComplexityPointsPerNumber", 0);
-			SetValue(L"ComplexityPointsPerSymbol", 0);
-			SetValue(L"ComplexityPointsPerUpper", 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERCHAR, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERLOWER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERNUMBER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERSYMBOL, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERUPPER, 0);
 
-			SetValue(L"ComplexityPointsUseOfLower", 0);
-			SetValue(L"ComplexityPointsUseOfNumber", 0);
-			SetValue(L"ComplexityPointsUseOfSymbol", 0);
-			SetValue(L"ComplexityPointsUseOfUpper", 100);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFLOWER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFNUMBER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 100);
 
 			TestString password (L"password1@PpW");
 			Assert::IsTrue(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
@@ -350,18 +350,18 @@ namespace NativeUnitTests
 
 		TEST_METHOD(ComplexityPointsUseOfUpperTestFail)
 		{
-			SetValue(L"ComplexityPointsRequired", 100);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSREQUIRED, 100);
 
-			SetValue(L"ComplexityPointsPerCharacter", 0);
-			SetValue(L"ComplexityPointsPerLower", 0);
-			SetValue(L"ComplexityPointsPerNumber", 0);
-			SetValue(L"ComplexityPointsPerSymbol", 0);
-			SetValue(L"ComplexityPointsPerUpper", 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERCHAR, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERLOWER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERNUMBER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERSYMBOL, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSPERUPPER, 0);
 
-			SetValue(L"ComplexityPointsUseOfLower", 0);
-			SetValue(L"ComplexityPointsUseOfNumber", 0);
-			SetValue(L"ComplexityPointsUseOfSymbol", 0);
-			SetValue(L"ComplexityPointsUseOfUpper", 100);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFLOWER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFNUMBER, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 0);
+			SetValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 100);
 
 			TestString password (L"password");
 			Assert::IsFalse(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));

@@ -9,16 +9,21 @@
 #include <atlconv.h>
 #include "SecureArrayT.h"
 
-binarystore::binarystore(const std::wstring& storeBasePath, const std::wstring& storeSubPath, int hashSize, int hashOffset)
+binarystore::binarystore(const std::wstring& storeBasePath, const std::wstring& storeSubPathPasswordStore, const std::wstring& storeSubPathWordStore, int hashSize, int hashOffset)
 {
 	this->hashSize = hashSize;
-	this->storeSubPath = storeSubPath;
+	this->storeSubPathPasswordStore = storeSubPathPasswordStore;
+	this->storeSubPathWordStore = storeSubPathWordStore;
 	this->storeBasePath = storeBasePath;
 	this->hashOffset = hashOffset;
 
-	WCHAR path[MAX_PATH] = L"";
+	WCHAR passwordStorePath[MAX_PATH] = L"";
+	WCHAR wordStorePath[MAX_PATH] = L"";
 
-	PathCombine(path, storeBasePath.c_str(), storeSubPath.c_str());
+	if (storeBasePath.empty())
+	{
+		throw std::exception("Store path was null");
+	}
 
 	if (!DirectoryExists(storeBasePath))
 	{
@@ -26,31 +31,48 @@ binarystore::binarystore(const std::wstring& storeBasePath, const std::wstring& 
 
 		std::stringstream ss;
 		ss << "There was no store found at ";
-		ss << W2A(path);
+		ss << W2A(passwordStorePath);
 		throw std::system_error(ERROR_PATH_NOT_FOUND, std::system_category(), ss.str().c_str());
 	}
 
-	if (!DirectoryExists(path))
+	PathCombine(passwordStorePath, storeBasePath.c_str(), storeSubPathPasswordStore.c_str());
+		
+	if (!DirectoryExists(passwordStorePath))
 	{
-		CreateDirectory(path, NULL);
+		CreateDirectory(passwordStorePath, NULL);
 	}
 
-	this->storePath = path;
+	PathCombine(wordStorePath, storeBasePath.c_str(), storeSubPathWordStore.c_str());
+
+	if (!DirectoryExists(wordStorePath))
+	{
+		CreateDirectory(wordStorePath, NULL);
+	}
+
+	this->storePathPasswordStore = passwordStorePath;
+	this->storePathWordStore = wordStorePath;
 }
 
 binarystore::~binarystore()
 = default;
 
-bool binarystore::IsPasswordInStore(const SecureArrayT<WCHAR> &password)
+bool binarystore::IsPasswordInPasswordStore(const SecureArrayT<WCHAR> &password)
 {
 	SecureArrayT<BYTE> hash = GetHashFromPassword(password);
 
-	return IsHashInStore(hash);
+	return IsHashInPasswordStore(hash);
 }
 
-bool binarystore::IsHashInStore(const SecureArrayT<BYTE> &hash)
+bool binarystore::IsPasswordInWordStore(const SecureArrayT<WCHAR> &password)
 {
-	std::wstring path = GetStoreFileName(GetRangeFromHash(hash));
+	SecureArrayT<BYTE> hash = GetHashFromPassword(password);
+
+	return IsHashInWordStore(hash);
+}
+
+bool binarystore::IsHashInPasswordStore(const SecureArrayT<BYTE> &hash)
+{
+	std::wstring path = GetPasswordStoreFileName(GetRangeFromHash(hash));
 
 	DWORD attr = GetFileAttributes(path.c_str());
 	if (attr == INVALID_FILE_ATTRIBUTES || (attr & FILE_ATTRIBUTE_DIRECTORY))
@@ -61,9 +83,30 @@ bool binarystore::IsHashInStore(const SecureArrayT<BYTE> &hash)
 	return IsHashInBinaryFile(path, hash);
 }
 
-std::wstring binarystore::GetStoreFileName(const std::wstring &range) const
+bool binarystore::IsHashInWordStore(const SecureArrayT<BYTE> &hash)
 {
-	std::wstring path = this->storePath;
+	std::wstring path = GetWordStoreFileName(GetRangeFromHash(hash));
+
+	DWORD attr = GetFileAttributes(path.c_str());
+	if (attr == INVALID_FILE_ATTRIBUTES || (attr & FILE_ATTRIBUTE_DIRECTORY))
+	{
+		return false;
+	}
+
+	return IsHashInBinaryFile(path, hash);
+}
+
+std::wstring binarystore::GetPasswordStoreFileName(const std::wstring &range) const
+{
+	std::wstring path = this->storePathPasswordStore;
+	path += range;
+	path += L".db";
+	return path;
+}
+
+std::wstring binarystore::GetWordStoreFileName(const std::wstring &range) const
+{
+	std::wstring path = this->storePathWordStore;
 	path += range;
 	path += L".db";
 	return path;

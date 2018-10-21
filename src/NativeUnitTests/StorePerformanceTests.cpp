@@ -79,56 +79,20 @@ namespace NativeUnitTests
 		}
 
 	public:
-
-		TEST_METHOD(LoopKnownBadPasswordsv1Store)
+		TEST_METHOD(LoopKnownBadPasswordsv3Store)
 		{
-			SetValue(L"HashCheckMode", 1);
 			LoopKnownBadPasswords();
-			SetValue(L"HashCheckMode", 0);
 		}
 
-		TEST_METHOD(LoopKnownBadPasswordsEseStore)
+		TEST_METHOD(LoopGoodPasswordv3Store)
 		{
-			SetValue(L"HashCheckMode", 0);
-			LoopKnownBadPasswords();
-			SetValue(L"HashCheckMode", 0);
-		}
-
-		TEST_METHOD(LoopKnownBadPasswordsv2Store)
-		{
-			SetValue(L"HashCheckMode", 2);
-			LoopKnownBadPasswords();
-			SetValue(L"HashCheckMode", 0);
-		}
-
-		TEST_METHOD(LoopGoodPasswordv1Store)
-		{
-			SetValue(L"HashCheckMode", 1);
-
 			LoopGoodRandomPasswords();
 
-			SetValue(L"HashCheckMode", 0);
-		}
-
-		TEST_METHOD(LoopGoodPasswordv2Store)
-		{
-			SetValue(L"HashCheckMode", 2);
-
-			LoopGoodRandomPasswords();
-
-			SetValue(L"HashCheckMode", 0);
-		}
-
-		TEST_METHOD(LoopGoodPasswordEseStore)
-		{
-			SetValue(L"HashCheckMode", 0);
-
-			LoopGoodRandomPasswords();
 		}
 
 		TEST_CLASS_INITIALIZE(Initialize)
 		{
-			SetValue(L"ValidateRawPasswordOnSet", 1);
+			SetValue(REG_VALUE_CHECKBANNEDPASSWORDONSET, 1);
 		}
 	};
 }
