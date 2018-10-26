@@ -39,3 +39,5 @@ std::wstring ToHexString(T first, T last, bool use_uppercase = true, bool insert
 
 	return ss.str();
 }
+
+LPCWSTR GetInteropString(LPCWSTR value);

@@ -48,7 +48,6 @@
     <Compile Include="HashRangeGroup.cs" />
     <Compile Include="IStore.cs" />
     <Compile Include="CryptoLib\MD4.cs" />
-    <Compile Include="NativeMethods.cs" />
     <Compile Include="CryptoLib\MD4CryptoServiceProvider.cs" />
     <Compile Include="OperationProgress.cs" />
     <Compile Include="PasswordTestResult.cs" />
@@ -57,6 +56,11 @@
     <Compile Include="StoreType.cs" />
     <Compile Include="StringNormalizer.cs" />
     <Compile Include="BinaryStore.cs" />
+    <Compile Include="Structures\StorePolicy.cs" />
+    <Compile Include="Structures\ComplexityPointsPolicy.cs" />
+    <Compile Include="Structures\ComplexityThresholdPolicy.cs" />
+    <Compile Include="Structures\GeneralPolicy.cs" />
+    <Compile Include="Structures\UserPolicy.cs" />
     <Compile Include="V3Store.cs" />
   </ItemGroup>
   <ItemGroup>

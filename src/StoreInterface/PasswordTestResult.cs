@@ -12,7 +12,7 @@ namespace StoreInterface
         LengthRequirementsNotMet = 1,
         ComplexityThresholdNotMet = 2,
         ComplexityPointsNotMet = 3,
-        DidNotMatchApprovRegex = 4,
+        DidNotMatchApprovalRegex = 4,
         MatchedRejectRegex = 5,
         ContainsAccountName = 6,
         ContainsFullName = 7,

@@ -1,4 +1,5 @@
 #pragma once
+#include "policy.h"
 
 extern "C" __declspec(dllexport)  BOOLEAN __stdcall InitializeChangeNotify(void);
 
@@ -18,3 +19,6 @@ extern "C" __declspec(dllexport) int __stdcall PasswordFilterEx(
 	LPCWSTR FullName,
 	LPCWSTR Password,
 	BOOLEAN SetOperation);
+
+extern "C" __declspec(dllexport) void __stdcall GetUserPolicySettings(
+	LPCWSTR AccountName, user_policy* policy);

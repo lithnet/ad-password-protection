@@ -51,9 +51,7 @@ namespace ManagedUnitTests
             };
 
             List<byte[]> hashBytes = hashes.Select(t => t.HexStringToBytes()).ToList();
-            int added = 0;
-            int discarded = 0;
-
+            
             this.store.AddToStore(
                 new HashSet<byte[]>(hashBytes, new ByteArrayComparer()), StoreType.Password);
 
