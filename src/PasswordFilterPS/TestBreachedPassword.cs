@@ -34,7 +34,6 @@ namespace PasswordFilterPS
         protected override void ProcessRecord()
         {
             if (this.ParameterSetName == "BreachedPasswordString")
-            if (this.ParameterSetName == "BreachedPasswordString")
                 {
                 string password = this.Normalize ? StringNormalizer.Normalize(this.Password) : this.Password;
 

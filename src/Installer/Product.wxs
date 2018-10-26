@@ -78,17 +78,25 @@
           </Directory>
         </Directory>
       </Directory>
+      <Directory Id="WindowsFolder">
+        <Directory Id="POLICYFOLDER" Name="PolicyDefinitions">
+          <Directory Id="POLICYFOLDERLOCALIZATIONS" Name="en-US"/>
+        </Directory>
+      </Directory>
     </Directory>
 
     <Feature Id="Filter" Title="Lithnet Active Directory Password Filter" Level="1" AllowAdvertise="no" Display="expand" TypicalDefault="install">
       <Feature Id="FeatureNotificationPackage" Title="Enable password filtering on this computer" Level="2" AllowAdvertise="no" TypicalDefault="install" Description="This feature registers the password filter with the Windows LSASS process. On domain controllers, this means all user password changes are processed by the filter. On workstations and member services, this only impacts passwords set for local users">
         <ComponentRef Id="cmp6339c3e064764797a0b4d747e655cb0e"/>
+        <ComponentGroupRef Id="FilterDLL" />
       </Feature>
       <Feature Id="FeaturePSModule" Title="PowerShell module" Level="2" AllowAdvertise="no" TypicalDefault="install" Description="Installs the PowerShell module on this computer which allows you to manage the password store and test passwords">
         <ComponentGroupRef Id="PSModule"/>
+        <ComponentGroupRef Id="FilterDLL" />
       </Feature>
-      <ComponentGroupRef Id="FilterDLL" />
-
+      <Feature Id="FeatureGPOExtensions" Title="Group policy templates (ADMX)" Level="2" AllowAdvertise="no" TypicalDefault="install" Description="Installs the group policy ADMX files which allows you to edit the Password Filter group policy settings from this machine">
+        <ComponentGroupRef Id="GPOExtensions"/>
+      </Feature>
     </Feature>
 
     <DirectoryRef Id="System64Folder">
@@ -147,6 +155,15 @@
         </Component>
       </Directory>-->
     </DirectoryRef>
+
+    <ComponentGroup Id="GPOExtensions">
+      <Component Id="cmp2fe2138ab7a64368a0a413c37086a5c7" Guid="*" Directory="POLICYFOLDER" >
+        <File Id="filb2b013b45e4f46d29981a68089a81a2a" KeyPath="yes" Source="$(var.StoreInterface.TargetDir)\PolicyDefinitions\lithnet.activedirectory.passwordfilter.admx" />
+      </Component>
+      <Component Id="cmp5f9749a416b54e96907026c4a19f36c5" Guid="*" Directory="POLICYFOLDERLOCALIZATIONS" >
+        <File Id="fil7eb7a2f48a5d4db39db66191307e58e4" KeyPath="yes" Source="$(var.StoreInterface.TargetDir)\PolicyDefinitions\en-US\lithnet.activedirectory.passwordfilter.adml" />
+      </Component>
+    </ComponentGroup>
 
     <ComponentGroup Id="PSModule">
       <ComponentRef Id="cmp7204cbc85cbc4d3faa2cfcb4907fa761"/>

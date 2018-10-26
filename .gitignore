@@ -261,3 +261,4 @@ __pycache__/
 *.pyc
 *.dll
 *.bin
+/src/enc_temp_folder/*

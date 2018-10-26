@@ -41,7 +41,7 @@ int ProcessPassword(const SecureArrayT<WCHAR> &password, const std::wstring &acc
 
 	if (!ProcessPasswordRegexReject(password, accountName, fullName, setOperation, reg))
 	{
-		return PASSWORD_REJECTED_REGEX_APPROVE;
+		return PASSWORD_REJECTED_REGEX_REJECT;
 	}
 
 	if (!ProcessPasswordDoesntContainAccountName(password, accountName, fullName, setOperation, reg))

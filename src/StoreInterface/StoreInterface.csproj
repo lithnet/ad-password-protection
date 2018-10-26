@@ -64,8 +64,12 @@
     <Compile Include="V3Store.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="PolicyDefinitions\en-US\lithnet.activedirectory.passwordfilter.adml" />
-    <None Include="PolicyDefinitions\lithnet.activedirectory.passwordfilter.admx" />
+    <None Include="PolicyDefinitions\en-US\lithnet.activedirectory.passwordfilter.adml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="PolicyDefinitions\lithnet.activedirectory.passwordfilter.admx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
