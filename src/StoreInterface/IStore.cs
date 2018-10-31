@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace StoreInterface
@@ -15,7 +16,7 @@ namespace StoreInterface
         
         void AddToStore(byte[] hash, StoreType storeType);
         
-        void AddToStore(HashSet<byte[]> hashes, StoreType storeType, OperationProgress progress);
+        void AddToStore(HashSet<byte[]> hashes, StoreType storeType, CancellationToken ct, OperationProgress progress);
         
         bool IsInStore(string password, StoreType storeType);
 

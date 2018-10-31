@@ -26,7 +26,7 @@ namespace PasswordFilterPS
 
         protected override void EndProcessing()
         {
-            Global.Store.EndBatch(StoreInterface.StoreType.Password, this.progress);
+            Global.Store.EndBatch(StoreInterface.StoreType.Password, new System.Threading.CancellationToken(), this.progress);
             base.EndProcessing();
         }
 

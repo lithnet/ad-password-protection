@@ -4,35 +4,38 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Management.Automation;
+using StoreInterface;
+using DSInternals;
+using DSInternals.Replication;
 
 namespace PasswordFilterPS
 {
-    [Cmdlet(VerbsCommon.Add, "BannedWord")]
-    public class AddBannedWord : Cmdlet
+    [Cmdlet(VerbsDiagnostic.Test, "ADUserPassword")]
+    public class TestADUserPassword : PSCmdlet
     {
         [Parameter(Mandatory = true, Position = 1, ValueFromPipeline = true), ValidateNotNullOrEmpty]
-        public string Value { get; set; }
-
-        private StoreInterface.OperationProgress progress;
+        public string AccountName { get; set; }
 
         protected override void BeginProcessing()
         {
             Global.OpenExistingDefaultOrThrow();
-            this.progress = new StoreInterface.OperationProgress();
-
-            Global.Store.StartBatch(StoreInterface.StoreType.Word);
             base.BeginProcessing();
         }
 
         protected override void EndProcessing()
         {
-            Global.Store.EndBatch(StoreInterface.StoreType.Word, new System.Threading.CancellationToken(), this.progress);
             base.EndProcessing();
         }
 
         protected override void ProcessRecord()
         {
-            Global.Store.AddToStore(this.Value, StoreInterface.StoreType.Word);
+            DSInternals.Replication.DirectoryReplicationClient client = new DirectoryReplicationClient("fim-dev1.local", RpcProtocol.TCP);
+            var x = client.GetAccountByUPN(this.AccountName);
+
+            if (Global.Store.IsInStore(x.NTHash, StoreType.Password))
+            {
+                this.WriteObject($"{this.AccountName}: password has been pwned");
+            }
         }
     }
 }

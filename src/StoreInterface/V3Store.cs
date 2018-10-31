@@ -11,8 +11,12 @@ namespace StoreInterface
 {
     public class V3Store : BinaryStore
     {
+        public const int BinaryHashLength = 16;
+
+        public const int BinaryHashOffset = 2;
+
         public V3Store(string storeBasePath)
-        : base(storeBasePath, "v3\\p", "v3\\w", MD4.Create(), 16, 2)
+        : base(storeBasePath, "v3\\p", "v3\\w", MD4.Create(), V3Store.BinaryHashLength, V3Store.BinaryHashOffset)
         {
         }
 
@@ -23,12 +27,12 @@ namespace StoreInterface
         
         protected override string GetRangeFromHash(string hash)
         {
-            return hash.Substring(0, 4);
+            return hash.Substring(0, V3Store.BinaryHashOffset * 2);
         }
 
         protected override string GetRangeFromHash(byte[] hash)
         {
-            return hash.ToHexString(0, 2);
+            return hash.ToHexString(0, V3Store.BinaryHashOffset);
         }
     }
 }

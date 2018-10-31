@@ -61,9 +61,14 @@ namespace StoreInterface
             this.GetInstance(storeType).StartBatch();
         }
 
-        public override void EndBatch(StoreType storeType, OperationProgress progress)
+        public override int GetHashCount(StoreType storeType, string range)
         {
-            this.GetInstance(storeType).EndBatch(progress);
+            return this.GetInstance(storeType).GetHashCount(range);
+        }
+
+        public override void EndBatch(StoreType storeType, CancellationToken ct, OperationProgress progress)
+        {
+            this.GetInstance(storeType).EndBatch(progress,ct);
         }
 
         public override HashSet<byte[]> GetHashes(string range, StoreType storeType)

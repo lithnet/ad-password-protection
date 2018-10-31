@@ -51,10 +51,10 @@ namespace StoreInterface
 
         public HashSet<byte[]> GetHashes(string range)
         {
-            HashSet<byte[]> items = new HashSet<byte[]>(ByteArrayComparer.Comparer);
+            HashSet<byte[]> items = new HashSet<byte[]>(10000, ByteArrayComparer.Comparer);
             string file = Path.Combine(this.StorePath, $"{range}.db");
 
-            this.LoadHashesFromStoreFile(file, items, null);
+            this.LoadHashesFromStoreFile(file, items, new OperationProgress());
 
             return items;
         }
@@ -65,46 +65,35 @@ namespace StoreInterface
             return this.IsHashInStoreFile(file, hash);
         }
 
-        public void AddHashRangeToStore(HashSet<byte[]> hashes, string range, OperationProgress progress)
+        public void AddHashRangeToStore(HashSet<byte[]> incomingHashes, string range, OperationProgress progress)
         {
             if (this.IsInBatch)
             {
-                this.AddHashRangeToTempStore(hashes, range);
+                this.AddHashRangeToTempStore(incomingHashes, range);
                 return;
             }
 
             string file = Path.Combine(this.StorePath, $"{range}.db");
 
-            bool writeFile = false;
-            int hashesAlreadyInStore = 0;
-            int newHashes = hashes.Count;
+            bool hasChanges = false;
+            HashSet<byte[]> hashesToProcess;
 
             if (File.Exists(file))
             {
-                this.LoadHashesFromStoreFile(file, hashes, progress);
+                HashSet<byte[]> originalHashes = new HashSet<byte[]>(ByteArrayComparer.Comparer);
+                this.LoadHashesFromStoreFile(file, originalHashes, progress);
+                hasChanges = this.MergeHashSets(originalHashes, incomingHashes, progress);
+                hashesToProcess = originalHashes;
             }
             else
             {
-                writeFile = true;
+                progress?.IncrementHashesAdded(incomingHashes.Count);
+                hashesToProcess = incomingHashes;
             }
 
-            int uniqueNewHashes = newHashes - hashesAlreadyInStore;
-
-            if (uniqueNewHashes > 0)
+            if (hasChanges)
             {
-                writeFile = true;
-            }
-            else
-            {
-                //Trace.WriteLine($"No new hashes for store {range}.db");
-            }
-
-            progress?.IncrementHashesAdded(uniqueNewHashes);
-            progress?.IncrementHashesDiscarded(hashesAlreadyInStore);
-
-            if (writeFile)
-            {
-                this.WriteStoreFile(file, false, hashes);
+                this.WriteStoreFile(file, false, hashesToProcess);
             }
         }
 
@@ -123,9 +112,9 @@ namespace StoreInterface
             this.IsInBatch = true;
         }
 
-        public void EndBatch(OperationProgress progress)
+        public void EndBatch(OperationProgress progress, CancellationToken ct)
         {
-            this.ConsolidateAndSort(progress);
+            this.ConsolidateAndSort(progress, ct);
             this.IsInBatch = false;
         }
 
@@ -136,40 +125,81 @@ namespace StoreInterface
             this.IsInBatch = true;
         }
 
-        public void ConsolidateAndSort(OperationProgress progress)
+        internal int GetHashCount(string range)
         {
-            Trace.WriteLine("Sorting store");
+            string file = Path.Combine(this.StorePath, $"{range}.db");
+            FileInfo fileInfo = new FileInfo(file);
 
-            Parallel.ForEach(Directory.EnumerateFiles(this.StorePath, "*.db.bin"),
+            if (!fileInfo.Exists || file.Length <= 0)
+            {
+                return 0;
+            }
+
+            return (int)(fileInfo.Length / (this.HashLength - this.HashOffset));
+        }
+
+        public void ConsolidateAndSort(OperationProgress progress, CancellationToken ct)
+        {
+            progress.Status = "Consolidating and sorting new entries";
+
+            List<string> files = Directory.EnumerateFiles(this.StorePath, "*.db.bin").ToList();
+            progress.ProgressTotalValue = files.Count;
+            ParallelOptions o = new ParallelOptions();
+            if (System.Diagnostics.Debugger.IsAttached)
+            {
+                o.MaxDegreeOfParallelism = 1;
+            }
+            o.CancellationToken = ct;
+
+            Parallel.ForEach(files, o,
                 tempFile =>
                 {
-                    HashSet<byte[]> hashes = new HashSet<byte[]>(ByteArrayComparer.Comparer);
+                    HashSet<byte[]> existingHashes = new HashSet<byte[]>(ByteArrayComparer.Comparer);
+                    HashSet<byte[]> newHashes = new HashSet<byte[]>(ByteArrayComparer.Comparer);
 
                     string realFile = tempFile.Substring(0, tempFile.Length - 4);
                     Trace.WriteLine($"Consolidating {realFile}");
 
-                    this.LoadHashesFromStoreFile(realFile, hashes, progress);
-                    int originalCount = hashes.Count;
+                    this.LoadHashesFromStoreFile(realFile, existingHashes, progress);
+                    this.LoadHashesFromStoreFile(tempFile, newHashes, progress);
 
-                    this.LoadHashesFromStoreFile(tempFile, hashes, progress);
+                    bool hasChanges = this.MergeHashSets(existingHashes, newHashes, progress);
 
-                    progress?.IncrementHashesAdded(hashes.Count - originalCount);
+                    if (hasChanges)
+                    {
+                        this.WriteStoreFile(realFile, false, existingHashes);
+                    }
 
-                    this.WriteStoreFile(realFile, false, hashes);
-                    hashes.Clear();
-
+                    progress.IncrementProgressCurrentValue();
                     File.Delete(tempFile);
                 });
+        }
+
+        private bool MergeHashSets(HashSet<byte[]> existingHashes, HashSet<byte[]> newHashes, OperationProgress progress)
+        {
+            bool write = false;
+
+            foreach (byte[] hash in newHashes)
+            {
+                if (existingHashes.Add(hash))
+                {
+                    progress?.IncrementHashesAdded();
+                    write = true;
+                }
+                else
+                {
+                    progress?.IncrementHashesDiscarded();
+                }
+            }
+
+            return write;
         }
 
         private void LoadHashesFromStoreFile(string file, HashSet<byte[]> hashes, OperationProgress progress)
         {
             foreach (byte[] hash in this.LoadHashesFromStoreFile(file))
             {
-                if (!hashes.Add(hash))
-                {
-                    progress?.IncrementHashesDiscarded();
-                }
+                hashes.Add(hash);
             }
         }
 
@@ -202,6 +232,8 @@ namespace StoreInterface
                 }
             }
 
+            int count = 0;
+
             using (BinaryReader reader = new BinaryReader(File.Open(file, FileMode.Open)))
             {
                 while (reader.BaseStream.Position < reader.BaseStream.Length)
@@ -216,6 +248,7 @@ namespace StoreInterface
                         raw = hash;
                     }
 
+                    count++;
                     yield return raw;
                 }
             }

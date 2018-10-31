@@ -101,7 +101,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <AdditionalLibraryDirectories>$(SolutionDir)PasswordFilter\$(Platform)\$(Configuration);$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ntdll.lib;advapi32.lib;Rpcrt4.lib;shlwapi.lib;esent.lib;authz.lib;v3store.obj;groups.obj;binarystore.obj;registry.obj;passwordevaluator.obj;complexityevaluator.obj;eventlog.obj;hasher.obj;utils.obj;stringnormalization.obj;filter.obj;stdafx.obj;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ntdll.lib;advapi32.lib;Rpcrt4.lib;shlwapi.lib;esent.lib;authz.lib;policy.obj;v3store.obj;groups.obj;binarystore.obj;registry.obj;passwordevaluator.obj;complexityevaluator.obj;eventlog.obj;hasher.obj;utils.obj;stringnormalization.obj;filter.obj;stdafx.obj;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

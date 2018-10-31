@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Text;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StoreInterface;
 using System.Linq;
+using System.Threading;
 
 namespace ManagedUnitTests
 {
@@ -31,6 +33,13 @@ namespace ManagedUnitTests
         }
 
         [TestMethod]
+        public void TestHashFileIsInOrder()
+        {
+            Assert.IsTrue(StoreInterface.Store.DoesHexHashFileAppearSorted(@"D:\pwnedpwds\raw\pwned-passwords-ntlm-ordered-by-hash.txt", 16));
+            Assert.IsFalse(StoreInterface.Store.DoesHexHashFileAppearSorted(@"D:\pwnedpwds\raw\pwned-passwords-ntlm-ordered-by-count.txt", 16));
+        }
+
+        [TestMethod]
         public void BuildUsablev3Store()
         {
             return;
@@ -38,29 +47,31 @@ namespace ManagedUnitTests
             Directory.CreateDirectory(path);
             V3Store store = new V3Store(path);
 
+            CancellationTokenSource ct = new CancellationTokenSource();
+
             // Start with HIBP
             string file = @"D:\pwnedpwds\raw\pwned-passwords-ntlm-ordered-by-hash.txt";
-            StoreInterface.Store.ImportHexHashesFromSortedFile(store, StoreType.Password, file);
+            StoreInterface.Store.ImportHexHashesFromSortedFile(store, StoreType.Password, file, ct.Token);
 
             // add english dictionary to word store
             file = @"D:\pwnedpwds\raw\english.txt";
-            StoreInterface.Store.ImportPasswordsFromFile(store, StoreType.Word, file);
+            StoreInterface.Store.ImportPasswordsFromFile(store, StoreType.Word, file, ct.Token);
 
             // add more english words to word store
             file = @"D:\pwnedpwds\raw\words.txt";
-            StoreInterface.Store.ImportPasswordsFromFile(store, StoreType.Word, file);
+            StoreInterface.Store.ImportPasswordsFromFile(store, StoreType.Word, file, ct.Token);
 
             // add rockyou breach
             file = @"D:\pwnedpwds\raw\rockyou.txt";
-            StoreInterface.Store.ImportPasswordsFromFile(store, StoreType.Password, file);
+            StoreInterface.Store.ImportPasswordsFromFile(store, StoreType.Password, file, ct.Token);
 
             // add top 100000 
             file = @"D:\pwnedpwds\raw\top1000000.txt";
-            StoreInterface.Store.ImportPasswordsFromFile(store, StoreType.Password, file);
+            StoreInterface.Store.ImportPasswordsFromFile(store, StoreType.Password, file, ct.Token);
 
             // add breach compilation
             file = @"D:\pwnedpwds\raw\breachcompilationuniq.txt";
-            StoreInterface.Store.ImportPasswordsFromFile(store, StoreType.Password, file);
+            StoreInterface.Store.ImportPasswordsFromFile(store, StoreType.Password, file, ct.Token);
         }
 
         [TestMethod]
@@ -124,11 +135,12 @@ namespace ManagedUnitTests
             string file = @"D:\pwnedpwds\raw\english.txt";
             string path = Path.Combine(TestHelpers.TestStorePath, Guid.NewGuid().ToString());
             Directory.CreateDirectory(path);
+            CancellationToken ct = new CancellationToken();
 
             try
             {
                 var store = new V3Store(path);
-                StoreInterface.Store.ImportPasswordsFromFile(store, StoreType.Word, file);
+                StoreInterface.Store.ImportPasswordsFromFile(store, StoreType.Word, file, ct);
 
                 using (StreamReader reader = new StreamReader(file))
                 {
@@ -207,10 +219,11 @@ namespace ManagedUnitTests
             };
 
             List<byte[]> hashBytes = hashes.Select(t => t.HexStringToBytes()).ToList();
+            CancellationToken ct = new CancellationToken();
 
             OperationProgress progress = new OperationProgress();
 
-            this.Store.AddToStore(new HashSet<byte[]>(hashBytes, new ByteArrayComparer()), StoreType.Password, progress);
+            this.Store.AddToStore(new HashSet<byte[]>(hashBytes, new ByteArrayComparer()), StoreType.Password, ct, progress);
 
             Assert.AreEqual(0, progress.HashesDiscarded);
             Assert.AreEqual(hashes.Length, progress.HashesAdded);
@@ -218,7 +231,7 @@ namespace ManagedUnitTests
             string rawFile = Path.Combine(this.Store.StorePathPasswordStore, this.GetFileNameFromHash(hashes[0]));
             TestHelpers.AssertFileIsExpectedSize(rawFile, this.StoredHashSize * hashes.Length);
 
-            this.Store.AddToStore(new HashSet<byte[]>(hashBytes, new ByteArrayComparer()), StoreType.Password);
+            this.Store.AddToStore(new HashSet<byte[]>(hashBytes, new ByteArrayComparer()), StoreType.Password, ct);
             TestHelpers.AssertFileIsExpectedSize(rawFile, this.StoredHashSize * hashes.Length);
         }
 
@@ -240,8 +253,9 @@ namespace ManagedUnitTests
             };
 
             List<byte[]> hashBytes = hashes.Select(t => t.HexStringToBytes()).ToList();
+            CancellationToken ct;
 
-            this.Store.AddToStore(new HashSet<byte[]>(hashBytes, new ByteArrayComparer()), StoreType.Password);
+            this.Store.AddToStore(new HashSet<byte[]>(hashBytes, new ByteArrayComparer()), StoreType.Password, ct);
 
             foreach (string hash in hashes)
             {
@@ -280,8 +294,8 @@ namespace ManagedUnitTests
 
             List<byte[]> hashBytes = hashes.Select(t => t.HexStringToBytes()).Reverse().ToList();
             OperationProgress progress = new OperationProgress();
-
-            this.Store.AddToStore(new HashSet<byte[]>(hashBytes, new ByteArrayComparer()), StoreType.Password, progress);
+            CancellationToken ct;
+            this.Store.AddToStore(new HashSet<byte[]>(hashBytes, new ByteArrayComparer()), StoreType.Password, ct, progress);
 
             Assert.AreEqual(0, progress.HashesDiscarded);
             Assert.AreEqual(hashes.Length, progress.HashesAdded);
@@ -312,9 +326,9 @@ namespace ManagedUnitTests
 
             HashSet<byte[]> hashBytes = new HashSet<byte[]>(hashes.Select(t => t.HexStringToBytes()), new ByteArrayComparer());
             OperationProgress progress = new OperationProgress();
+            CancellationToken ct;
 
-
-            this.Store.AddToStore(hashBytes, StoreType.Password, progress);
+            this.Store.AddToStore(hashBytes, StoreType.Password, ct, progress);
 
             Assert.AreEqual(0, progress.HashesDiscarded);
             Assert.AreEqual(hashes.Length, progress.HashesAdded);
@@ -341,8 +355,8 @@ namespace ManagedUnitTests
 
             HashSet<byte[]> hashBytes = new HashSet<byte[]>(hashes.Reverse().Select(t => t.HexStringToBytes()), new ByteArrayComparer());
             OperationProgress progress = new OperationProgress();
-
-            this.Store.AddToStore(hashBytes, StoreType.Password, progress);
+            CancellationToken ct;
+            this.Store.AddToStore(hashBytes, StoreType.Password, ct, progress);
 
             Assert.AreEqual(0, progress.HashesDiscarded);
             Assert.AreEqual(hashes.Length, progress.HashesAdded);
