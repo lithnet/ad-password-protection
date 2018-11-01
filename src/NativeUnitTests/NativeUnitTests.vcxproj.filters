@@ -62,8 +62,5 @@
     <ClCompile Include="v3StoreTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GroupLookupTests.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>

@@ -51,7 +51,7 @@ namespace StoreInterface
 
         public HashSet<byte[]> GetHashes(string range)
         {
-            HashSet<byte[]> items = new HashSet<byte[]>(10000, ByteArrayComparer.Comparer);
+            HashSet<byte[]> items = new HashSet<byte[]>(ByteArrayComparer.Comparer);
             string file = Path.Combine(this.StorePath, $"{range}.db");
 
             this.LoadHashesFromStoreFile(file, items, new OperationProgress());

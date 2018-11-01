@@ -120,7 +120,7 @@ namespace StoreInterface
         public static void ImportHexHashesFromSortedFile(Store store, StoreType storeType, string sourceFile, CancellationToken ct, OperationProgress progress = null)
         {
             string lastRange = null;
-            HashSet<byte[]> hashes = new HashSet<byte[]>(10000, ByteArrayComparer.Comparer);
+            HashSet<byte[]> hashes = new HashSet<byte[]>(ByteArrayComparer.Comparer);
 
             if (progress == null)
             {
@@ -212,7 +212,7 @@ namespace StoreInterface
 
             progress.Status = $"Loading unsorted hexadecimal hashes from {sourceFile}";
 
-            HashSet<byte[]> hashes = new HashSet<byte[]>(batchSize, ByteArrayComparer.Comparer);
+            HashSet<byte[]> hashes = new HashSet<byte[]>(ByteArrayComparer.Comparer);
 
             foreach (byte[] hash in Store.GetHexHashesFromFile(sourceFile, store.HashLength, progress))
             {
@@ -359,7 +359,7 @@ namespace StoreInterface
             this.AddToStore(
                 hashes
                     .GroupBy(this.GetRangeFromHash, StringComparer.OrdinalIgnoreCase)
-                    .ToDictionary(g => g.Key, g => g.ToHashSet()),
+                    .ToDictionary(g => g.Key, g => new HashSet<byte[]>(g, ByteArrayComparer.Comparer)),
                 storeType,
                 ct,
                 false,

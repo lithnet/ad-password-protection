@@ -6,7 +6,7 @@
            Version="!(bind.FileVersion.fil8af462b935f3462f99441454d9154d51)"
            Manufacturer="Lithnet"
            UpgradeCode="0b7695f2-5eeb-4331-923a-ca56af5f1eb1">
-    <Package InstallerVersion="200"
+    <Package InstallerVersion="301"
              Compressed="yes"
              InstallScope="perMachine"
              InstallPrivileges="elevated"
@@ -17,7 +17,6 @@
                   DowngradeErrorMessage="A later version of [ProductName] is already installed"
                   AllowSameVersionUpgrades="yes"/>
     <Media Id="1" Cabinet="Cab1.cab" EmbedCab="yes" />
-
 
     <Property Id="STOREDIR" Secure="yes">
       <RegistrySearch Id="r152002c8c7b14f7f9d56a3129a68cac3"
@@ -30,6 +29,11 @@
 
     <Property Id="INSTALLLEVEL" Value="2" />
 
+    <PropertyRef Id="WIX_IS_NETFRAMEWORK_46_OR_LATER_INSTALLED" />
+
+    <Condition Message="[ProductName] Requires .NET Framework 4.6 or later to be installed">
+      <![CDATA[Installed OR WIX_IS_NETFRAMEWORK_46_OR_LATER_INSTALLED]]>
+    </Condition>
     <UI>
       <UIRef Id="WixUI_FeatureTree" />
 
@@ -89,15 +93,21 @@
       <Feature Id="FeatureNotificationPackage" Title="Enable password filtering on this computer" Level="2" AllowAdvertise="no" TypicalDefault="install" Description="This feature registers the password filter with the Windows LSASS process. On domain controllers, this means all user password changes are processed by the filter. On workstations and member services, this only impacts passwords set for local users">
         <ComponentRef Id="cmp6339c3e064764797a0b4d747e655cb0e"/>
         <ComponentGroupRef Id="FilterDLL" />
+        <MergeRef Id="VCRedist"/>
       </Feature>
       <Feature Id="FeaturePSModule" Title="PowerShell module" Level="2" AllowAdvertise="no" TypicalDefault="install" Description="Installs the PowerShell module on this computer which allows you to manage the password store and test passwords">
         <ComponentGroupRef Id="PSModule"/>
         <ComponentGroupRef Id="FilterDLL" />
+        <MergeRef Id="VCRedist"/>
       </Feature>
       <Feature Id="FeatureGPOExtensions" Title="Group policy templates (ADMX)" Level="2" AllowAdvertise="no" TypicalDefault="install" Description="Installs the group policy ADMX files which allows you to edit the Password Filter group policy settings from this machine">
         <ComponentGroupRef Id="GPOExtensions"/>
       </Feature>
     </Feature>
+
+    <DirectoryRef Id="TARGETDIR">
+      <Merge Id="VCRedist" SourceFile="C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Redist\MSVC\14.15.26706\MergeModules\Microsoft_VC141_CRT_x64.msm" DiskId="1" Language="0"/>
+    </DirectoryRef>
 
     <DirectoryRef Id="System64Folder">
       <Component Id="cmpa437d95c32f74a17b1b7537b38cd382a" Win64="yes" Guid="*">
