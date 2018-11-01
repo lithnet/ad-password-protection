@@ -53,7 +53,7 @@ namespace ManagedUnitTests
             List<byte[]> hashBytes = hashes.Select(t => t.HexStringToBytes()).ToList();
             
             this.store.AddToStore(
-                new HashSet<byte[]>(hashBytes, new ByteArrayComparer()), StoreType.Password, new System.Threading.CancellationToken());
+                new HashSet<byte[]>(hashBytes, new ByteArrayComparer()), StoreType.Password, new System.Threading.CancellationToken(), new OperationProgress());
 
             foreach (string hash in hashes)
             {

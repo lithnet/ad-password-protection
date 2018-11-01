@@ -39,6 +39,40 @@ namespace ManagedUnitTests
             Assert.IsFalse(StoreInterface.Store.DoesHexHashFileAppearSorted(@"D:\pwnedpwds\raw\pwned-passwords-ntlm-ordered-by-count.txt", 16));
         }
 
+
+        [TestMethod]
+        public void TestGoodHashTypes()
+        {
+            StoreInterface.Store.ImportHexHashesFromSortedFile(this.Store, StoreType.Password, @"D:\pwnedpwds\raw\test-good-hash.txt", new CancellationToken());
+        }
+
+        [TestMethod]
+        public void TestHashTooLong()
+        {
+            try
+            {
+                StoreInterface.Store.ImportHexHashesFromSortedFile(this.Store, StoreType.Password, @"D:\pwnedpwds\raw\test-hash-too-long.txt", new CancellationToken());
+                Assert.Fail("Did not throw the expected exception");
+            }
+            catch (InvalidDataException)
+            {
+            }
+        }
+
+        [TestMethod]
+        public void TestHashTooShort()
+        {
+            try
+            {
+                StoreInterface.Store.ImportHexHashesFromSortedFile(this.Store, StoreType.Password, @"D:\pwnedpwds\raw\test-hash-too-short.txt", new CancellationToken());
+                Assert.Fail("Did not throw the expected exception");
+            }
+            catch (InvalidDataException)
+            {
+            }
+        }
+
+
         [TestMethod]
         public void BuildUsablev3Store()
         {
@@ -231,7 +265,7 @@ namespace ManagedUnitTests
             string rawFile = Path.Combine(this.Store.StorePathPasswordStore, this.GetFileNameFromHash(hashes[0]));
             TestHelpers.AssertFileIsExpectedSize(rawFile, this.StoredHashSize * hashes.Length);
 
-            this.Store.AddToStore(new HashSet<byte[]>(hashBytes, new ByteArrayComparer()), StoreType.Password, ct);
+            this.Store.AddToStore(new HashSet<byte[]>(hashBytes, new ByteArrayComparer()), StoreType.Password, ct, new OperationProgress());
             TestHelpers.AssertFileIsExpectedSize(rawFile, this.StoredHashSize * hashes.Length);
         }
 
@@ -255,7 +289,7 @@ namespace ManagedUnitTests
             List<byte[]> hashBytes = hashes.Select(t => t.HexStringToBytes()).ToList();
             CancellationToken ct;
 
-            this.Store.AddToStore(new HashSet<byte[]>(hashBytes, new ByteArrayComparer()), StoreType.Password, ct);
+            this.Store.AddToStore(new HashSet<byte[]>(hashBytes, new ByteArrayComparer()), StoreType.Password, ct, new OperationProgress());
 
             foreach (string hash in hashes)
             {

@@ -113,7 +113,6 @@ extern "C" __declspec(dllexport) int __stdcall PasswordFilterEx(
 	BOOLEAN SetOperation
 )
 {
-	bool simulate = false;
 	registry reg;
 
 	try {
@@ -129,66 +128,29 @@ extern "C" __declspec(dllexport) int __stdcall PasswordFilterEx(
 			return PASSWORD_REJECTED_BLANK;
 		}
 
-		simulate = reg.GetRegValue(REG_VALUE_SIMULATE, 0) != 0;
-
 		std::wstring accountName = AccountName;
 		std::wstring fullName = FullName;
-
 		SecureArrayT<WCHAR> password = StringToWcharArray(Password);
 
-		int result = ProcessPassword(password, accountName, fullName, SetOperation);
-
-		if (simulate)
-		{
-			return PASSWORD_APPROVED;
-		}
-		else
-		{
-			return result;
-		}
+		return ProcessPassword(password, accountName, fullName, SetOperation);
 	}
 	catch (std::system_error const& e)
 	{
 		OutputDebugString(L"Win32 error caught");
-
 		eventlog::getInstance().log(EVENTLOG_ERROR_TYPE, MSG_WIN32ERROR, 2, std::to_string(e.code().value()).c_str(), e.what());
-
-		if ((SetOperation && reg.GetRegValue(L"AllowPasswordSetOnError", 1) == 0) || (!SetOperation && reg.GetRegValue(L"AllowPasswordChangeOnError", 1) == 0))
-		{
-			OutputDebugString(L"Rejected password because AllowPasswordSetOnError or AllowPasswordChangeOnError was non-zero");
-			eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_ON_ERROR, 1, SetOperation ? L"set" : L"change");
-			return simulate ? TRUE : FALSE;
-		}
 	}
 	catch (std::exception const& e)
 	{
 		OutputDebugString(L"Other error caught");
-
 		eventlog::getInstance().log(EVENTLOG_ERROR_TYPE, MSG_UNEXPECTEDERROR, 1, e.what());
-
-		if ((SetOperation && reg.GetRegValue(L"AllowPasswordSetOnError", 1) == 0) || (!SetOperation && reg.GetRegValue(L"AllowPasswordChangeOnError", 1) == 0))
-		{
-			OutputDebugString(L"Rejected password because AllowPasswordSetOnError or AllowPasswordChangeOnError was non-zero");
-			eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_ON_ERROR, 1, SetOperation ? L"set" : L"change");
-			return simulate ? TRUE : FALSE;
-		}
 	}
 	catch (...)
 	{
 		OutputDebugString(L"Unexpected error caught");
-
 		eventlog::getInstance().logw(EVENTLOG_ERROR_TYPE, MSG_UNEXPECTEDERROR, 1, L"No exception information was available");
-
-		if ((SetOperation && reg.GetRegValue(L"AllowPasswordSetOnError", 1) == 0) || (!SetOperation && reg.GetRegValue(L"AllowPasswordChangeOnError", 1) == 0))
-		{
-			OutputDebugString(L"Rejected password because AllowPasswordSetOnError or AllowPasswordChangeOnError was non-zero");
-			eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_ON_ERROR, 1, SetOperation ? L"set" : L"change");
-			return simulate ? TRUE : FALSE;
-		}
 	}
 
-	OutputDebugString(L"Approved password");
-	return TRUE;
+	return FILTER_ERROR;
 }
 
 extern "C" __declspec(dllexport) void __stdcall GetUserPolicySettings(

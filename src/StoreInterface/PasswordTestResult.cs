@@ -19,6 +19,7 @@ namespace StoreInterface
         Banned = 8,
         BannedNormalizedPassword = 9,
         BannedNormalizedWord = 10,
-        PasswordWasBlank = 11
+        PasswordWasBlank = 11,
+        FilterError = 100,
     }
 }

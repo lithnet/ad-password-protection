@@ -10,7 +10,7 @@ using StoreInterface;
 namespace PasswordFilterPS
 {
     [Cmdlet(VerbsData.Import, "BannedWordHashes")]
-    public class ImportBannedWordHashes : Cmdlet
+    public class ImportBannedWordHashes : ImportPSCmdlet
     {
         [Parameter(Mandatory = true, Position = 1, ValueFromPipeline = true), ValidateNotNullOrEmpty]
         public string Filename { get; set; }
@@ -21,14 +21,12 @@ namespace PasswordFilterPS
         [Parameter(Mandatory = false, Position = 3)]
         public int BatchSize { get; set; } = -1;
 
-        private StoreInterface.OperationProgress progress;
-
         private CancellationTokenSource token = new CancellationTokenSource();
 
         protected override void BeginProcessing()
         {
             Global.OpenExistingDefaultOrThrow();
-            this.progress = new StoreInterface.OperationProgress();
+            this.InitializeProgressUpdate($"Importing banned word hashes from {this.Filename}");
             base.BeginProcessing();
         }
 
@@ -55,16 +53,16 @@ namespace PasswordFilterPS
                     }
                     else
                     {
-                        isSorted = StoreInterface.Store.DoesHexHashFileAppearSorted(this.Filename, V3Store.BinaryHashLength);
+                        isSorted = Store.DoesHexHashFileAppearSorted(this.Filename, V3Store.BinaryHashLength);
                     }
 
                     if (isSorted)
                     {
-                        StoreInterface.Store.ImportHexHashesFromSortedFile(Global.Store, StoreInterface.StoreType.Word, this.Filename, this.token.Token, this.progress);
+                        Store.ImportHexHashesFromSortedFile(Global.Store, StoreType.Word, this.Filename, this.token.Token, this.Progress);
                     }
                     else
                     {
-                        StoreInterface.Store.ImportHexHashesFromFile(Global.Store, StoreInterface.StoreType.Word, this.Filename, this.token.Token, this.BatchSize, this.progress);
+                        Store.ImportHexHashesFromFile(Global.Store, StoreType.Word, this.Filename, this.token.Token, this.BatchSize, this.Progress);
                     }
                 }
                 catch (OperationCanceledException)
@@ -72,40 +70,13 @@ namespace PasswordFilterPS
                 }
             }, this.token.Token);
 
-            ProgressRecord p = new ProgressRecord(1, "Importing hashes", "Starting...");
-
-            DateTime startTime = DateTime.Now;
-
             while (!(task.IsCompleted || task.IsCanceled || task.IsFaulted))
             {
-                p.StatusDescription = this.progress.Status ?? "Processing";
-                p.CurrentOperation = this.progress.GetProgressText();
-                p.PercentComplete = Math.Min(100, this.progress.ProgressPercent);
-
-                double totalSeconds = (DateTime.Now - startTime).TotalSeconds;
-                int secondsRemaining = 0;
-
-                if (totalSeconds > 0)
-                {
-                    double bytesPerSecond = this.progress.ProgressCurrentValue / totalSeconds;
-                    long remainingBytes = this.progress.ProgressTotalValue - this.progress.ProgressCurrentValue;
-
-                    if (bytesPerSecond > 0)
-                    {
-                        double result = remainingBytes / bytesPerSecond;
-
-                        if (result < Int32.MaxValue && result > 0)
-                        {
-                            secondsRemaining = Convert.ToInt32(result);
-                        }
-                    }
-                }
-
-                p.SecondsRemaining = secondsRemaining;
-
-                this.WriteProgress(p);
+                this.WriteProgressUpdate();
                 Thread.Sleep(1000);
             }
+
+            this.EndProgressUpdate();
         }
     }
 }

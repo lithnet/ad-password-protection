@@ -74,7 +74,7 @@ BOOLEAN ProcessPasswordComplexityThreshold(const SecureArrayT<WCHAR> &password, 
 	if ((charSetsPresent < charSetsRequired) || (requiresLower && !hasLower) || (requiresUpper && !hasUpper) || (requiresNumber && !hasNumber) || (requiresSymbol && !hasSymbol) || (requiresSymbolOrNumber && !(hasSymbol || hasNumber)))
 	{
 		OutputDebugString(std::wstring(L"Password did not meet the " + thresholdID + L" complexity requirements").c_str());
-		eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_THRESHOLD_COMPLEXITY, 4, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str(), pwdlength);
+		eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_THRESHOLD_COMPLEXITY, 4, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str(), std::to_wstring(pwdlength).c_str());
 		return FALSE;
 	}
 

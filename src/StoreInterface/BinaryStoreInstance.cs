@@ -89,6 +89,7 @@ namespace StoreInterface
             {
                 progress?.IncrementHashesAdded(incomingHashes.Count);
                 hashesToProcess = incomingHashes;
+                hasChanges = true;
             }
 
             if (hasChanges)
@@ -141,14 +142,14 @@ namespace StoreInterface
         public void ConsolidateAndSort(OperationProgress progress, CancellationToken ct)
         {
             progress.Status = "Consolidating and sorting new entries";
-
             List<string> files = Directory.EnumerateFiles(this.StorePath, "*.db.bin").ToList();
-            progress.ProgressTotalValue = files.Count;
+            progress.ConsolidateStoreInProgress = true;
+            progress.ConsolidateStoreTotal = files.Count;
+            progress.ConsolidateStoreStartTime = DateTime.Now;
+            progress.ConsolidateStorePosition = 0;
+
             ParallelOptions o = new ParallelOptions();
-            if (System.Diagnostics.Debugger.IsAttached)
-            {
-                o.MaxDegreeOfParallelism = 1;
-            }
+            o.MaxDegreeOfParallelism = Debugger.IsAttached ? 1 : -1;
             o.CancellationToken = ct;
 
             Parallel.ForEach(files, o,
@@ -170,9 +171,11 @@ namespace StoreInterface
                         this.WriteStoreFile(realFile, false, existingHashes);
                     }
 
-                    progress.IncrementProgressCurrentValue();
+                    progress.IncrementConsolidateStorePosition();
                     File.Delete(tempFile);
                 });
+
+            progress.ConsolidateStoreInProgress = false;
         }
 
         private bool MergeHashSets(HashSet<byte[]> existingHashes, HashSet<byte[]> newHashes, OperationProgress progress)
@@ -232,8 +235,6 @@ namespace StoreInterface
                 }
             }
 
-            int count = 0;
-
             using (BinaryReader reader = new BinaryReader(File.Open(file, FileMode.Open)))
             {
                 while (reader.BaseStream.Position < reader.BaseStream.Length)
@@ -248,7 +249,6 @@ namespace StoreInterface
                         raw = hash;
                     }
 
-                    count++;
                     yield return raw;
                 }
             }

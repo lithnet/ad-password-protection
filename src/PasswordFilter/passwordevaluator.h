@@ -14,6 +14,7 @@ static const int PASSWORD_REJECTED_BANNED = 8;
 static const int PASSWORD_REJECTED_BANNED_NORMALIZED_PASSWORD = 9;
 static const int PASSWORD_REJECTED_BANNED_NORMALIZED_WORD = 10;
 static const int PASSWORD_REJECTED_BLANK = 11;
+static const int FILTER_ERROR = 100;
 
 int ProcessPassword(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation);
 

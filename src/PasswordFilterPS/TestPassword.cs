@@ -17,11 +17,11 @@ namespace PasswordFilterPS
         [Parameter(Mandatory = true, Position = 2, ValueFromPipeline = true), ValidateNotNullOrEmpty]
         public string Username { get; set; }
 
-        [Parameter(Mandatory = false, Position = 3, ValueFromPipeline = true), ValidateNotNullOrEmpty]
+        [Parameter(Mandatory = true, Position = 3, ValueFromPipeline = true), ValidateNotNullOrEmpty]
         public string Fullname { get; set; }
 
         [Parameter(Mandatory = false, Position = 4, ValueFromPipeline = false), ValidateNotNullOrEmpty]
-        public bool IsSet { get; set; }
+        public bool IsSetOperation { get; set; }
 
         protected override void BeginProcessing()
         {
@@ -36,7 +36,7 @@ namespace PasswordFilterPS
 
         protected override void ProcessRecord()
         {
-            this.WriteObject(FilterInterface.TestPassword(this.Username, this.Fullname, this.Password, this.IsSet));
+            this.WriteObject(FilterInterface.TestPassword(this.Username, this.Fullname, this.Password, this.IsSetOperation));
         }
     }
 }

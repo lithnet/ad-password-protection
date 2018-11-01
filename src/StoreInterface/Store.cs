@@ -287,7 +287,20 @@ namespace StoreInterface
             {
                 if (line.Length < hashStringLength)
                 {
+                    throw new InvalidDataException("The file contained a line that was not recognized as a hexadecimal hash. Lines must end with a new line character or colon");
+                }
+
+                if (line.Length == hashStringLength)
+                {
+                    yield return line.HexStringToBytes();
                     continue;
+                }
+
+                char next = line[hashStringLength];
+
+                if (!(next == ':' || next == '\r' || next == '\n'))
+                {
+                    throw new InvalidDataException("The file contained a line that was not recognized as a hexadecimal hash. Lines must end with a new line character or colon");
                 }
 
                 yield return line.Substring(0, hashStringLength).HexStringToBytes();
@@ -303,12 +316,14 @@ namespace StoreInterface
 
             using (StreamReader reader = new StreamReader(sourceFile))
             {
-                progress.ProgressTotalValue = reader.BaseStream.Length;
+                progress.FileReadInProgress = true;
+                progress.FileReadStartTime = DateTime.Now;
+                progress.FileSizeTotal = reader.BaseStream.Length;
 
                 while (!reader.EndOfStream)
                 {
                     string line = reader.ReadLine();
-                    progress.ProgressCurrentValue = reader.BaseStream.Position;
+                    progress.FileReadPosition = reader.BaseStream.Position;
 
                     if (line == null || line.Length <= 0)
                     {
@@ -318,6 +333,8 @@ namespace StoreInterface
                     yield return line;
                 }
             }
+
+            progress.FileReadInProgress = false;
         }
 
         public void AddToStore(string password, StoreType storeType)
@@ -334,43 +351,48 @@ namespace StoreInterface
         {
             HashSet<byte[]> hashset = new HashSet<byte[]>(ByteArrayComparer.Comparer);
             hashset.Add(hash);
-            this.AddToStore(hashset, storeType, new CancellationToken(), null);
+            this.AddToStore(hashset, storeType, new CancellationToken(), new OperationProgress());
         }
 
-        public void AddToStore(HashSet<byte[]> hashes, StoreType storeType, CancellationToken ct, OperationProgress progress = null)
+        public void AddToStore(HashSet<byte[]> hashes, StoreType storeType, CancellationToken ct, OperationProgress progress)
         {
-            ParallelOptions o = new ParallelOptions();
-            o.CancellationToken = ct;
-            if (System.Diagnostics.Debugger.IsAttached)
-            {
-                o.MaxDegreeOfParallelism = 1;
-            }
-
-            Parallel.ForEach(
+            this.AddToStore(
                 hashes
-                    .OrderBy(t => t, ByteArrayComparer.Comparer)
-                    .GroupBy(this.GetRangeFromHash, StringComparer.OrdinalIgnoreCase),
-                o,
-                group => this.AddToStore(group, storeType, progress));
+                    .GroupBy(this.GetRangeFromHash, StringComparer.OrdinalIgnoreCase)
+                    .ToDictionary(g => g.Key, g => g.ToHashSet()),
+                storeType,
+                ct,
+                false,
+                progress);
         }
 
-        public void AddToStore(Dictionary<string, HashSet<byte[]>> hashes, StoreType storeType, CancellationToken ct, bool emptyAfterCommit, OperationProgress progress = null)
+        private void AddToStore(Dictionary<string, HashSet<byte[]>> hashes, StoreType storeType, CancellationToken ct, bool emptyAfterCommit, OperationProgress progress)
         {
-            ParallelOptions o = new ParallelOptions();
-            o.CancellationToken = ct;
-            if (System.Diagnostics.Debugger.IsAttached)
+            try
             {
-                o.MaxDegreeOfParallelism = 1;
-            }
+                ParallelOptions o = new ParallelOptions();
+                o.CancellationToken = ct;
+                o.MaxDegreeOfParallelism = Debugger.IsAttached ? 1 : -1;
 
-            Parallel.ForEach(hashes, o, group =>
-            {
-                this.AddToStore(group.Value, group.Key, storeType, progress);
-                if (emptyAfterCommit)
+                progress.FlushStoreInProgress = true;
+                progress.FlushStoreTotal = hashes.Count;
+                progress.FlushStorePosition = 0;
+                progress.FlushStoreStartTime = DateTime.Now;
+
+                Parallel.ForEach(hashes, o, group =>
                 {
-                    group.Value.Clear();
-                }
-            });
+                    this.AddToStore(group.Value, group.Key, storeType, progress);
+                    progress.IncrementFlushStorePosition();
+                    if (emptyAfterCommit)
+                    {
+                        group.Value.Clear();
+                    }
+                });
+            }
+            finally
+            {
+                progress.FlushStoreInProgress = false;
+            }
         }
 
         public bool IsInStore(string password, StoreType storeType)
@@ -381,13 +403,6 @@ namespace StoreInterface
             }
 
             return this.IsInStore(this.ComputeHash(password), storeType);
-        }
-
-        private void AddToStore(IGrouping<string, byte[]> group, StoreType storeType, OperationProgress progress)
-        {
-            string range = group.Key;
-            HashSet<byte[]> set = new HashSet<byte[]>(group, ByteArrayComparer.Comparer);
-            this.AddToStore(set, range, storeType, progress);
         }
 
         protected abstract string GetRangeFromHash(string hash);
