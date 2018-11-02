@@ -10,9 +10,6 @@
 #include "complexityevaluator.h"
 #include "v3store.h"
 
-static registry baseReg;
-static v3store store(baseReg.GetRegValue(L"Store", L""));
-
 int ProcessPassword(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation)
 {
 	eventlog::getInstance().logw(EVENTLOG_INFORMATION_TYPE, MSG_PROCESSING_REQUEST, 3, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
@@ -83,7 +80,7 @@ BOOLEAN ProcessPasswordRaw(const SecureArrayT<WCHAR> &password, const std::wstri
 	{
 		OutputDebugString(L"Checking raw password");
 
-		if (store.IsPasswordInPasswordStore(password))
+		if (v3store::getInstance().IsPasswordInPasswordStore(password))
 		{
 			OutputDebugString(L"Rejected password as it was found in the banned store");
 			eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_BANNED, 3, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
@@ -106,7 +103,7 @@ BOOLEAN ProcessPasswordNormalizedPasswordStore(const SecureArrayT<WCHAR> &passwo
 		const SecureArrayT<WCHAR> normalizedPassword = NormalizePassword(password);
 		OutputDebugString(L"Checking normalized password");
 
-		result = store.IsPasswordInPasswordStore(normalizedPassword);
+		result = v3store::getInstance().IsPasswordInPasswordStore(normalizedPassword);
 		if (result)
 		{
 			OutputDebugString(L"Rejected normalized password as it was found in the banned password store");
@@ -134,7 +131,7 @@ BOOLEAN ProcessPasswordNormalizedWordStore(const SecureArrayT<WCHAR> &password, 
 		const SecureArrayT<WCHAR> normalizedPassword = NormalizePassword(password);
 		OutputDebugString(L"Checking normalized password");
 
-		result = store.IsPasswordInWordStore(normalizedPassword);
+		result = v3store::getInstance().IsPasswordInWordStore(normalizedPassword);
 		if (result)
 		{
 			OutputDebugString(L"Rejected normalized password as it was found in the banned word store");

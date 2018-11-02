@@ -3,11 +3,12 @@
 #include <fstream>
 #include "Shlwapi.h"
 #include <sstream>
-#include <sstream>
 #include <iomanip>
 #include "utils.h"
 #include <atlconv.h>
 #include "SecureArrayT.h"
+#include "eventlog.h"
+#include "messages.h"
 
 binarystore::binarystore(const std::wstring& storeBasePath, const std::wstring& storeSubPathPasswordStore, const std::wstring& storeSubPathWordStore, int hashSize, int hashOffset)
 {
@@ -27,27 +28,16 @@ binarystore::binarystore(const std::wstring& storeBasePath, const std::wstring& 
 
 	if (!DirectoryExists(storeBasePath))
 	{
-		USES_CONVERSION;
-
-		std::stringstream ss;
-		ss << "There was no store found at ";
-		ss << W2A(passwordStorePath);
-		throw std::system_error(ERROR_PATH_NOT_FOUND, std::system_category(), ss.str().c_str());
+		if (!CreateDirectory(storeBasePath.c_str(), NULL))
+		{
+			const DWORD error = GetLastError();
+			eventlog::getInstance().logw(EVENTLOG_ERROR_TYPE, MSG_STOREERROR, 1, std::to_wstring(error).c_str());
+			throw std::system_error(error, std::system_category(), "Failed to create the store folder");
+		}
 	}
 
 	PathCombine(passwordStorePath, storeBasePath.c_str(), storeSubPathPasswordStore.c_str());
-		
-	if (!DirectoryExists(passwordStorePath))
-	{
-		CreateDirectory(passwordStorePath, NULL);
-	}
-
 	PathCombine(wordStorePath, storeBasePath.c_str(), storeSubPathWordStore.c_str());
-
-	if (!DirectoryExists(wordStorePath))
-	{
-		CreateDirectory(wordStorePath, NULL);
-	}
 
 	this->storePathPasswordStore = passwordStorePath;
 	this->storePathWordStore = wordStorePath;

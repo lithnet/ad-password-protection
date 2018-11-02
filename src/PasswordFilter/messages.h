@@ -92,6 +92,16 @@
 #define MSG_WIN32ERROR                   ((DWORD)0xC0020008L)
 
 //
+// MessageId: MSG_STOREERROR
+//
+// MessageText:
+//
+// There was a problem opening the store file. Check that the store folder exists and is accessible
+// Error code: %1
+//
+#define MSG_STOREERROR                   ((DWORD)0xC0020009L)
+
+//
 // MessageId: MSG_PASSWORD_REJECTED_ON_ERROR
 //
 // MessageText:

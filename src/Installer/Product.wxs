@@ -166,6 +166,14 @@
       </Directory>-->
     </DirectoryRef>
 
+    <DirectoryRef Id="STOREDIR">
+      <Component Id="cmp4ad81ba1ff4447269a6b9b34af6560f4"
+                 Guid="06f1d30bb03e4a2991b36e28879f5fcb"
+                 KeyPath="yes">
+        <CreateFolder />
+      </Component>
+    </DirectoryRef>
+
     <ComponentGroup Id="GPOExtensions">
       <Component Id="cmp2fe2138ab7a64368a0a413c37086a5c7" Guid="*" Directory="POLICYFOLDER" >
         <File Id="filb2b013b45e4f46d29981a68089a81a2a" KeyPath="yes" Source="$(var.StoreInterface.TargetDir)\PolicyDefinitions\lithnet.activedirectory.passwordfilter.admx" />
@@ -192,6 +200,7 @@
       <ComponentRef Id="cmpbdb687be91364145aa7b44287c14be38"/>
       <ComponentRef Id="cmp5aebe5a182914904ad6fe7ced1dfc5d6"/>
       <ComponentRef Id="cmp3d41c57e8c89436994a394bf0b01c885"/>
+      <ComponentRef Id="cmp4ad81ba1ff4447269a6b9b34af6560f4"/>
     </ComponentGroup>
   </Product>
 </Wix>

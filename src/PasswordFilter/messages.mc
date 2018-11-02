@@ -59,6 +59,15 @@ Error code: %1
 Message: %2
 .
 
+MessageId=0x9
+Severity=Error
+Facility=Runtime
+SymbolicName=MSG_STOREERROR
+Language=English
+There was a problem opening the store file. Check that the store folder exists and is accessible
+Error code: %1
+.
+
 MessageId=0x2001
 Severity=Warning
 Facility=System
