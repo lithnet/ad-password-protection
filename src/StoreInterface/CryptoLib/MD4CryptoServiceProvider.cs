@@ -36,11 +36,11 @@ namespace Microsoft.Protocols.TestTools.StackSdk.Security.Cryptographic
             this.hashHandle = IntPtr.Zero;
             this.HashSizeValue = 128;
 
-            bool status = NativeMethods.CryptAcquireContext(ref this.providerHandle, "MD4", null, ProviderType.PROV_RSA_AES, 0);
+            bool status = NativeMethods.CryptAcquireContext(ref this.providerHandle, "MD4", null, ProviderType.PROV_RSA_AES, CryptAcquireContextTypes.CRYPT_VERIFYCONTEXT | CryptAcquireContextTypes.CRYPT_SILENT);
 
             if (!status)
             {
-                status = NativeMethods.CryptAcquireContext(ref this.providerHandle, "MD4", null, ProviderType.PROV_RSA_AES, CryptAcquireContextTypes.CRYPT_NEWKEYSET);
+                status = NativeMethods.CryptAcquireContext(ref this.providerHandle, "MD4", null, ProviderType.PROV_RSA_AES, CryptAcquireContextTypes.CRYPT_VERIFYCONTEXT | CryptAcquireContextTypes.CRYPT_SILENT | CryptAcquireContextTypes.CRYPT_NEWKEYSET);
 
                 if (!status)
                 {

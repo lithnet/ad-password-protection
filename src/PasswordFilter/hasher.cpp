@@ -33,13 +33,13 @@ SecureArrayT<BYTE> GetSha1HashBytes(const SecureArrayT<char> &input)
 		DWORD dwHashLen;
 		DWORD dwCount = sizeof(DWORD);
 
-		if (!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL, 0))
+		if (!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT))
 		{
 			DWORD result = GetLastError();
 			if (result == NTE_BAD_KEYSET)
 			{
 				// No default container was found. Attempt to create it.
-				if (!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL, CRYPT_NEWKEYSET))
+				if (!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL, CRYPT_NEWKEYSET | CRYPT_VERIFYCONTEXT))
 				{
 					throw std::system_error(GetLastError(), std::system_category(), "CryptAcquireContext create container failed");
 				}
@@ -114,14 +114,14 @@ SecureArrayT<BYTE> GetNtlmHashBytes(const SecureArrayT<WCHAR> &input)
 	{
 		DWORD dwHashLen;
 		DWORD dwCount = sizeof(DWORD);
-
-		if (!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL, 0))
+		
+		if (!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL, CRYPT_SILENT | CRYPT_VERIFYCONTEXT))
 		{
 			DWORD result = GetLastError();
 			if (result == NTE_BAD_KEYSET)
 			{
 				// No default container was found. Attempt to create it.
-				if (!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL, CRYPT_NEWKEYSET))
+				if (!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL, CRYPT_SILENT| CRYPT_NEWKEYSET | CRYPT_VERIFYCONTEXT))
 				{
 					throw std::system_error(GetLastError(), std::system_category(), "CryptAcquireContext create container failed");
 				}
