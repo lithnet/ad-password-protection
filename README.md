@@ -2,7 +2,7 @@
 # Active Directory Password Filter
 The Lithnet Active Directory Password filter enhances the options available to an organization for protecting their accounts in Active Directory with strong passwords.
 
-We're firm believers that password hygeine is essential in any organization, and it should not be a premium that you pay extra for.
+We're firm believers that good password hygeine is essential in every organization, and it should not be a premium that you pay extra for.
 
 ## Features
 * No internet access required
