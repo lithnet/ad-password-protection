@@ -6,6 +6,7 @@ We're firm believers that good password hygeine is essential in every organizati
 
 ## Features
 * No internet access required
+* Group policy support
 * Supports checked passwords against a breached password list
 * Supports checking for banned words in passwords
 * Checks common character substitutions (eg P@ssw0rd is normalized to password before being checked against the banned word store)
