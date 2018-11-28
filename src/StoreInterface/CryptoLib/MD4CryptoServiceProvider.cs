@@ -36,11 +36,11 @@ namespace Microsoft.Protocols.TestTools.StackSdk.Security.Cryptographic
             this.hashHandle = IntPtr.Zero;
             this.HashSizeValue = 128;
 
-            bool status = NativeMethods.CryptAcquireContext(ref this.providerHandle, "MD4", null, ProviderType.PROV_RSA_AES, CryptAcquireContextTypes.CRYPT_VERIFYCONTEXT | CryptAcquireContextTypes.CRYPT_SILENT);
+            bool status = NativeMethods.CryptAcquireContext(ref this.providerHandle, null, null, ProviderType.PROV_RSA_FULL, CryptAcquireContextTypes.CRYPT_VERIFYCONTEXT | CryptAcquireContextTypes.CRYPT_SILENT);
 
             if (!status)
             {
-                status = NativeMethods.CryptAcquireContext(ref this.providerHandle, "MD4", null, ProviderType.PROV_RSA_AES, CryptAcquireContextTypes.CRYPT_VERIFYCONTEXT | CryptAcquireContextTypes.CRYPT_SILENT | CryptAcquireContextTypes.CRYPT_NEWKEYSET);
+                status = NativeMethods.CryptAcquireContext(ref this.providerHandle, null, null, ProviderType.PROV_RSA_FULL, CryptAcquireContextTypes.CRYPT_VERIFYCONTEXT | CryptAcquireContextTypes.CRYPT_SILENT | CryptAcquireContextTypes.CRYPT_NEWKEYSET);
 
                 if (!status)
                 {
@@ -81,7 +81,6 @@ namespace Microsoft.Protocols.TestTools.StackSdk.Security.Cryptographic
             }
         }
 
-
         /// <inheritdoc />
         protected override byte[] HashFinal()
         {
@@ -95,7 +94,7 @@ namespace Microsoft.Protocols.TestTools.StackSdk.Security.Cryptographic
                 throw new CryptographicException(Marshal.GetLastWin32Error());
             }
 
-            hashSize = (uint)BitConverter.ToUInt32(hashSizeBuffer, 0);
+            hashSize = BitConverter.ToUInt32(hashSizeBuffer, 0);
             byte[] hashValue = new byte[hashSize];
 
             status = NativeMethods.CryptGetHashParam(this.hashHandle, HashParameters.HP_HASHVAL, hashValue, ref hashSize, 0);
@@ -113,7 +112,6 @@ namespace Microsoft.Protocols.TestTools.StackSdk.Security.Cryptographic
 
             return hashValue;
         }
-
 
         /// <inheritdoc />
         protected override void Dispose(bool disposing)

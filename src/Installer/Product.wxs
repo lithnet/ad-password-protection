@@ -100,9 +100,10 @@
         <ComponentGroupRef Id="FilterDLL" />
         <MergeRef Id="VCRedist"/>
       </Feature>
-      <Feature Id="FeatureGPOExtensions" Title="Group policy templates (ADMX)" Level="2" AllowAdvertise="no" TypicalDefault="install" Description="Installs the group policy ADMX files which allows you to edit the Password Filter group policy settings from this machine">
-        <ComponentGroupRef Id="GPOExtensions"/>
-      </Feature>
+    </Feature>
+
+    <Feature Id="FeatureGPOExtensions" Title="Group policy templates (ADMX)" Level="1" AllowAdvertise="no" TypicalDefault="install" Description="Installs the group policy ADMX files which allows you to edit the Password Filter group policy settings from this machine">
+      <ComponentGroupRef Id="GPOExtensions"/>
     </Feature>
 
     <DirectoryRef Id="TARGETDIR">
@@ -159,6 +160,23 @@
       <Component Id="cmp1fd70d1ed9384b2089e7419192ca41f7" Guid="*">
         <File Id="filedb8d7c74f7f44bdb56b64fe3742eca1" KeyPath="yes" Source="$(var.PasswordFilterPS.TargetDir)\StoreInterface.dll" />
       </Component>
+      <Component Id="cmpaf9ac17c7e274d8c941ca1f8fdaf9a44" Guid="*">
+        <File Id="file5840797ac9cd4c25b383b94896db2c4b" KeyPath="yes" Source="$(var.PasswordFilterPS.TargetDir)\DSInternals.Common.dll" />
+      </Component>
+      <Component Id="cmp5e06cf0f45924429b9dfe527e9d03600" Guid="*">
+        <File Id="filea792b4d9b07b403aa7bc9fd785fd5b02" KeyPath="yes" Source="$(var.PasswordFilterPS.TargetDir)\DSInternals.Replication.dll" />
+      </Component>
+      <Component Id="cmpe187c39309a1444a98a724d04d29d166" Guid="*">
+        <File Id="filec12dd2a2507a486cb22789985ca18fb9" KeyPath="yes" Source="$(var.PasswordFilterPS.TargetDir)\DSInternals.Replication.Interop.dll" />
+      </Component>
+      <Component Id="cmp1a76f00a71584b5889e81c97333f8b77" Guid="*">
+        <File Id="fileea9ce89a9d834e08a961a847c122f6dd" KeyPath="yes" Source="$(var.PasswordFilterPS.TargetDir)\DSInternals.Replication.Model.dll" />
+      </Component>
+
+      <Component Id="cmpb250217af8ee45e88914e9de43e757b3" Guid="*">
+        <File Id="file18be3db5b36d491bad0993e5afa30958" KeyPath="yes" Source="$(var.PasswordFilterPS.TargetDir)\NDceRpc.Microsoft.dll" />
+      </Component>
+     
       <!--<Directory Id="dir8459fd46db3f4caf9bc3123af22f87a3" Name="en-us">
         <Component Id="cmp413ea4412fee4931a3d7b34e97f04b87" Guid="*">
           <File Id="filfdba194a56e5425681d7f54895170698" KeyPath="yes" Source="$(var.PasswordFilterPS.TargetDir)\en-us\PasswordFilterPS-help.xml" />
@@ -188,6 +206,13 @@
       <ComponentRef Id="cmp5b3dadeab922498faa0fbf7ee16f954b"/>
       <ComponentRef Id="cmp8fd1ec557ac5456aa990cfc6992d7054"/>
       <ComponentRef Id="cmp1fd70d1ed9384b2089e7419192ca41f7"/>
+      <ComponentRef Id="cmpaf9ac17c7e274d8c941ca1f8fdaf9a44"/>
+
+      <ComponentRef Id="cmpaf9ac17c7e274d8c941ca1f8fdaf9a44"/>
+      <ComponentRef Id="cmp5e06cf0f45924429b9dfe527e9d03600"/>
+      <ComponentRef Id="cmpe187c39309a1444a98a724d04d29d166"/>
+      <ComponentRef Id="cmp1a76f00a71584b5889e81c97333f8b77"/>
+      <ComponentRef Id="cmpb250217af8ee45e88914e9de43e757b3"/>
     </ComponentGroup>
 
     <ComponentGroup Id="NotificationPackage">

@@ -8,8 +8,8 @@ using StoreInterface;
 
 namespace PasswordFilterPS
 {
-    [Cmdlet(VerbsDiagnostic.Test, "Password")]
-    public class TestPassword : PSCmdlet
+    [Cmdlet(VerbsCommon.Get, "PasswordFilterResult")]
+    public class GetPasswordFilterResult : PSCmdlet
     {
         [Parameter(Mandatory = true, Position = 1, ValueFromPipeline = true), ValidateNotNullOrEmpty]
         public string Password { get; set; }
