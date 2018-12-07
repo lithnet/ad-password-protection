@@ -12,7 +12,7 @@ namespace PasswordFilterPS
     public class TestBannedWord: PSCmdlet
     {
         [Parameter(Mandatory = true, Position = 1, ValueFromPipeline = true, ParameterSetName = "String"), ValidateNotNullOrEmpty]
-        public string Word { get; set; }
+        public string Value { get; set; }
 
         [Parameter(Mandatory = true, Position = 1, ValueFromPipeline = true, ParameterSetName = "Hash"), ValidateNotNullOrEmpty]
         public byte[] Hash { get; set; }
@@ -32,7 +32,7 @@ namespace PasswordFilterPS
         {
             if (this.ParameterSetName == "String")
             {
-                string password = StringNormalizer.Normalize(this.Word);
+                string password = StringNormalizer.Normalize(this.Value);
 
                 this.WriteObject(Global.Store.IsInStore(password, StoreType.Word));
             }

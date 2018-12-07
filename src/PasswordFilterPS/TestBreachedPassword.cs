@@ -12,13 +12,13 @@ namespace PasswordFilterPS
     public class TestBreachedPassword : PSCmdlet
     {
         [Parameter(Mandatory = true, Position = 1, ValueFromPipeline = true, ParameterSetName = "BreachedPasswordString"), ValidateNotNullOrEmpty]
-        public string Password { get; set; }
+        public string Value { get; set; }
 
         [Parameter(Mandatory = true, Position = 1, ValueFromPipeline = true, ParameterSetName = "BreachedPasswordHash"), ValidateNotNullOrEmpty]
         public byte[] Hash { get; set; }
 
         [Parameter(Mandatory = false, Position = 2, ParameterSetName = "BreachedPasswordString")]
-        public bool Normalize { get; set; }
+        public SwitchParameter Normalize { get; set; }
 
         protected override void BeginProcessing()
         {
@@ -35,7 +35,7 @@ namespace PasswordFilterPS
         {
             if (this.ParameterSetName == "BreachedPasswordString")
             {
-                string password = this.Normalize ? StringNormalizer.Normalize(this.Password) : this.Password;
+                string password = this.Normalize.IsPresent ? StringNormalizer.Normalize(this.Value) : this.Value;
 
                 this.WriteObject(Global.Store.IsInStore(password, StoreType.Password));
             }

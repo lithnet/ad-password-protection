@@ -11,7 +11,7 @@ namespace PasswordFilterPS
     public class AddBreachedPassword : Cmdlet
     {
         [Parameter(Mandatory = true, Position = 1, ValueFromPipeline = true), ValidateNotNullOrEmpty]
-        public string Password { get; set; }
+        public string Value { get; set; }
 
         private StoreInterface.OperationProgress progress;
 
@@ -32,7 +32,7 @@ namespace PasswordFilterPS
 
         protected override void ProcessRecord()
         {
-            Global.Store.AddToStore(this.Password, StoreInterface.StoreType.Password);
+            Global.Store.AddToStore(this.Value, StoreInterface.StoreType.Password);
         }
     }
 }
