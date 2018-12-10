@@ -86,7 +86,13 @@
     <None Include="PolicyDefinitions\en-US\lithnet.activedirectory.passwordfilter.adml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="PolicyDefinitions\en-US\lithnet.adml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="PolicyDefinitions\lithnet.activedirectory.passwordfilter.admx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="PolicyDefinitions\lithnet.admx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

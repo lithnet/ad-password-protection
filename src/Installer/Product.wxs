@@ -199,6 +199,13 @@
       <Component Id="cmp5f9749a416b54e96907026c4a19f36c5" Guid="*" Directory="POLICYFOLDERLOCALIZATIONS" >
         <File Id="fil7eb7a2f48a5d4db39db66191307e58e4" KeyPath="yes" Source="$(var.StoreInterface.TargetDir)\PolicyDefinitions\en-US\lithnet.activedirectory.passwordfilter.adml" />
       </Component>
+
+      <Component Id="cmp8f072b9d7556476d84579295536ec55d" Guid="*" Directory="POLICYFOLDER" Shared="yes" >
+        <File Id="fileeb730f97aa0425e8de8c3882e01e77a" KeyPath="yes" Source="$(var.StoreInterface.TargetDir)\PolicyDefinitions\lithnet.admx" />
+      </Component>
+      <Component Id="cmpfc02f2bf23f84411a9caff880722e9b2" Guid="*" Directory="POLICYFOLDERLOCALIZATIONS" Shared="yes">
+        <File Id="filcdb3c2fedab347ef8306ab3c4f5f3d39" KeyPath="yes" Source="$(var.StoreInterface.TargetDir)\PolicyDefinitions\en-US\lithnet.adml" />
+      </Component>
     </ComponentGroup>
 
     <ComponentGroup Id="PSModule">

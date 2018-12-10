@@ -1,0 +1,11 @@
+<policyDefinitions revision="1.0" schemaVersion="1.0">
+  <policyNamespaces>
+    <target prefix="Lithnet" namespace="Lithnet" />
+    <using prefix="windows" namespace="Microsoft.Policies.Windows" />
+  </policyNamespaces>
+  <supersededAdm fileName="" />
+  <resources minRequiredRevision="1.0" />
+  <categories>
+    <category name="CAT_300017F2_090D_4E59_A535_01350C2E0428" displayName="$(string.CAT_300017F2_090D_4E59_A535_01350C2E0428)" />
+  </categories>
+</policyDefinitions>

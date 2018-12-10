@@ -1,0 +1,11 @@
+<policyDefinitionResources revision="1.0" schemaVersion="1.0">
+  <displayName>
+  </displayName>
+  <description>
+  </description>
+  <resources>
+    <stringTable>
+      <string id="CAT_300017F2_090D_4E59_A535_01350C2E0428">Lithnet</string>
+    </stringTable>
+  </resources>
+</policyDefinitionResources>
