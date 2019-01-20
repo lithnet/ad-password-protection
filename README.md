@@ -1,6 +1,6 @@
 ![](https://lithnet.github.io/images/logo-ex-small.png)
-# Active Directory Password Filter
-The Lithnet Active Directory Password filter enhances the options available to an organization for protecting their accounts in Active Directory with strong passwords.
+# Lithnet Password Protection for Active Directory
+Lithnet Password Protection for Active Directory (LPPAD) enhances the options available to an organization wanting to ensure that all their Active Directory accounts have strong passwords.
 
 We're firm believers that good password hygeine is essential in every organization, and it should not be a premium that you pay extra for.
 
@@ -28,9 +28,9 @@ We're firm believers that good password hygeine is essential in every organizati
 * PowerShell 5
 
 ## Getting started
-Download the installer from the [releases page](https://github.com/lithnet/ad-password-filter/releases)
+Download the installer from the [releases page](https://github.com/lithnet/ad-password-protection/releases)
 
-Read the [getting started guide](https://github.com/lithnet/ad-password-filter/wiki)
+Read the [getting started guide](https://github.com/lithnet/ad-password-protection/wiki)
 
 ## Keep up to date
 * [Visit my blog](http://blog.lithiumblue.com)
