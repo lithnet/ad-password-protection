@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Management.Automation;
 
-namespace PasswordFilterPS
+namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
 {
     [Cmdlet(VerbsCommon.Add, "BreachedPassword")]
     public class AddBreachedPassword : Cmdlet
@@ -13,26 +13,26 @@ namespace PasswordFilterPS
         [Parameter(Mandatory = true, Position = 1, ValueFromPipeline = true), ValidateNotNullOrEmpty]
         public string Value { get; set; }
 
-        private StoreInterface.OperationProgress progress;
+        private PasswordProtection.OperationProgress progress;
 
         protected override void BeginProcessing()
         {
             Global.OpenExistingDefaultOrThrow();
-            this.progress = new StoreInterface.OperationProgress();
+            this.progress = new PasswordProtection.OperationProgress();
 
-            Global.Store.StartBatch(StoreInterface.StoreType.Password);
+            Global.Store.StartBatch(PasswordProtection.StoreType.Password);
             base.BeginProcessing();
         }
 
         protected override void EndProcessing()
         {
-            Global.Store.EndBatch(StoreInterface.StoreType.Password, new System.Threading.CancellationToken(), this.progress);
+            Global.Store.EndBatch(PasswordProtection.StoreType.Password, new System.Threading.CancellationToken(), this.progress);
             base.EndProcessing();
         }
 
         protected override void ProcessRecord()
         {
-            Global.Store.AddToStore(this.Value, StoreInterface.StoreType.Password);
+            Global.Store.AddToStore(this.Value, PasswordProtection.StoreType.Password);
         }
     }
 }

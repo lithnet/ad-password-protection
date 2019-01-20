@@ -7,7 +7,7 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace StoreInterface
+namespace Lithnet.ActiveDirectory.PasswordProtection
 {
     public abstract class Store : IStore
     {

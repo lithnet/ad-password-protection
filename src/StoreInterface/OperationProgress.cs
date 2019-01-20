@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 
-namespace StoreInterface
+namespace Lithnet.ActiveDirectory.PasswordProtection
 {
     public class OperationProgress
     {

@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace StoreInterface
+namespace Lithnet.ActiveDirectory.PasswordProtection
 {
     public static class FilterInterface
     {

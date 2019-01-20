@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 
-namespace StoreInterface
+namespace Lithnet.ActiveDirectory.PasswordProtection
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct ComplexityThresholdPolicy

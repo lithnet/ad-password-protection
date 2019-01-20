@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace StoreInterface
+namespace Lithnet.ActiveDirectory.PasswordProtection
 {
     public class HashRangeGroup : IGrouping<string, IEnumerable<byte[]>>
     {

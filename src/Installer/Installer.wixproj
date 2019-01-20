@@ -6,7 +6,7 @@
     <ProductVersion>3.10</ProductVersion>
     <ProjectGuid>f42ef09f-7ab1-484b-bf80-72d455e9e9e4</ProjectGuid>
     <SchemaVersion>2.0</SchemaVersion>
-    <OutputName>Lithnet.ActiveDirectory.PasswordFilter</OutputName>
+    <OutputName>Lithnet.ActiveDirectory.PasswordProtection</OutputName>
     <OutputType>Package</OutputType>
     <RunWixToolsOutOfProc>true</RunWixToolsOutOfProc>
   </PropertyGroup>
@@ -47,8 +47,8 @@
     </WixExtension>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\PasswordFilterPS\PasswordFilterPS.csproj">
-      <Name>PasswordFilterPS</Name>
+    <ProjectReference Include="..\PasswordFilterPS\Lithnet.ActiveDirectory.PasswordProtection.PowerShell.csproj">
+      <Name>Lithnet.ActiveDirectory.PasswordProtection.PowerShell</Name>
       <Project>{5f3d1518-5edc-4552-8a65-19c20037ef3e}</Project>
       <Private>True</Private>
       <DoNotHarvest>True</DoNotHarvest>
@@ -63,8 +63,8 @@
       <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
       <RefTargetDir>INSTALLFOLDER</RefTargetDir>
     </ProjectReference>
-    <ProjectReference Include="..\StoreInterface\StoreInterface.csproj">
-      <Name>StoreInterface</Name>
+    <ProjectReference Include="..\StoreInterface\Lithnet.ActiveDirectory.PasswordProtection.csproj">
+      <Name>Lithnet.ActiveDirectory.PasswordProtection</Name>
       <Project>{61df881d-34fe-462b-aaa8-a56cd4dff287}</Project>
       <Private>True</Private>
       <DoNotHarvest>True</DoNotHarvest>

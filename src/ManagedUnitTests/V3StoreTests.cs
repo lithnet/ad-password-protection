@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using StoreInterface;
+using Lithnet.ActiveDirectory.PasswordProtection;
 using System.Linq;
 using System.Threading;
 
@@ -35,15 +35,15 @@ namespace ManagedUnitTests
         [TestMethod]
         public void TestHashFileIsInOrder()
         {
-            Assert.IsTrue(StoreInterface.Store.DoesHexHashFileAppearSorted(@"D:\pwnedpwds\raw\pwned-passwords-ntlm-ordered-by-hash.txt", 16));
-            Assert.IsFalse(StoreInterface.Store.DoesHexHashFileAppearSorted(@"D:\pwnedpwds\raw\pwned-passwords-ntlm-ordered-by-count.txt", 16));
+            Assert.IsTrue(Lithnet.ActiveDirectory.PasswordProtection.Store.DoesHexHashFileAppearSorted(@"D:\pwnedpwds\raw\pwned-passwords-ntlm-ordered-by-hash.txt", 16));
+            Assert.IsFalse(Lithnet.ActiveDirectory.PasswordProtection.Store.DoesHexHashFileAppearSorted(@"D:\pwnedpwds\raw\pwned-passwords-ntlm-ordered-by-count.txt", 16));
         }
 
 
         [TestMethod]
         public void TestGoodHashTypes()
         {
-            StoreInterface.Store.ImportHexHashesFromSortedFile(this.Store, StoreType.Password, @"D:\pwnedpwds\raw\test-good-hash.txt", new CancellationToken());
+            Lithnet.ActiveDirectory.PasswordProtection.Store.ImportHexHashesFromSortedFile(this.Store, StoreType.Password, @"D:\pwnedpwds\raw\test-good-hash.txt", new CancellationToken());
         }
 
         [TestMethod]
@@ -51,7 +51,7 @@ namespace ManagedUnitTests
         {
             try
             {
-                StoreInterface.Store.ImportHexHashesFromSortedFile(this.Store, StoreType.Password, @"D:\pwnedpwds\raw\test-hash-too-long.txt", new CancellationToken());
+                Lithnet.ActiveDirectory.PasswordProtection.Store.ImportHexHashesFromSortedFile(this.Store, StoreType.Password, @"D:\pwnedpwds\raw\test-hash-too-long.txt", new CancellationToken());
                 Assert.Fail("Did not throw the expected exception");
             }
             catch (InvalidDataException)
@@ -64,7 +64,7 @@ namespace ManagedUnitTests
         {
             try
             {
-                StoreInterface.Store.ImportHexHashesFromSortedFile(this.Store, StoreType.Password, @"D:\pwnedpwds\raw\test-hash-too-short.txt", new CancellationToken());
+                Lithnet.ActiveDirectory.PasswordProtection.Store.ImportHexHashesFromSortedFile(this.Store, StoreType.Password, @"D:\pwnedpwds\raw\test-hash-too-short.txt", new CancellationToken());
                 Assert.Fail("Did not throw the expected exception");
             }
             catch (InvalidDataException)
@@ -85,27 +85,27 @@ namespace ManagedUnitTests
 
             // Start with HIBP
             string file = @"D:\pwnedpwds\raw\pwned-passwords-ntlm-ordered-by-hash.txt";
-            StoreInterface.Store.ImportHexHashesFromSortedFile(store, StoreType.Password, file, ct.Token);
+            Lithnet.ActiveDirectory.PasswordProtection.Store.ImportHexHashesFromSortedFile(store, StoreType.Password, file, ct.Token);
 
             // add english dictionary to word store
             file = @"D:\pwnedpwds\raw\english.txt";
-            StoreInterface.Store.ImportPasswordsFromFile(store, StoreType.Word, file, ct.Token);
+            Lithnet.ActiveDirectory.PasswordProtection.Store.ImportPasswordsFromFile(store, StoreType.Word, file, ct.Token);
 
             // add more english words to word store
             file = @"D:\pwnedpwds\raw\words.txt";
-            StoreInterface.Store.ImportPasswordsFromFile(store, StoreType.Word, file, ct.Token);
+            Lithnet.ActiveDirectory.PasswordProtection.Store.ImportPasswordsFromFile(store, StoreType.Word, file, ct.Token);
 
             // add rockyou breach
             file = @"D:\pwnedpwds\raw\rockyou.txt";
-            StoreInterface.Store.ImportPasswordsFromFile(store, StoreType.Password, file, ct.Token);
+            Lithnet.ActiveDirectory.PasswordProtection.Store.ImportPasswordsFromFile(store, StoreType.Password, file, ct.Token);
 
             // add top 100000 
             file = @"D:\pwnedpwds\raw\top1000000.txt";
-            StoreInterface.Store.ImportPasswordsFromFile(store, StoreType.Password, file, ct.Token);
+            Lithnet.ActiveDirectory.PasswordProtection.Store.ImportPasswordsFromFile(store, StoreType.Password, file, ct.Token);
 
             // add breach compilation
             file = @"D:\pwnedpwds\raw\breachcompilationuniq.txt";
-            StoreInterface.Store.ImportPasswordsFromFile(store, StoreType.Password, file, ct.Token);
+            Lithnet.ActiveDirectory.PasswordProtection.Store.ImportPasswordsFromFile(store, StoreType.Password, file, ct.Token);
         }
 
         [TestMethod]
@@ -174,7 +174,7 @@ namespace ManagedUnitTests
             try
             {
                 var store = new V3Store(path);
-                StoreInterface.Store.ImportPasswordsFromFile(store, StoreType.Word, file, ct);
+                Lithnet.ActiveDirectory.PasswordProtection.Store.ImportPasswordsFromFile(store, StoreType.Word, file, ct);
 
                 using (StreamReader reader = new StreamReader(file))
                 {

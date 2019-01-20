@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Management.Automation;
-using StoreInterface;
+using Lithnet.ActiveDirectory.PasswordProtection;
 
-namespace PasswordFilterPS
+namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
 {
     [Cmdlet(VerbsDiagnostic.Test, "BreachedPassword", DefaultParameterSetName = "BreachedPasswordString")]
     public class TestBreachedPassword : PSCmdlet

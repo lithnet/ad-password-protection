@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Management.Automation;
 using System.Threading;
-using StoreInterface;
+using Lithnet.ActiveDirectory.PasswordProtection;
 
-namespace PasswordFilterPS
+namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
 {
     [Cmdlet(VerbsData.Import, "BannedWordHashes")]
     public class ImportBannedWordHashes : ImportPSCmdlet

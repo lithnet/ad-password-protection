@@ -6,7 +6,7 @@ HANDLE hlog;
 
 eventlog::eventlog()
 {
-	hlog = RegisterEventSource(NULL, L"LithnetPasswordFilter");
+	hlog = RegisterEventSource(NULL, L"LithnetPasswordProtection");
 }
 
 eventlog::~eventlog()

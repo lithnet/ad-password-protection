@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
 
-namespace StoreInterface
+namespace Lithnet.ActiveDirectory.PasswordProtection
 {
     public class BinaryStoreInstance
     {

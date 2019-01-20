@@ -58,7 +58,7 @@
 //
 // MessageText:
 //
-// The Lithnet AD Password Filter is currently disabled and has not evaluated the password change request.
+// The password filter is currently disabled and has not evaluated the password change request.
 //
 #define MSG_AGENT_DISABLED               ((DWORD)0x80040002L)
 

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Management.Automation;
 using System.Security.Principal;
-using StoreInterface;
+using Lithnet.ActiveDirectory.PasswordProtection;
 using DSInternals.Replication;
 using DSInternals.Common.Data;
 
-namespace PasswordFilterPS
+namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
 {
     [Cmdlet(VerbsDiagnostic.Test, "ADUserPasswordIsPwned")]
     public class TestADUserPasswordIsPwned : PSCmdlet

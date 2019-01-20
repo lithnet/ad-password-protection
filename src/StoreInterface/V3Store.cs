@@ -7,7 +7,7 @@ using System.Security.Cryptography;
 using Microsoft.Protocols.TestTools.StackSdk.Security.Cryptographic;
 using System.Text;
 
-namespace StoreInterface
+namespace Lithnet.ActiveDirectory.PasswordProtection
 {
     public class V3Store : BinaryStore
     {

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Management.Automation;
 using System.Threading;
 
-namespace PasswordFilterPS
+namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
 {
     [Cmdlet(VerbsData.Import, "BannedWords")]
     public class ImportBannedWords : ImportPSCmdlet
@@ -42,7 +42,7 @@ namespace PasswordFilterPS
             {
                 try
                 {
-                    StoreInterface.Store.ImportPasswordsFromFile(Global.Store, StoreInterface.StoreType.Word, this.Filename, this.token.Token, this.BatchSize, this.Progress);
+                    PasswordProtection.Store.ImportPasswordsFromFile(Global.Store, PasswordProtection.StoreType.Word, this.Filename, this.token.Token, this.BatchSize, this.Progress);
                 }
                 catch (OperationCanceledException)
                 {
