@@ -47,14 +47,6 @@
     </WixExtension>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\PasswordFilterPS\Lithnet.ActiveDirectory.PasswordProtection.PowerShell.csproj">
-      <Name>Lithnet.ActiveDirectory.PasswordProtection.PowerShell</Name>
-      <Project>{5f3d1518-5edc-4552-8a65-19c20037ef3e}</Project>
-      <Private>True</Private>
-      <DoNotHarvest>True</DoNotHarvest>
-      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
-      <RefTargetDir>INSTALLFOLDER</RefTargetDir>
-    </ProjectReference>
     <ProjectReference Include="..\PasswordFilter\PasswordFilter.vcxproj">
       <Name>PasswordFilter</Name>
       <Project>{850894df-b439-4daa-a574-f7cfea422a2f}</Project>
@@ -63,7 +55,15 @@
       <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
       <RefTargetDir>INSTALLFOLDER</RefTargetDir>
     </ProjectReference>
-    <ProjectReference Include="..\StoreInterface\Lithnet.ActiveDirectory.PasswordProtection.csproj">
+    <ProjectReference Include="..\PasswordProtectionPS\Lithnet.ActiveDirectory.PasswordProtection.PowerShell.csproj">
+      <Name>Lithnet.ActiveDirectory.PasswordProtection.PowerShell</Name>
+      <Project>{5f3d1518-5edc-4552-8a65-19c20037ef3e}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLFOLDER</RefTargetDir>
+    </ProjectReference>
+    <ProjectReference Include="..\PasswordProtection\Lithnet.ActiveDirectory.PasswordProtection.csproj">
       <Name>Lithnet.ActiveDirectory.PasswordProtection</Name>
       <Project>{61df881d-34fe-462b-aaa8-a56cd4dff287}</Project>
       <Private>True</Private>
