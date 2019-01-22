@@ -12,7 +12,7 @@
 ModuleVersion = '$version$'
 
 # ID used to uniquely identify this module
-GUID = '975097d6-0c52-4e29-808b-50990c1ae18c'
+GUID = 'e6a12c2f-7a92-44af-9ec8-6473d479cf27'
 
 # Author of this module
 Author = 'Ryan Newington'
@@ -48,10 +48,10 @@ ProcessorArchitecture = 'Amd64'
 RequiredModules = @()
 
 # Assemblies that must be loaded prior to importing this module
-#RequiredAssemblies = 'LithnetPasswordProtection.dll'
+RequiredAssemblies = @('DSInternals.Common.dll', 'DSInternals.Replication.Model.dll', 'DSInternals.Replication.Interop.dll', 'NDceRpc.Microsoft.dll', 'DSInternals.Replication.dll', 'Lithnet.ActiveDirectory.PasswordProtection.dll')
 
 # Script files (.ps1) that are run in the caller's environment prior to importing this module
-# ScriptsToProcess = @('RegisterResolver.ps1')
+# ScriptsToProcess = @()
 
 # Type files (.ps1xml) to be loaded when importing this module
 TypesToProcess = @()
@@ -60,7 +60,7 @@ TypesToProcess = @()
 #FormatsToProcess = @("ManagementAgent.format.ps1xml", "Attribute.format.ps1xml")
 
 # Modules to import as nested modules of the module specified in ModuleToProcess
-NestedModules = @('LithnetPasswordProtection.dll')
+RootModule = @('LithnetPasswordProtection.dll')
 
 # Functions to export from this module
 FunctionsToExport = '*'
@@ -75,7 +75,7 @@ VariablesToExport = '*'
 AliasesToExport = '*'
 
 # List of all modules packaged with this module
-ModuleList = @()
+#ModuleList = @()
 
 # List of all files packaged with this module
 FileList = @()
