@@ -45,6 +45,6 @@ Read the [getting started guide](https://github.com/lithnet/ad-password-protecti
 * [Follow me on twitter](https://twitter.com/RyanLNewington)![](http://twitter.com/favicon.ico)
 
 ## Acknowledgements
-* None of this would be possible without Troy Hunt's [Have I Been Pwned](haveibeenpwned.com) service. [Buy him a beer to say thanks](https://haveibeenpwned.com/Donate)! 
+* None of this would be possible without Troy Hunt's [Have I Been Pwned](https://haveibeenpwned.com) service. [Buy him a beer to say thanks](https://haveibeenpwned.com/Donate)! 
 * The capability to audit existing user passwords comes from the incredible work Michael Grafnetter has done with his [DSInternals](https://github.com/MichaelGrafnetter/DSInternals) tools.
 * Contains code from [Windows-Protocol-Test-Suites](https://github.com/Microsoft/WindowsProtocolTestSuites) used under the [MIT license](https://github.com/Microsoft/WindowsProtocolTestSuites/blob/master/LICENSE.txt) 
