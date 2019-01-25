@@ -21,10 +21,10 @@ We're firm believers that good password hygeine is essential in every organizati
   * Managing the breached password and banned word stores. Add your own banned words and known breached passwords, as well as use popular databases such as the haveibeenpwned downloadable password list
   * Testing passwords and existing hashes against the store
   * Test your user's current passwords in AD against the banned password store
-  * Passwords never leave the domain controller
-  * Designed for large environments where high performance is required
-  * Creates detailed event logs
-  * Uses a DFS-R friendly data store
+* Passwords never leave the domain controller
+* Designed for large environments where high performance is required
+* Creates detailed event logs
+* Uses a DFS-R friendly data store
 
 ## System Requirements
 #### Password Filter
