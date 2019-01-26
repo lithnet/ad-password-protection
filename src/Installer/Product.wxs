@@ -13,6 +13,10 @@
              Manufacturer="Lithnet"
              Platform="x64"/>
 
+
+    <Icon Id="passwordprotectionico" SourceFile="password-protection.ico"/>
+    <Property Id="ARPPRODUCTICON" Value="passwordprotectionico" />
+
     <MajorUpgrade Schedule="afterInstallExecute"
                   DowngradeErrorMessage="A later version of [ProductName] is already installed"
                   AllowSameVersionUpgrades="yes"/>
@@ -34,8 +38,13 @@
     <Condition Message="[ProductName] Requires .NET Framework 4.6 or later to be installed">
       <![CDATA[Installed OR WIX_IS_NETFRAMEWORK_46_OR_LATER_INSTALLED]]>
     </Condition>
+
+    <WixVariable Id="WixUILicenseRtf" Value="license.rtf" />
+
     <UI>
       <UIRef Id="WixUI_FeatureTree" />
+
+      <DialogRef Id="LicenseAgreementDlg" />
 
       <DialogRef Id="ProgressDlg" />
       <DialogRef Id="ErrorDlg" />
@@ -43,8 +52,10 @@
       <DialogRef Id="FatalError" />
       <DialogRef Id="UserExit" />
 
-      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="CustomizeDlg" Order="2">1</Publish>
-      <Publish Dialog="CustomizeDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="3">1</Publish>
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="LicenseAgreementDlg" Order="2">1</Publish>
+      <Publish Dialog="LicenseAgreementDlg" Control="Next" Event="NewDialog" Value="CustomizeDlg" Order="4">1</Publish>
+
+      <Publish Dialog="CustomizeDlg" Control="Back" Event="NewDialog" Value="LicenseAgreementDlg" Order="3">1</Publish>
       <Publish Dialog="CustomizeDlg" Control="Next" Event="NewDialog" Value="StoreDialog" Order="1">1</Publish>
       <Publish Dialog="StoreDialog" Control="Back" Event="NewDialog" Value="CustomizeDlg" Order="1">1</Publish>
       <Publish Dialog="StoreDialog" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Order="1">1</Publish>

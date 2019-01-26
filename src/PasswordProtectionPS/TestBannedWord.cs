@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Management.Automation;
+using System.Security;
 using Lithnet.ActiveDirectory.PasswordProtection;
 
 namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
@@ -16,6 +17,9 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
 
         [Parameter(Mandatory = true, Position = 1, ValueFromPipeline = true, ParameterSetName = "Hash"), ValidateNotNullOrEmpty]
         public byte[] Hash { get; set; }
+
+        [Parameter(Mandatory = true, Position = 1, ValueFromPipeline = true, ParameterSetName = "SecureString"), ValidateNotNullOrEmpty]
+        public SecureString SecureString { get; set; }
 
         protected override void BeginProcessing()
         {
@@ -33,7 +37,11 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
             if (this.ParameterSetName == "String")
             {
                 string password = StringNormalizer.Normalize(this.Value);
-
+                this.WriteObject(Global.Store.IsInStore(password, StoreType.Word));
+            }
+            else if (this.ParameterSetName == "SecureString")
+            {
+                string password = StringNormalizer.Normalize(this.SecureString.SecureStringToString());
                 this.WriteObject(Global.Store.IsInStore(password, StoreType.Word));
             }
             else

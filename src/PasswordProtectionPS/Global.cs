@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 using Lithnet.ActiveDirectory.PasswordProtection;
@@ -48,5 +50,20 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
         }
 
         public static bool IsOpen => Global.Store != null;
+
+        public static string SecureStringToString(this SecureString value)
+        {
+            IntPtr valuePtr = IntPtr.Zero;
+
+            try
+            {
+                valuePtr = Marshal.SecureStringToGlobalAllocUnicode(value);
+                return Marshal.PtrToStringUni(valuePtr);
+            }
+            finally
+            {
+                Marshal.ZeroFreeGlobalAllocUnicode(valuePtr);
+            }
+        }
     }
 }
