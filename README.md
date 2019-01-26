@@ -5,11 +5,8 @@ Lithnet Password Protection for Active Directory (LPPAD) enhances the options av
 We're firm believers that good password hygeine is essential in every organization, and it should not be a premium that you pay extra for.
 
 ## Features
-* Filter's passwords using an Active Directory [password filter](https://docs.microsoft.com/en-us/windows/desktop/secmgmt/password-filters) module
-* No internet access required
-* No additional servers required for deployment
-* Group policy support
-* Supports checked passwords against a breached password list
+* Evaluates user password changes using an Active Directory [password filter](https://docs.microsoft.com/en-us/windows/desktop/secmgmt/password-filters) module
+* Supports checking passwords against a breached password list
 * Supports checking for passwords based on banned words
 * Checks common character substitutions (eg P@ssw0rd is normalized to password before being checked against the banned word store)
 * Supports custom complexity password rules
@@ -25,6 +22,9 @@ We're firm believers that good password hygeine is essential in every organizati
 * Designed for large environments where high performance is required
 * Creates detailed event logs
 * Uses a DFS-R friendly data store
+* No internet access required
+* No additional servers required for deployment
+* Group policy support
 
 ## System Requirements
 #### Password Filter
