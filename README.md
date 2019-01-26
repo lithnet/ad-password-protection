@@ -1,4 +1,5 @@
 ![](https://lithnet.github.io/images/lppad.png)
+
 Lithnet Password Protection for Active Directory (LPPAD) enhances the options available to an organization wanting to ensure that all their Active Directory accounts have strong passwords.
 
 We're firm believers that good password hygeine is essential in every organization, and it should not be a premium that you pay extra for.
