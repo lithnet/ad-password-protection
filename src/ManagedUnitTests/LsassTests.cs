@@ -87,7 +87,7 @@ namespace ManagedUnitTests
         {
             using (PrincipalContext ctx = new PrincipalContext(ContextType.Machine))
             {
-                UserPrincipal p = UserPrincipal.FindByIdentity(ctx, "test");
+                UserPrincipal p = UserPrincipal.FindByIdentity(ctx, "pwntest");
 
                 if (p == null)
                 {
