@@ -124,7 +124,7 @@
 //
 // MessageText:
 //
-// The password %1 request for %2 (%3) was rejected because it matched a password in the banned password store.
+// The password %1 request for %2 (%3) was rejected because it matched a password in the comrpomised password store.
 //
 #define MSG_PASSWORD_REJECTED_BANNED     ((DWORD)0x80002003L)
 
@@ -133,7 +133,7 @@
 //
 // MessageText:
 //
-// The password %1 request for %2 (%3) was rejected after being normalized because it matched a password in the banned password store.
+// The password %1 request for %2 (%3) was rejected after being normalized because it matched a password in the compromised password store.
 //
 #define MSG_PASSWORD_REJECTED_BANNED_NORMALIZED_PASSWORD ((DWORD)0x80002004L)
 

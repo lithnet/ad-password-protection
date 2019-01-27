@@ -8,8 +8,8 @@ using System.Security;
 
 namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
 {
-    [Cmdlet(VerbsCommon.Add, "BreachedPassword", DefaultParameterSetName = "String")]
-    public class AddBreachedPassword : PSCmdlet
+    [Cmdlet(VerbsCommon.Add, "CompromisedPassword", DefaultParameterSetName = "String")]
+    public class AddCompromisedPassword : PSCmdlet
     {
         [Parameter(Mandatory = true, Position = 1, ValueFromPipeline = true, ParameterSetName = "String"), ValidateNotNullOrEmpty]
         public string Value { get; set; }

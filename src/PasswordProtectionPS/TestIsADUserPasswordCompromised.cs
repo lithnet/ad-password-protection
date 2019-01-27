@@ -7,8 +7,8 @@ using DSInternals.Common.Data;
 
 namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
 {
-    [Cmdlet(VerbsDiagnostic.Test, "ADUserPasswordIsPwned", DefaultParameterSetName = "AccountName")]
-    public class TestADUserPasswordIsPwned : PSCmdlet
+    [Cmdlet(VerbsDiagnostic.Test, "IsADUserPasswordCompromised", DefaultParameterSetName = "AccountName")]
+    public class TestIsADUserPasswordCompromised : PSCmdlet
     {
         [Parameter(Mandatory = true, Position = 1, ValueFromPipeline = false, ParameterSetName = "AccountName"), ValidateNotNullOrEmpty]
         public string AccountName { get; set; }

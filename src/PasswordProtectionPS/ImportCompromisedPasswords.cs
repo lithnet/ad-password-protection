@@ -5,20 +5,16 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Management.Automation;
-using Lithnet.ActiveDirectory.PasswordProtection;
 
 namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
 {
-    [Cmdlet(VerbsData.Import, "BreachedPasswordHashes")]
-    public class ImportBreachedPasswordHashes : ImportPSCmdlet
+    [Cmdlet(VerbsData.Import, "CompromisedPasswords")]
+    public class ImportCompromisedPasswords : ImportPSCmdlet
     {
         [Parameter(Mandatory = true, Position = 1, ValueFromPipeline = true), ValidateNotNullOrEmpty]
         public string Filename { get; set; }
 
         [Parameter(Mandatory = false, Position = 2)]
-        public bool? Sorted { get; set; }
-
-        [Parameter(Mandatory = false, Position = 3)]
         public int BatchSize { get; set; } = -1;
 
         private CancellationTokenSource token = new CancellationTokenSource();
@@ -26,10 +22,10 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
         protected override void BeginProcessing()
         {
             Global.OpenExistingDefaultOrThrow();
-            this.InitializeProgressUpdate($"Importing password hashes from {this.Filename}");
-
+            this.InitializeProgressUpdate($"Importing plain-text passwords from {this.Filename}");
             base.BeginProcessing();
         }
+
         protected override void StopProcessing()
         {
             this.token.Cancel();
@@ -46,24 +42,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
             {
                 try
                 {
-                    bool isSorted;
-                    if (this.Sorted.HasValue)
-                    {
-                        isSorted = this.Sorted.Value;
-                    }
-                    else
-                    {
-                        isSorted = Store.DoesHexHashFileAppearSorted(this.Filename, V3Store.BinaryHashLength);
-                    }
-
-                    if (isSorted)
-                    {
-                        Store.ImportHexHashesFromSortedFile(Global.Store, StoreType.Password, this.Filename, this.token.Token, this.Progress);
-                    }
-                    else
-                    {
-                        Store.ImportHexHashesFromFile(Global.Store, StoreType.Password, this.Filename, this.token.Token, this.BatchSize, this.Progress);
-                    }
+                    PasswordProtection.Store.ImportPasswordsFromFile(Global.Store, PasswordProtection.StoreType.Password, this.Filename, this.token.Token, this.BatchSize, this.Progress);
                 }
                 catch (OperationCanceledException)
                 {

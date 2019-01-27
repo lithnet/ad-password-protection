@@ -89,7 +89,7 @@ Severity=Warning
 Facility=System
 SymbolicName=MSG_PASSWORD_REJECTED_BANNED
 Language=English
-The password %1 request for %2 (%3) was rejected because it matched a password in the banned password store.
+The password %1 request for %2 (%3) was rejected because it matched a password in the comrpomised password store.
 .
 
 MessageId=0x2004
@@ -97,7 +97,7 @@ Severity=Warning
 Facility=System
 SymbolicName=MSG_PASSWORD_REJECTED_BANNED_NORMALIZED_PASSWORD
 Language=English
-The password %1 request for %2 (%3) was rejected after being normalized because it matched a password in the banned password store.
+The password %1 request for %2 (%3) was rejected after being normalized because it matched a password in the compromised password store.
 .
 
 MessageId=0x2005

@@ -9,8 +9,8 @@ using Lithnet.ActiveDirectory.PasswordProtection;
 
 namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
 {
-    [Cmdlet(VerbsDiagnostic.Test, "BannedWord", DefaultParameterSetName = "String")]
-    public class TestBannedWord: PSCmdlet
+    [Cmdlet(VerbsDiagnostic.Test, "ISBannedWord", DefaultParameterSetName = "String")]
+    public class TestIsBannedWord: PSCmdlet
     {
         [Parameter(Mandatory = true, Position = 1, ValueFromPipeline = true, ParameterSetName = "String"), ValidateNotNullOrEmpty]
         public string Value { get; set; }

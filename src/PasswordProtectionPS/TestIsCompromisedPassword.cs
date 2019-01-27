@@ -9,8 +9,8 @@ using Lithnet.ActiveDirectory.PasswordProtection;
 
 namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
 {
-    [Cmdlet(VerbsDiagnostic.Test, "BreachedPassword", DefaultParameterSetName = "String")]
-    public class TestBreachedPassword : PSCmdlet
+    [Cmdlet(VerbsDiagnostic.Test, "IsCompromisedPassword", DefaultParameterSetName = "String")]
+    public class TestIsCompromisedPassword : PSCmdlet
     {
         [Parameter(Mandatory = true, Position = 1, ValueFromPipeline = true, ParameterSetName = "String"), ValidateNotNullOrEmpty]
         public string Value { get; set; }
