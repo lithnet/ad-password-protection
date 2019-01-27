@@ -56,14 +56,14 @@ int ProcessPassword(const SecureArrayT<WCHAR> &password, const std::wstring &acc
 		return PASSWORD_REJECTED_BANNED;
 	}
 
-	if (!ProcessPasswordNormalizedPasswordStore(password, accountName, fullName, setOperation, reg))
-	{
-		return PASSWORD_REJECTED_BANNED_NORMALIZED_PASSWORD;
-	}
-
 	if (!ProcessPasswordNormalizedWordStore(password, accountName, fullName, setOperation, reg))
 	{
 		return PASSWORD_REJECTED_BANNED_NORMALIZED_WORD;
+	}
+
+	if (!ProcessPasswordNormalizedPasswordStore(password, accountName, fullName, setOperation, reg))
+	{
+		return PASSWORD_REJECTED_BANNED_NORMALIZED_PASSWORD;
 	}
 
 	OutputDebugString(L"Password was approved by all modules");
@@ -75,8 +75,8 @@ int ProcessPassword(const SecureArrayT<WCHAR> &password, const std::wstring &acc
 
 BOOLEAN ProcessPasswordRaw(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
 {
-	if ((setOperation && reg.GetRegValue(REG_VALUE_CHECKBANNEDPASSWORDONSET, 1) != 0) || 
-		(!setOperation && reg.GetRegValue(REG_VALUE_CHECKBANNEDPASSWORDONCHANGE, 1) != 0))
+	if ((setOperation && reg.GetRegValue(REG_VALUE_CHECKBANNEDPASSWORDONSET, 0) != 0) || 
+		(!setOperation && reg.GetRegValue(REG_VALUE_CHECKBANNEDPASSWORDONCHANGE, 0) != 0))
 	{
 		OutputDebugString(L"Checking raw password");
 
@@ -95,8 +95,8 @@ BOOLEAN ProcessPasswordRaw(const SecureArrayT<WCHAR> &password, const std::wstri
 
 BOOLEAN ProcessPasswordNormalizedPasswordStore(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
 {
-	if (setOperation && reg.GetRegValue(REG_VALUE_CHECKNORMALIZEDBANNEDPASSWORDONSET, 1) != 0 ||
-		!setOperation && reg.GetRegValue(REG_VALUE_CHECKNORMALIZEDBANNEDPASSWORDONCHANGE, 1) != 0 )
+	if (setOperation && reg.GetRegValue(REG_VALUE_CHECKNORMALIZEDBANNEDPASSWORDONSET, 0) != 0 ||
+		!setOperation && reg.GetRegValue(REG_VALUE_CHECKNORMALIZEDBANNEDPASSWORDONCHANGE, 0) != 0 )
 	{
 		bool result = TRUE;
 
@@ -123,8 +123,8 @@ BOOLEAN ProcessPasswordNormalizedPasswordStore(const SecureArrayT<WCHAR> &passwo
 
 BOOLEAN ProcessPasswordNormalizedWordStore(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
 {
-	if (setOperation && reg.GetRegValue(REG_VALUE_CHECKNORMALIZEDBANNEDWORDONSET, 1) != 0 ||
-		!setOperation && reg.GetRegValue(REG_VALUE_CHECKNORMALIZEDBANNEDWORDONCHANGE, 1) != 0)
+	if (setOperation && reg.GetRegValue(REG_VALUE_CHECKNORMALIZEDBANNEDWORDONSET, 0) != 0 ||
+		!setOperation && reg.GetRegValue(REG_VALUE_CHECKNORMALIZEDBANNEDWORDONCHANGE, 0) != 0)
 	{
 		bool result = TRUE;
 

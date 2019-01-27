@@ -29,7 +29,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
         public PSCredential Credential { get; set; }
 
         [Parameter(Mandatory = false, Position = 5, ValueFromPipeline = false)]
-        public SwitchParameter OutBadHashOnMatch { get; set; }
+        public SwitchParameter OutputCompromisedHashOnMatch { get; set; }
 
         private DirectoryReplicationClient client;
 
@@ -65,7 +65,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
             }
 
             bool result = Global.Store.IsInStore(account.NTHash, StoreType.Password);
-            if (this.OutBadHashOnMatch.IsPresent)
+            if (this.OutputCompromisedHashOnMatch.IsPresent)
             {
                 if (result)
                 {

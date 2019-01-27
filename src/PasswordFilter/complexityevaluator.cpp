@@ -63,7 +63,7 @@ BOOLEAN ProcessPasswordComplexityThreshold(const SecureArrayT<WCHAR> &password, 
 	}
 
 	const bool requiresLower = (reg.GetRegValue(thresholdID + REG_VALUE_CTREQUIRESLOWER, 0) != 0);
-	const 	bool requiresUpper = (reg.GetRegValue(thresholdID + REG_VALUE_CTREQUIRESUPPER, 0) != 0);
+	const bool requiresUpper = (reg.GetRegValue(thresholdID + REG_VALUE_CTREQUIRESUPPER, 0) != 0);
 	const bool requiresNumber = (reg.GetRegValue(thresholdID + REG_VALUE_CTREQUIRESNUMBER, 0) != 0);
 	const bool requiresSymbol = (reg.GetRegValue(thresholdID + REG_VALUE_CTREQUIRESSYMBOL, 0) != 0);
 	const bool requiresSymbolOrNumber = (reg.GetRegValue(thresholdID + REG_VALUE_CTREQUIRESSYMBOLORNUMBER, 0) != 0);
