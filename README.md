@@ -2,7 +2,7 @@
 
 Lithnet Password Protection for Active Directory (LPP) enhances the options available to an organization wanting to ensure that all their Active Directory accounts have strong passwords.
 
-LPP is a module that you install on your Active Directory servers uses a [password filter](https://docs.microsoft.com/en-us/windows/desktop/secmgmt/password-filters) to inspect passwords as users attempt to change them. Using group policy, you customize the types of checks you want to perform on those passwords and they are either rejected, or approved, and committed to the directory.
+LPP is a module that you install on your Active Directory servers that uses a [password filter](https://docs.microsoft.com/en-us/windows/desktop/secmgmt/password-filters) to inspect passwords as users attempt to change them. Using group policy, you customize the types of checks you want to perform on those passwords and they are either rejected, or approved, and committed to the directory.
 
 LPP gives you the ability to take control of what a good password means to you. Whether you want to adopt the 2018 NIST password recommendations in part, or in full, it provides a rich set of group policy-based controls that allow you to enable any combination of the following checks on attempted password changes.
 
