@@ -1,23 +1,24 @@
 ![](https://lithnet.github.io/images/lppad.png)
 
-Lithnet Password Protection for Active Directory (LPPAD) enhances the options available to an organization wanting to ensure that all their Active Directory accounts have strong passwords.
+Lithnet Password Protection for Active Directory (LPP) enhances the options available to an organization wanting to ensure that all their Active Directory accounts have strong passwords.
 
-We're firm believers that good password hygeine is essential in every organization, and it should not be a premium that you pay extra for.
+LPPAD is a module that you install on your Active Directory servers uses a [password filter](https://docs.microsoft.com/en-us/windows/desktop/secmgmt/password-filters) to inspect passwords as users attempt to change them. Using group policy, you customize the types of checks you want to perform on those passwords and they are either rejected, or approved, and committed to the directory.
 
-## Features
-* Evaluates user password changes using an Active Directory [password filter](https://docs.microsoft.com/en-us/windows/desktop/secmgmt/password-filters) module
-* Supports checking passwords against a breached password list
-* Supports checking for passwords based on banned words
-* Checks common character substitutions (eg P@ssw0rd is normalized to password before being checked against the banned word store)
-* Supports custom complexity password rules
-  * Minimum password length
-  * Length-based complexity rules (allow longer passwords to be less complex)
-  * Points-based complexity rules
-  * Regular expression matching
-* Full PowerShell support
-  * Managing the breached password and banned word stores. Add your own banned words and known breached passwords, as well as use popular databases such as the haveibeenpwned downloadable password list
-  * Testing passwords and existing hashes against the store
-  * Test your user's current passwords in AD against the banned password store
+LPPAD gives you the ability to take control of what a good password means to you. Whether you want to adopt the 2018 NIST password recommendations in part, or in full, it provides a rich set of group policy-based controls that allow you to enable any combination of the following checks on attempted password changes.
+
+* **Block compromised passwords from being used**. We've made it super easy to import the HIBP data set, but you can also import any plain-text passwords or NTLM hashes that you can get your hands on.
+* **Block passwords based on certain words**. Adding a banned word prevents it from being used as the base of a password. For example, adding the word 'password' to the banned word store, prevents not only the use of that word itself, but common variants such as 'P@ssw0rd', 'pa55word!' and 'password123456!'. LPPAD is aware of common character substitutions and weak obfuscations and prevents their use through a normalization process. 
+* **Define complexity policies based on length**. For example, you can require number, symbol, upper and lower for passwords less than 13 characters, but have no special requirements for passwords 13 characters or longer. Reward length, with less complexity.
+* **Regular expression-based policies**. If regular expressions are your thing, you can define a regular expression that the password must match (or not match).
+* **Points-based complexity**. Assign points for the use of certain characters and categories and set a minimum point threshold a password must meet.
+
+It also includes the ability to audit your users' existing passwords against the comrpomised password list. You'll be able to find the weak and known compromised passwords, and force those users to change their password.
+
+## Additional features
+* Full PowerShell support which is used to;
+  * Manage the compromised password and banned word stores. Add your own banned words and compromised passwords, as well as use popular databases such as the haveibeenpwned.com downloadable password list
+  * Test passwords and existing hashes against the compromised store
+  * Check to see if your user's current passwords in AD are found in the compromised password store
 * Passwords never leave the domain controller
 * Designed for large environments where high performance is required
 * Creates detailed event logs
@@ -27,6 +28,8 @@ We're firm believers that good password hygeine is essential in every organizati
 * Group policy support
 
 ## System Requirements
+LPPAD is only supported on x64 editions of Windows
+
 #### Password Filter
 * Windows Server 2008 R2 or higher
 * Microsoft Visual C++ Runtime 14 (2017)
