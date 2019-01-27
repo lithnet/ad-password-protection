@@ -41,7 +41,7 @@ LPP is only supported on x64 editions of Windows
 ## Getting started
 Download the installer from the [releases page](https://github.com/lithnet/ad-password-protection/releases)
 
-Read the [getting started guide](https://github.com/lithnet/ad-password-protection/wiki)
+Read the [getting started guide](https://blog.lithnet.io/2019/01/lppad-1.html) or visit the [wiki](https://github.com/lithnet/ad-password-protection/wiki) for the full set of documentation.
 
 ## Keep up to date
 * [Visit my blog](http://blog.lithnet.io)
