@@ -14,7 +14,7 @@ LPP gives you the ability to take control of what a good password means to you. 
 * **Regular expression-based policies**. If regular expressions are your thing, you can define a regular expression that the password must match (or not match).
 * **Points-based complexity**. Assign points for the use of certain characters and categories and set a minimum point threshold a password must meet.
 
-It also includes the ability to audit your users' existing passwords against the comrpomised password list. You'll be able to find the weak and known compromised passwords, and force those users to change their password.
+It also includes the ability to audit your users' existing passwords against the compromised password list. You'll be able to find the weak and known compromised passwords, and force those users to change their password.
 
 ## Additional features
 * Full PowerShell support which is used to;
