@@ -65,5 +65,31 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
                 Marshal.ZeroFreeGlobalAllocUnicode(valuePtr);
             }
         }
+
+        internal static void ThrowIfFaulted(this Task t)
+        {
+            if (t.IsFaulted)
+            {
+                if (t.Exception == null)
+                {
+                    throw new InvalidOperationException("A faulted task had not exception details");
+                }
+
+                UnwrapAndThrow(t.Exception);
+            }
+        }
+
+        internal static void UnwrapAndThrow(Exception ex)
+        {
+            if (ex is AggregateException e)
+            {
+                if (e.InnerExceptions.Count == 1)
+                {
+                    throw e.InnerExceptions[0];
+                }
+            }
+
+            throw ex;
+        }
     }
 }

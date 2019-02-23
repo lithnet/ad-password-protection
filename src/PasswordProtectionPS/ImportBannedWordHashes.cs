@@ -76,6 +76,8 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
                 Thread.Sleep(1000);
             }
 
+            task.ThrowIfFaulted();
+
             this.EndProgressUpdate();
         }
     }
