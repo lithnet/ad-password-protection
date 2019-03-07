@@ -14,3 +14,5 @@ void RemoveWhiteSpace(SecureArrayT<WCHAR> &s);
 void RemoveChars(SecureArrayT<WCHAR> &s, const WCHAR *charsToRemove);
 
 void ReplaceChars(SecureArrayT<WCHAR> &s, const WCHAR *charPairsToReplace);
+
+bool HasLetter(const SecureArrayT<WCHAR> &s);

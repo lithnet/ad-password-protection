@@ -44,6 +44,11 @@ namespace NativeUnitTests
 			TestString password(L"Password345!");
 			Assert::AreEqual(L"password", NormalizePassword(password));
 		}
-	};
 
+		TEST_METHOD(NormalizedStringNoLetters)
+		{
+			TestString password(L"123456789");
+			Assert::AreEqual(L"123456789", NormalizePassword(password));
+		}
+	};
 }

@@ -35,6 +35,11 @@ SecureArrayT<WCHAR> NormalizePassword(const SecureArrayT<WCHAR> &password)
 		return SecureArrayT<WCHAR>(0);
 	}
 
+	if (!HasLetter(password))
+	{
+		return password;
+	}
+
 	SecureArrayT<WCHAR> newPassword = ToLowerInvariant(password);
 
 	RemoveWhiteSpace(newPassword);
@@ -43,6 +48,19 @@ SecureArrayT<WCHAR> NormalizePassword(const SecureArrayT<WCHAR> &password)
 	RemoveChars(newPassword, CHARS_TO_DELETE);
 
 	return newPassword;
+}
+
+bool HasLetter(const SecureArrayT<WCHAR> &s)
+{
+	for (wchar_t* c = s.get(); *c; ++c)
+	{
+		if (std::iswalpha(*c))
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
 
 void RemoveWhiteSpace(SecureArrayT<WCHAR> &s)

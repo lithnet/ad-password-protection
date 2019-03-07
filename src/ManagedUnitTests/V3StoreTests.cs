@@ -112,7 +112,7 @@ namespace ManagedUnitTests
         public void TestBadPassword()
         {
             V3Store store = new V3Store(@"D:\pwnedpwds\store");
-            Assert.IsTrue(store.IsInStore("monash!!!!", StoreType.Word));
+            Assert.IsTrue(store.IsInStore("password!!!!", StoreType.Word));
         }
 
         [TestMethod]

@@ -17,7 +17,13 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
         public static string Normalize(string password)
         {
+            if (!password.Any(char.IsLetter))
+            {
+                return password;
+            }
+
             password = password.ToLowerInvariant();
+
             password = new string(password.Where(t => !char.IsWhiteSpace(t)).ToArray());
             password = password.TrimEnd(StringNormalizer.CharsToTrim);
             password = password.TrimStart(StringNormalizer.CharsToTrim);
@@ -26,11 +32,11 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
                 .Replace(".", "")
                 .Replace("+", "")
                 .Replace('$', 's')
+                .Replace('5', 's')
                 .Replace('0', 'o')
                 .Replace('4', 'a')
                 .Replace('3', 'e')
                 .Replace('@', 'a')
-                .Replace('4', 'a')
                 .Replace('^', 'a')
                 .Replace('(', 'c')
                 .Replace('6', 'g')
