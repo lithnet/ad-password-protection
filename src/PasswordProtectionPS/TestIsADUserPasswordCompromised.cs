@@ -13,7 +13,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
         [Parameter(Mandatory = true, Position = 1, ValueFromPipeline = false, ParameterSetName = "AccountName"), ValidateNotNullOrEmpty]
         public string AccountName { get; set; }
 
-        [Parameter(Mandatory = true, Position = 2, ValueFromPipeline = false, ParameterSetName = "AccountName"), ValidateNotNullOrEmpty]
+        [Parameter(Mandatory = false, Position = 2, ValueFromPipeline = false, ParameterSetName = "AccountName"), ValidateNotNullOrEmpty]
         public string DomainName { get; set; }
 
         [Parameter(Mandatory = true, Position = 1, ValueFromPipeline = false, ParameterSetName = "Upn"), ValidateNotNullOrEmpty]
@@ -47,6 +47,11 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
             switch (this.ParameterSetName)
             {
                 case "AccountName":
+                    if (this.DomainName == null)
+                    {
+                        this.DomainName = Environment.GetEnvironmentVariable("UserDomain");
+                    }
+
                     account = this.client.GetAccount(new NTAccount(this.DomainName, this.AccountName));
                     break;
 
@@ -62,6 +67,16 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
             if (account == null)
             {
                 throw new InvalidOperationException("The account could not be found");
+            }
+
+            if (account.NTHash == null)
+            {
+                if (!this.OutputCompromisedHashOnMatch.IsPresent)
+                {
+                    this.WriteObject(false);
+                }
+
+                return;
             }
 
             bool result = Global.Store.IsInStore(account.NTHash, StoreType.Password);

@@ -51,6 +51,11 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
         public HashSet<byte[]> GetHashes(string range)
         {
+            if (range == null)
+            {
+                throw new ArgumentNullException(nameof(range));
+            }
+
             HashSet<byte[]> items = new HashSet<byte[]>(ByteArrayComparer.Comparer);
             string file = Path.Combine(this.StorePath, $"{range}.db");
 
@@ -61,12 +66,27 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
         public bool IsHashInStore(byte[] hash)
         {
+            if (hash == null)
+            {
+                throw new ArgumentNullException(nameof(hash));
+            }
+
             string file = Path.Combine(this.StorePath, $"{this.GetRangeFromHash(hash)}.db");
             return this.IsHashInStoreFile(file, hash);
         }
 
         public void AddHashRangeToStore(HashSet<byte[]> incomingHashes, string range, OperationProgress progress)
         {
+            if (incomingHashes == null)
+            {
+                throw new ArgumentNullException(nameof(incomingHashes));
+            }
+
+            if (range == null)
+            {
+                throw new ArgumentNullException(nameof(range));
+            }
+            
             if (this.IsInBatch)
             {
                 this.AddHashRangeToTempStore(incomingHashes, range);
@@ -100,11 +120,21 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
         public string GetRangeFromHash(string hash)
         {
+            if (hash == null)
+            {
+                throw new ArgumentNullException(nameof(hash));
+            }
+
             return hash.Substring(0, this.HashOffset * 2);
         }
 
         public string GetRangeFromHash(byte[] hash)
         {
+            if (hash == null)
+            {
+                throw new ArgumentNullException(nameof(hash));
+            }
+
             return hash.ToHexString(0, this.HashOffset);
         }
 

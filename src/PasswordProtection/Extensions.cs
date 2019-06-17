@@ -11,11 +11,31 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
     {
        public static string ToHexString(this byte[] hash)
         {
+            if (hash == null)
+            {
+                throw new ArgumentNullException(nameof(hash), "The binary has provided was null");
+            }
+
             return hash.ToHexString(0, hash.Length);
         }
 
         public static string ToHexString(this byte[] hash, int offset, int count)
         {
+            if (hash == null)
+            {
+                throw new ArgumentNullException(nameof(hash), "The binary has provided was null");
+            }
+
+            if (offset >= hash.Length)
+            {
+                throw new ArgumentException("The value for offset cannot exceed the length of the hash", nameof(offset));
+            }
+
+            if (count + offset > hash.Length)
+            {
+                throw new ArgumentException("The combined values of offset and count cannot exceed the length of the hash", nameof(offset));
+            }
+
             StringBuilder sb = new StringBuilder(hash.Length * 2);
 
             for (int i = offset; i < count; i++)
@@ -28,6 +48,11 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
         public static byte[] HexStringToBytes(this string hexHash)
         {
+            if (hexHash == null)
+            {
+                throw new ArgumentNullException(nameof(hexHash));
+            }
+
             if (hexHash.Length % 2 != 0)
             {
                 throw new ArgumentException($"The value supplied must be a hexadecimal representation of the hash");
