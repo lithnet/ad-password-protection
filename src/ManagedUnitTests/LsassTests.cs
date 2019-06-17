@@ -81,21 +81,5 @@ namespace ManagedUnitTests
                 key.SetValue("Disabled", 0);
             }
         }
-
-        [TestMethod]
-        public void TestEmptyGuid()
-        {
-            using (PrincipalContext ctx = new PrincipalContext(ContextType.Machine))
-            {
-                UserPrincipal p = UserPrincipal.FindByIdentity(ctx, "pwntest");
-
-                if (p == null)
-                {
-                    Assert.Fail("The test user was not found");
-                }
-
-                p.SetPassword(new Guid().ToString());
-            }
-        }
     }
 }

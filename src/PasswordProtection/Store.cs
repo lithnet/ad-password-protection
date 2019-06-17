@@ -337,6 +337,35 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             progress.FileReadInProgress = false;
         }
 
+        public void RemoveFromStore(byte[] hash, StoreType storeType)
+        {
+            HashSet<byte[]> hashset = new HashSet<byte[]>(ByteArrayComparer.Comparer);
+            hashset.Add(hash);
+            this.RemoveFromStore(hashset, storeType, new CancellationToken(), new OperationProgress());
+        }
+
+        public void RemoveFromStore(string password, StoreType storeType)
+        {
+            if (storeType == StoreType.Word)
+            {
+                password = StringNormalizer.Normalize(password);
+            }
+
+            this.RemoveFromStore(this.ComputeHash(password), storeType);
+        }
+
+        public void RemoveFromStore(HashSet<byte[]> hashes, StoreType storeType, CancellationToken ct, OperationProgress progress)
+        {
+            this.RemoveFromStore(
+                hashes
+                    .GroupBy(this.GetRangeFromHash, StringComparer.OrdinalIgnoreCase)
+                    .ToDictionary(g => g.Key, g => new HashSet<byte[]>(g, ByteArrayComparer.Comparer)),
+                storeType,
+                ct,
+                false,
+                progress);
+        }
+
         public void AddToStore(string password, StoreType storeType)
         {
             if (storeType == StoreType.Word)
@@ -395,6 +424,36 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             }
         }
 
+        private void RemoveFromStore(Dictionary<string, HashSet<byte[]>> hashes, StoreType storeType, CancellationToken ct, bool emptyAfterCommit, OperationProgress progress)
+        {
+            try
+            {
+                ParallelOptions o = new ParallelOptions();
+                o.CancellationToken = ct;
+                o.MaxDegreeOfParallelism = Debugger.IsAttached ? 1 : -1;
+
+                progress.FlushStoreInProgress = true;
+                progress.FlushStoreTotal = hashes.Count;
+                progress.FlushStorePosition = 0;
+                progress.FlushStoreStartTime = DateTime.Now;
+
+                Parallel.ForEach(hashes, o, group =>
+                {
+                    this.RemoveFromStore(group.Value, group.Key, storeType, progress);
+                    progress.IncrementFlushStorePosition();
+                    if (emptyAfterCommit)
+                    {
+                        group.Value.Clear();
+                    }
+                });
+            }
+            finally
+            {
+                progress.FlushStoreInProgress = false;
+            }
+        }
+
+
         public bool IsInStore(string password, StoreType storeType)
         {
             if (storeType == StoreType.Word)
@@ -419,6 +478,8 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
         protected abstract void AddToStore(HashSet<byte[]> hashes, string range, StoreType storeType, OperationProgress progress);
 
+        protected abstract void RemoveFromStore(HashSet<byte[]> hashes, string range, StoreType storeType, OperationProgress progress);
+       
         public abstract void StartBatch(StoreType storeType);
 
         public abstract byte[] ComputeHash(string text);

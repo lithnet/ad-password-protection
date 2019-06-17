@@ -33,14 +33,6 @@ namespace ManagedUnitTests
         }
 
         [TestMethod]
-        public void TestHashFileIsInOrder()
-        {
-            Assert.IsTrue(Lithnet.ActiveDirectory.PasswordProtection.Store.DoesHexHashFileAppearSorted(@"D:\pwnedpwds\raw\pwned-passwords-ntlm-ordered-by-hash.txt", 16));
-            Assert.IsFalse(Lithnet.ActiveDirectory.PasswordProtection.Store.DoesHexHashFileAppearSorted(@"D:\pwnedpwds\raw\pwned-passwords-ntlm-ordered-by-count.txt", 16));
-        }
-
-
-        [TestMethod]
         public void TestGoodHashTypes()
         {
             Lithnet.ActiveDirectory.PasswordProtection.Store.ImportHexHashesFromSortedFile(this.Store, StoreType.Password, @"D:\pwnedpwds\raw\test-good-hash.txt", new CancellationToken());
@@ -72,96 +64,23 @@ namespace ManagedUnitTests
             }
         }
 
-
         [TestMethod]
-        public void BuildUsablev3Store()
+        public void TestAddNormalizedWordToStore()
         {
-            return;
-            string path = Path.Combine(TestHelpers.TestStorePath, "v3Build");
-            Directory.CreateDirectory(path);
-            V3Store store = new V3Store(path);
+            string password = "password"; //8846F7EAEE8FB117AD06BDD830B7586C
 
-            CancellationTokenSource ct = new CancellationTokenSource();
+            this.Store.AddToStore(password, StoreType.Word);
 
-            // Start with HIBP
-            string file = @"D:\pwnedpwds\raw\pwned-passwords-ntlm-ordered-by-hash.txt";
-            Lithnet.ActiveDirectory.PasswordProtection.Store.ImportHexHashesFromSortedFile(store, StoreType.Password, file, ct.Token);
+            string rawFile = Path.Combine(this.Store.StorePathWordStore, this.GetFileNameFromHash("8846F7EAEE8FB117AD06BDD830B7586C"));
+            TestHelpers.AssertFileIsExpectedSize(rawFile, this.StoredHashSize);
 
-            // add english dictionary to word store
-            file = @"D:\pwnedpwds\raw\english.txt";
-            Lithnet.ActiveDirectory.PasswordProtection.Store.ImportPasswordsFromFile(store, StoreType.Word, file, ct.Token);
+            this.Store.AddToStore(password, StoreType.Word);
 
-            // add more english words to word store
-            file = @"D:\pwnedpwds\raw\words.txt";
-            Lithnet.ActiveDirectory.PasswordProtection.Store.ImportPasswordsFromFile(store, StoreType.Word, file, ct.Token);
+            TestHelpers.AssertFileIsExpectedSize(rawFile, this.StoredHashSize);
 
-            // add rockyou breach
-            file = @"D:\pwnedpwds\raw\rockyou.txt";
-            Lithnet.ActiveDirectory.PasswordProtection.Store.ImportPasswordsFromFile(store, StoreType.Password, file, ct.Token);
-
-            // add top 100000 
-            file = @"D:\pwnedpwds\raw\top1000000.txt";
-            Lithnet.ActiveDirectory.PasswordProtection.Store.ImportPasswordsFromFile(store, StoreType.Password, file, ct.Token);
-
-            // add breach compilation
-            file = @"D:\pwnedpwds\raw\breachcompilationuniq.txt";
-            Lithnet.ActiveDirectory.PasswordProtection.Store.ImportPasswordsFromFile(store, StoreType.Password, file, ct.Token);
+            Assert.IsTrue(this.Store.IsInStore(password, StoreType.Word));
+            Assert.IsTrue(this.Store.IsInStore("Password1234!", StoreType.Word));
         }
-
-        [TestMethod]
-        public void TestBadPassword()
-        {
-            V3Store store = new V3Store(@"D:\pwnedpwds\store");
-            Assert.IsTrue(store.IsInStore("password!!!!", StoreType.Word));
-        }
-
-        [TestMethod]
-        public void TestBadPassword2()
-        {
-            V3Store store = new V3Store(@"D:\pwnedpwds\store");
-            Assert.IsTrue(store.IsInStore("Password345!", StoreType.Word));
-        }
-
-        //[TestMethod]
-        //public void BuildStoreEnglish()
-        //{
-        //    this.BuildStore(@"D:\pwnedpwds\raw\english.txt");
-        //}
-
-        //[TestMethod]
-        //public void BuildStoreWords()
-        //{
-        //    this.BuildStore(@"D:\pwnedpwds\raw\words.txt");
-        //}
-
-        //[TestMethod]
-        //public void BuildStoreRockyou()
-        //{
-        //    this.BuildStore(@"D:\pwnedpwds\raw\rockyou.txt");
-        //}
-
-        //[TestMethod]
-        //public void BuildStoreTop1000000()
-        //{
-        //    this.BuildStore(@"D:\pwnedpwds\raw\top1000000.txt");
-        //}
-
-        //[TestMethod]
-        //public void BuildStoreBreachCompilationUniq()
-        //{
-        //    this.BuildStore(@"D:\pwnedpwds\raw\breachcompilationuniq.txt");
-        //}
-
-        //[TestMethod]
-        //public void BuildStoreHibp()
-        //{
-        //    string file = @"D:\pwnedpwds\raw\pwned-passwords-ntlm-ordered-by-hash.txt";
-        //    string path = Path.Combine(TestHelpers.TestStorePath, "hibp");
-        //    Directory.CreateDirectory(path);
-
-        //    var store = new V3Store(path);
-        //    StoreInterface.Store.ImportHexHashesFromSortedFile(store, file);
-        //}
 
         [TestMethod]
         public void AddEnglishDictionaryToNewStoreAndValidate()
@@ -218,6 +137,57 @@ namespace ManagedUnitTests
             TestHelpers.AssertFileIsExpectedSize(rawFile, this.StoredHashSize);
 
             Assert.IsTrue(this.Store.IsInStore(password, StoreType.Password));
+        }
+
+        [TestMethod]
+        public void TestRemovePasswordFromStore()
+        {
+            string password = "password"; //8846F7EAEE8FB117AD06BDD830B7586C
+
+            this.Store.AddToStore(password, StoreType.Password);
+
+            string rawFile = Path.Combine(this.Store.StorePathPasswordStore, this.GetFileNameFromHash("8846F7EAEE8FB117AD06BDD830B7586C"));
+            TestHelpers.AssertFileIsExpectedSize(rawFile, this.StoredHashSize);
+
+            Assert.IsTrue(this.Store.IsInStore(password, StoreType.Password));
+
+            this.Store.RemoveFromStore(password, StoreType.Password);
+            TestHelpers.AssertFileIsExpectedSize(rawFile, 0);
+            Assert.IsFalse(this.Store.IsInStore(password, StoreType.Password));
+        }
+
+        [TestMethod]
+        public void TestRemoveWordFromStore()
+        {
+            string password = "password"; //8846F7EAEE8FB117AD06BDD830B7586C
+
+            this.Store.AddToStore(password, StoreType.Word);
+
+            string rawFile = Path.Combine(this.Store.StorePathWordStore, this.GetFileNameFromHash("8846F7EAEE8FB117AD06BDD830B7586C"));
+            TestHelpers.AssertFileIsExpectedSize(rawFile, this.StoredHashSize);
+
+            Assert.IsTrue(this.Store.IsInStore(password, StoreType.Word));
+
+            this.Store.RemoveFromStore(password, StoreType.Word);
+            TestHelpers.AssertFileIsExpectedSize(rawFile, 0);
+            Assert.IsFalse(this.Store.IsInStore(password, StoreType.Word));
+        }
+
+        [TestMethod]
+        public void TestRemoveNormalizedWordFromStore()
+        {
+            string password = "password"; //8846F7EAEE8FB117AD06BDD830B7586C
+
+            this.Store.AddToStore(password, StoreType.Word);
+
+            string rawFile = Path.Combine(this.Store.StorePathWordStore, this.GetFileNameFromHash("8846F7EAEE8FB117AD06BDD830B7586C"));
+            TestHelpers.AssertFileIsExpectedSize(rawFile, this.StoredHashSize);
+
+            Assert.IsTrue(this.Store.IsInStore(password, StoreType.Word));
+
+            this.Store.RemoveFromStore("password1", StoreType.Word);
+            TestHelpers.AssertFileIsExpectedSize(rawFile, 0);
+            Assert.IsFalse(this.Store.IsInStore(password, StoreType.Word));
         }
 
         [TestMethod]

@@ -46,6 +46,11 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             this.GetInstance(storeType).AddHashRangeToStore(hashes, range, progress);
         }
 
+        protected override void RemoveFromStore(HashSet<byte[]> hashes, string range, StoreType storeType, OperationProgress progress)
+        {
+            this.GetInstance(storeType).RemoveHashRangeFromStore(hashes, range, progress);
+        }
+
         public override bool IsInStore(byte[] hash, StoreType storeType)
         {
             return this.GetInstance(storeType).IsHashInStore(hash);

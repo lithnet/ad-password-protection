@@ -9,7 +9,7 @@ using System.Security.Cryptography;
 
 namespace Lithnet.ActiveDirectory.PasswordProtection
 {
-    public class BinaryStoreInstance
+    internal class BinaryStoreInstance
     {
         public bool IsInBatch { get; private set; }
 
@@ -115,6 +115,38 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             if (hasChanges)
             {
                 this.WriteStoreFile(file, false, hashesToProcess);
+            }
+        }
+
+        public void RemoveHashRangeFromStore(HashSet<byte[]> hashesToRemove, string range, OperationProgress progress)
+        {
+            if (hashesToRemove == null)
+            {
+                throw new ArgumentNullException(nameof(hashesToRemove));
+            }
+
+            if (range == null)
+            {
+                throw new ArgumentNullException(nameof(range));
+            }
+
+            string file = Path.Combine(this.StorePath, $"{range}.db");
+
+            bool hasChanges = false;
+            HashSet<byte[]> storedHashes = new HashSet<byte[]>(ByteArrayComparer.Comparer);
+
+            if (File.Exists(file))
+            {
+                this.LoadHashesFromStoreFile(file, storedHashes, progress);
+                foreach (byte[] hashToRemove in hashesToRemove)
+                {
+                    hasChanges |= storedHashes.Remove(hashToRemove);
+                }
+            }
+
+            if (hasChanges)
+            {
+                this.WriteStoreFile(file, false, storedHashes);
             }
         }
 
