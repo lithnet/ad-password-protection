@@ -46,7 +46,7 @@ Download the installer from the [releases page](https://github.com/lithnet/ad-pa
 Read the [getting started guide](https://blog.lithnet.io/2019/01/lppad-1.html) or visit the [wiki](https://github.com/lithnet/ad-password-protection/wiki) for the full set of documentation.
 
 ## How can I contribute to the project?
-* Found an issue and want us to fix it? [Log it](https://github.com/lithnet/laps-web/issues)
+* Found an issue and want us to fix it? [Log it](https://github.com/lithnet/ad-password-protection/issues)
 * Want to fix an issue yourself or add functionality? Clone the project and submit a pull request
 * Make a [donation](https://lithnet.io/donate) and help us cover our costs
 
