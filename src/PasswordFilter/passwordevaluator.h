@@ -14,6 +14,7 @@ static const int PASSWORD_REJECTED_BANNED = 8;
 static const int PASSWORD_REJECTED_BANNED_NORMALIZED_PASSWORD = 9;
 static const int PASSWORD_REJECTED_BANNED_NORMALIZED_WORD = 10;
 static const int PASSWORD_REJECTED_BLANK = 11;
+static const int PASSWORD_REJECTED_HIBP_API = 12;
 static const int FILTER_ERROR = 100;
 
 int ProcessPassword(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation);
@@ -33,3 +34,5 @@ BOOLEAN ProcessPasswordDoesntContainFullName(const SecureArrayT<WCHAR> &password
 BOOLEAN ProcessPasswordRegexApprove(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg);
 
 BOOLEAN ProcessPasswordRegexReject(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg);
+
+BOOLEAN ProcessPasswordHibp(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg);

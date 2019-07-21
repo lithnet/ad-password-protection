@@ -9,6 +9,7 @@
 #include "utils.h"
 #include "complexityevaluator.h"
 #include "v3store.h"
+#include "hibp.h"
 
 int ProcessPassword(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation)
 {
@@ -66,6 +67,11 @@ int ProcessPassword(const SecureArrayT<WCHAR> &password, const std::wstring &acc
 		return PASSWORD_REJECTED_BANNED_NORMALIZED_PASSWORD;
 	}
 
+	if (!ProcessPasswordHibp(password, accountName, fullName, setOperation, reg))
+	{
+		return PASSWORD_REJECTED_HIBP_API;
+	}
+
 	OutputDebugString(L"Password was approved by all modules");
 
 	eventlog::getInstance().logw(EVENTLOG_SUCCESS, MSG_PASSWORD_APPROVED, 3, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
@@ -73,9 +79,84 @@ int ProcessPassword(const SecureArrayT<WCHAR> &password, const std::wstring &acc
 	return PASSWORD_APPROVED;
 }
 
+
+BOOLEAN ProcessPasswordHibp(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
+{
+	if ((setOperation && reg.GetRegValue(REG_VALUE_CHECKHIBPONSET, 0) != 0) ||
+		(!setOperation && reg.GetRegValue(REG_VALUE_CHECKHIBPONCHANGE, 0) != 0))
+	{
+		OutputDebugString(L"Checking password in HIBP API");
+
+		try
+		{
+			if (IsInHibp(password, reg))
+			{
+				OutputDebugString(L"Rejected password as it was found in the HIBP API");
+				eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_HIBP_API, 3, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
+				return FALSE;
+			}
+
+			OutputDebugString(L"Password was not found in the HIBP API");
+		}
+		catch (std::system_error const& e)
+		{
+			OutputDebugString(L"Win32 error caught when trying to read HIBP API");
+
+			eventlog::getInstance().log(EVENTLOG_ERROR_TYPE, MSG_WIN32_HIBP_ERROR, 2, std::to_string(e.code().value()).c_str(), e.what());
+
+			if (reg.GetRegValue(REG_VALUE_REJECTPASSWORDONHIBPERROR, 0) != 0)
+			{
+				OutputDebugString(L"Rejected password because RejectPasswordOnHibpError was non-zero");
+				eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_ON_HIBP_ERROR, 1, setOperation ? L"set" : L"change");
+				return FALSE;
+			}
+			else
+			{
+				eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_PASSED_ON_HIBP_ERROR, 1, setOperation ? L"set" : L"change");
+			}
+		}
+		catch (std::exception const& e)
+		{
+			OutputDebugString(L"Error caught trying to read the HIBP API");
+
+			eventlog::getInstance().log(EVENTLOG_ERROR_TYPE, MSG_OTHER_HIBP_ERROR, 1, e.what());
+
+			if (reg.GetRegValue(REG_VALUE_REJECTPASSWORDONHIBPERROR, 0) != 0)
+			{
+				OutputDebugString(L"Rejected password because RejectPasswordOnHibpError was non-zero");
+				eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_ON_HIBP_ERROR, 1, setOperation ? L"set" : L"change");
+				return FALSE;
+			}
+			else
+			{
+				eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_PASSED_ON_HIBP_ERROR, 1, setOperation ? L"set" : L"change");
+			}
+		}
+		catch (...)
+		{
+			OutputDebugString(L"Unexpected error caught");
+
+			eventlog::getInstance().logw(EVENTLOG_ERROR_TYPE, MSG_OTHER_HIBP_ERROR, 1, L"No exception information was available");
+
+			if (reg.GetRegValue(REG_VALUE_REJECTPASSWORDONHIBPERROR, 0) != 0)
+			{
+				OutputDebugString(L"Rejected password because RejectPasswordOnHibpError was non-zero");
+				eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_ON_HIBP_ERROR, 1, setOperation ? L"set" : L"change");
+				return FALSE;
+			}
+			else
+			{
+				eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_PASSED_ON_HIBP_ERROR, 1, setOperation ? L"set" : L"change");
+			}
+		}
+	}
+
+	return TRUE;
+}
+
 BOOLEAN ProcessPasswordRaw(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
 {
-	if ((setOperation && reg.GetRegValue(REG_VALUE_CHECKBANNEDPASSWORDONSET, 0) != 0) || 
+	if ((setOperation && reg.GetRegValue(REG_VALUE_CHECKBANNEDPASSWORDONSET, 0) != 0) ||
 		(!setOperation && reg.GetRegValue(REG_VALUE_CHECKBANNEDPASSWORDONCHANGE, 0) != 0))
 	{
 		OutputDebugString(L"Checking raw password");
@@ -96,7 +177,7 @@ BOOLEAN ProcessPasswordRaw(const SecureArrayT<WCHAR> &password, const std::wstri
 BOOLEAN ProcessPasswordNormalizedPasswordStore(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
 {
 	if (setOperation && reg.GetRegValue(REG_VALUE_CHECKNORMALIZEDBANNEDPASSWORDONSET, 0) != 0 ||
-		!setOperation && reg.GetRegValue(REG_VALUE_CHECKNORMALIZEDBANNEDPASSWORDONCHANGE, 0) != 0 )
+		!setOperation && reg.GetRegValue(REG_VALUE_CHECKNORMALIZEDBANNEDPASSWORDONCHANGE, 0) != 0)
 	{
 		bool result = TRUE;
 

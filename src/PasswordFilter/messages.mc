@@ -68,6 +68,25 @@ There was a problem opening the store file. Check that the store folder exists a
 Error code: %1
 .
 
+MessageId=0xA
+Severity=Error
+Facility=Runtime
+SymbolicName=MSG_WIN32_HIBP_ERROR
+Language=English
+An error occurred calling the HIBP API.
+Error code: %1
+Message: %2
+.
+
+MessageId=0xB
+Severity=Error
+Facility=Runtime
+SymbolicName=MSG_OTHER_HIBP_ERROR
+Language=English
+An error occurred calling the HIBP API.
+Message: %1
+.
+
 MessageId=0x2001
 Severity=Warning
 Facility=System
@@ -170,4 +189,28 @@ Facility=System
 SymbolicName=MSG_PASSWORD_REJECTED_BANNED_NORMALIZED_WORD
 Language=English
 The password %1 request for %2 (%3) was rejected after being normalized because it matched a password in the banned word store.
+.
+
+MessageId=0x200E
+Severity=Warning
+Facility=System
+SymbolicName=MSG_PASSWORD_REJECTED_HIBP_API
+Language=English
+The password %1 request for %2 (%3) was rejected as it was found in the HIBP API.
+.
+
+MessageId=0x200F
+Severity=Warning
+Facility=System
+SymbolicName=MSG_PASSWORD_REJECTED_ON_HIBP_ERROR
+Language=English
+The password %1 request was rejected. The module is configured to deny password requests when an error occurs when communicating with the HIBP API.
+.
+
+MessageId=0x2010
+Severity=Warning
+Facility=System
+SymbolicName=MSG_PASSWORD_PASSED_ON_HIBP_ERROR
+Language=English
+The password %1 request passed through the HIBP API module without being tested. The HIBP module is currently configured to silently pass through password requests when an error occurs when communicating with the HIBP API. Other modules may yet reject this password change.
 .
