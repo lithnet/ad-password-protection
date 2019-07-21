@@ -136,6 +136,21 @@ std::wstring GetHibpRangeData(const std::wstring &range, const registry &reg)
 
 		} while (dwSize > 0 && dwDownloaded);
 
+		if (hRequest)
+		{
+			WinHttpCloseHandle(hRequest);
+		}
+
+		if (hConnect)
+		{
+			WinHttpCloseHandle(hConnect);
+		}
+
+		if (hSession)
+		{
+			WinHttpCloseHandle(hSession);
+		}
+
 		return data.str();
 	}
 	catch (...)

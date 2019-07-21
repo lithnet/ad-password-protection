@@ -2,6 +2,7 @@
 #include "CppUnitTest.h"
 #include "../PasswordFilter/hibp.h"
 #include "passwordevaluator.h"
+
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace NativeUnitTests
@@ -83,7 +84,7 @@ namespace NativeUnitTests
 			SetValue(REG_VALUE_REJECTPASSWORDONHIBPERROR, 0);
 			SetValue(REG_VALUE_CHECKHIBPONCHANGE, 1);
 			TestString password(L"asfdadsfasdjhk348925hjksdgfhjksdfhgjkdsfAASDFASD23423432sdgasd$#$#");
-			Assert::IsTrue(ProcessPasswordHibp(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
+			Assert::IsTrue(ProcessPasswordHibp(password, std::wstring(L"accountName"), std::wstring(L"full name"), FALSE, reg));
 		}
 
 		TEST_METHOD(TestPasswordChangeIsRejectedWhenHibpErrors)
@@ -92,7 +93,28 @@ namespace NativeUnitTests
 			SetValue(REG_VALUE_REJECTPASSWORDONHIBPERROR, 1);
 			SetValue(REG_VALUE_CHECKHIBPONCHANGE, 1);
 			TestString password(L"asfdadsfasdjhk348925hjksdgfhjksdfhgjkdsfAASDFASD23423432sdgasd$#$#");
-			Assert::IsFalse(ProcessPasswordHibp(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
+			Assert::IsFalse(ProcessPasswordHibp(password, std::wstring(L"accountName"), std::wstring(L"full name"), FALSE, reg));
+		}
+
+		TEST_METHOD(LoadTestOnMockApi)
+		{
+			return;
+
+			SetValue(REG_VALUE_HIBPHOSTNAME, L"localhost");
+			SetValue(REG_VALUE_CHECKHIBPONSET, 1);
+
+			for (size_t i = 0; i < 1000000; i++)
+			{
+				std::wstringstream ss;
+				ss << L"asfdadsfasdjhk348925hjksdgfhjksdfhgjkdsfAASDFASD23423432sdgasd$#$#";
+				ss << i;
+
+				TestString password(ss.str());
+				if (!ProcessPasswordHibp(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg))
+				{
+					Assert::Fail(L"Password check failed");
+				}
+			}
 		}
 
 		TEST_METHOD_CLEANUP(HibpCleanup)
