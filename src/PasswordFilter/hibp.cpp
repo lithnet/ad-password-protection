@@ -5,6 +5,7 @@
 #include "hasher.h"
 #include "utils.h"
 #include "registry.h"
+#include <algorithm>
 
 bool IsInHibp(const SecureArrayT<WCHAR> &password, const registry &reg)
 {
@@ -31,22 +32,8 @@ bool IsInHibp(const SecureArrayT<WCHAR> &password, const registry &reg)
 	const std::wstring matchtext = hashstring.substr(5, 35);
 
 	const std::wstring hashes = GetHibpRangeData(range, reg);
-
-	std::wstringstream ss(hashes);
-	std::wstring line;
-
-	while (std::getline(ss, line))
-	{
-		if (line.length() >= 35)
-		{
-			if (line.substr(0, 35) == matchtext)
-			{
-				return true;
-			}
-		}
-	}
-
-	return false;
+	
+	return hashes.find(matchtext + L":") != std::string::npos;
 }
 
 std::wstring GetHibpRangeData(const std::wstring &range, const registry &reg)
