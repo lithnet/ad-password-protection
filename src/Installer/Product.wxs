@@ -112,7 +112,11 @@
 
     <DirectoryRef Id="System64Folder">
       <Component Id="cmpa437d95c32f74a17b1b7537b38cd382a" Win64="yes" Guid="*">
+        <?if $(var.Configuration) = MicrosoftSignedRelease ?>
+        <File Id="fil8af462b935f3462f99441454d9154d51" KeyPath="yes" Source="MSSigned\lithnetpwdf.dll" />
+        <?else?>
         <File Id="fil8af462b935f3462f99441454d9154d51" KeyPath="yes" Source="$(var.PasswordFilter.TargetPath)" />
+        <?endif?>
       </Component>
 
       <Component Id="cmp6339c3e064764797a0b4d747e655cb0e" Guid="*">
