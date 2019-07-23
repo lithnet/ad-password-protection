@@ -262,3 +262,4 @@ __pycache__/
 *.dll
 *.bin
 /src/enc_temp_folder/*
+*.cab
