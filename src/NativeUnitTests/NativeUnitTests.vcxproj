@@ -137,7 +137,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <AdditionalLibraryDirectories>$(SolutionDir)PasswordFilter\$(Platform)\$(Configuration);$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ntdll.lib;advapi32.lib;Rpcrt4.lib;shlwapi.lib;policy.obj;v3store.obj;binarystore.obj;registry.obj;passwordevaluator.obj;complexityevaluator.obj;eventlog.obj;hasher.obj;utils.obj;stringnormalization.obj;filter.obj;stdafx.obj;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ntdll.lib;advapi32.lib;Rpcrt4.lib;shlwapi.lib;AuthZ.lib;policy.obj;v3store.obj;binarystore.obj;registry.obj;passwordevaluator.obj;complexityevaluator.obj;eventlog.obj;hasher.obj;utils.obj;stringnormalization.obj;filter.obj;stdafx.obj;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -240,6 +240,7 @@
     <ClCompile Include="PasswordEvaluatorNameTests.cpp" />
     <ClCompile Include="PasswordEvaluatorRegexApproveTests.cpp" />
     <ClCompile Include="PasswordEvaluatorLengthTests.cpp" />
+    <ClCompile Include="PolicyTest.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

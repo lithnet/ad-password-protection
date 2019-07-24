@@ -2,10 +2,167 @@
 #include "policy.h"
 #include "registry.h"
 #include "utils.h"
+#include <AuthZ.h>
 
-user_policy policy::getpolicy(LPCWSTR account)
+PSID policy::ConvertNameToBinarySid(const std::wstring &pAccountName)
 {
-	registry reg = registry::GetRegistryForUser(account);
+	LPTSTR szDomainName = NULL;
+	DWORD cbDomainName = 0;
+	PSID pSid = NULL;
+	DWORD cbSid = 0;
+	SID_NAME_USE sidType;
+
+	while (!LookupAccountName(NULL, pAccountName.c_str(), pSid, &cbSid, szDomainName, &cbDomainName, &sidType))
+	{
+		const DWORD result = GetLastError();
+
+		if (result != ERROR_INSUFFICIENT_BUFFER)
+		{
+			throw std::system_error(result, std::system_category(), "LookupAccountName failed");
+		}
+
+		pSid = LocalAlloc(LPTR, cbSid);
+		szDomainName = static_cast<LPTSTR>(LocalAlloc(LPTR, cbDomainName * sizeof(TCHAR)));
+
+		if (szDomainName == NULL || pSid == NULL)
+		{
+			throw std::system_error(GetLastError(), std::system_category(), "Out of memory");
+		}
+	}
+
+	if (szDomainName != NULL)
+	{
+		LocalFree(szDomainName);
+	}
+
+	return pSid;
+}
+
+std::wstring policy::GetPolicyNameForUser(const std::wstring &accountName)
+{
+	std::wstring effectivePolicyName = L"Default";
+
+	auto policySids = registry::GetActivePolicyGroupSids();
+
+	if (policySids.empty())
+	{
+		return effectivePolicyName;
+	}
+
+	AUTHZ_RESOURCE_MANAGER_HANDLE hResourceManager = 0;
+	LUID unusedId = { 0 };
+	AUTHZ_CLIENT_CONTEXT_HANDLE hCtx = NULL;
+	DWORD dwTokenGroupsSize = 0;
+	PVOID pvTokenGroupsBuf = NULL;
+	PSID pUserSid = NULL;
+
+	try
+	{
+		if (!AuthzInitializeResourceManager(AUTHZ_RM_FLAG_NO_AUDIT, NULL, NULL, NULL, NULL, &hResourceManager))
+		{
+			throw std::system_error(GetLastError(), std::system_category(), "AuthzInitializeResourceManager failed");
+		}
+
+		pUserSid = ConvertNameToBinarySid(accountName);
+
+		if (!AuthzInitializeContextFromSid(0, pUserSid, hResourceManager, NULL, unusedId, NULL, &hCtx))
+		{
+			throw std::system_error(GetLastError(), std::system_category(), "AuthzInitializeContextFromSid failed");
+		}
+
+		while (!AuthzGetInformationFromContext(hCtx, AuthzContextInfoGroupsSids, dwTokenGroupsSize, &dwTokenGroupsSize, pvTokenGroupsBuf))
+		{
+			if (GetLastError() != ERROR_INSUFFICIENT_BUFFER)
+			{
+				throw std::system_error(GetLastError(), std::system_category(), "AuthzGetInformationFromContext failed");
+			}
+
+			if (pvTokenGroupsBuf)
+			{
+				free(pvTokenGroupsBuf);
+			}
+
+			pvTokenGroupsBuf = malloc(dwTokenGroupsSize);
+		}
+
+		for (const SidGroupMap &map : policySids)
+		{
+			bool matched = false;
+
+			for (DWORD i = 0; i < ((PTOKEN_GROUPS)pvTokenGroupsBuf)->GroupCount; i++)
+			{
+				if (EqualSid(map.Sid, ((PTOKEN_GROUPS)pvTokenGroupsBuf)->Groups[i].Sid))
+				{
+					effectivePolicyName = map.GroupName;
+					matched = true;
+					break;
+				}
+			}
+
+			if (matched)
+			{
+				break;
+			}
+		}
+
+		if (pvTokenGroupsBuf)
+		{
+			free(pvTokenGroupsBuf);
+		}
+
+		if (hCtx)
+		{
+			AuthzFreeContext(hCtx);
+		}
+
+		if (pUserSid)
+		{
+			LocalFree(pUserSid);
+		}
+
+		if (hResourceManager)
+		{
+			AuthzFreeResourceManager(hResourceManager);
+		}
+
+		return effectivePolicyName;
+	}
+	catch (...)
+	{
+		if (pvTokenGroupsBuf)
+		{
+			free(pvTokenGroupsBuf);
+		}
+
+		if (hCtx)
+		{
+			AuthzFreeContext(hCtx);
+		}
+
+		if (pUserSid)
+		{
+			LocalFree(pUserSid);
+			pUserSid = NULL;
+		}
+
+		if (hResourceManager)
+		{
+			AuthzFreeResourceManager(hResourceManager);
+		}
+
+		throw;
+	}
+
+	// https://github.com/mnkeddy/Windows-Classic-Samples/blob/1d363ff4bd17d8e20415b92e2ee989d615cc0d91/Samples/Win7Samples/security/authorization/authz/AuthzSvr.c
+
+
+}
+
+user_policy policy::GetPolicyForUser(const std::wstring &accountName)
+{
+	const std::wstring policyName = policy::GetPolicyNameForUser(accountName);
+
+	registry reg = registry::GetRegistryForGroup(policyName);
 
 	user_policy policy{};
 
@@ -47,7 +204,7 @@ user_policy policy::getpolicy(LPCWSTR account)
 	policy.GeneralPolicy.MinimumLength = reg.GetRegValue(REG_VALUE_MINIMUMLENGTH, 0);
 	policy.GeneralPolicy.ValidatePasswordDoesntContainAccountName = reg.GetRegValue(REG_VALUE_PASSWORDDOESNTCONTAINACCOUNTNAME, 0) != 0;
 	policy.GeneralPolicy.ValidatePasswordDoesntContainFullName = reg.GetRegValue(REG_VALUE_PASSWORDDOESNTCONTAINFULLNAME, 0) != 0;
-		
+
 	policy.GeneralPolicy.RegexApprove = GetInteropString(reg.GetRegValue(REG_VALUE_REGEXAPPROVE, L"").c_str());
 	policy.GeneralPolicy.RegexReject = GetInteropString(reg.GetRegValue(REG_VALUE_REGEXREJECT, L"").c_str());
 

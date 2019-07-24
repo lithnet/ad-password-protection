@@ -59,8 +59,12 @@ struct user_policy
 class policy
 {
 public:
-	static struct user_policy getpolicy(LPCWSTR account);
+	static struct user_policy GetPolicyForUser(const std::wstring &account);
+
 	policy();
 
 	~policy();
+private:
+	static std::wstring GetPolicyNameForUser(const std::wstring &account);
+	static PSID ConvertNameToBinarySid(const std::wstring &pAccountName);
 };

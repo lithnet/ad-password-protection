@@ -1,5 +1,7 @@
 #pragma once
 #include "stdafx.h"
+#include "SecureArrayT.h"
+#include <vector>
 
 static LPCWSTR REG_BASE_SETTINGS_KEY = L"SOFTWARE\\Lithnet\\PasswordFilter";
 static LPCWSTR REG_BASE_POLICY_KEY = L"SOFTWARE\\Policies\\Lithnet\\PasswordFilter";
@@ -64,6 +66,25 @@ static LPCWSTR REG_VALUE_REGEXREJECT = L"RegexReject";
 static LPCWSTR REG_VALUE_PASSWORDDOESNTCONTAINACCOUNTNAME = L"ValidatePasswordDoesntContainAccountName";
 static LPCWSTR REG_VALUE_PASSWORDDOESNTCONTAINFULLNAME = L"ValidatePasswordDoesntContainFullName";
 
+struct SidGroupMap
+{
+	PSID Sid;
+	std::wstring GroupName;
+
+	SidGroupMap(const PSID sid, const std::wstring &groupName)
+	{
+		this->Sid = sid;
+		this->GroupName = groupName;
+	}
+
+	~SidGroupMap()
+	{
+		if (Sid)
+		{
+			LocalFree(Sid);
+		}
+	}
+};
 
 class registry
 {
@@ -78,13 +99,14 @@ public:
 	~registry();
 	std::wstring GetRegValue(const std::wstring & valueName, const std::wstring & defaultValue) const;
 	DWORD GetRegValue(const std::wstring & valueName, DWORD defaultValue) const;
-	static registry GetRegistryForUser(const std::wstring & user);
+	static registry GetRegistryForGroup(const std::wstring & groupName);
+	static std::vector<SidGroupMap> GetActivePolicyGroupSids();
 
 private:
 	DWORD GetPolicyOrSettingsValue(const std::wstring & valueName, DWORD defaultValue) const;
-	const std::wstring GetKeyName(LPCWSTR& key) const;
-	const std::wstring GetPolicyOrSettingsValue(const std::wstring & valueName, const std::wstring & defaultValue) const;
-	const std::wstring GetValueString(DWORD & dwBufferSize, const std::wstring & keyName, const std::wstring & valueName, const std::wstring & defaultValue) const;
+	std::wstring GetKeyName(LPCWSTR& key) const;
+	std::wstring GetPolicyOrSettingsValue(const std::wstring & valueName, const std::wstring & defaultValue) const;
+	std::wstring GetValueString(DWORD & dwBufferSize, const std::wstring & keyName, const std::wstring & valueName, const std::wstring & defaultValue) const;
 };
 
 

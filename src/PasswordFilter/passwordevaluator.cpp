@@ -14,7 +14,7 @@ int ProcessPassword(const SecureArrayT<WCHAR> &password, const std::wstring &acc
 {
 	eventlog::getInstance().logw(EVENTLOG_INFORMATION_TYPE, MSG_PROCESSING_REQUEST, 3, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
 
-	const registry reg = registry::GetRegistryForUser(accountName);
+	const registry reg = registry::GetRegistryForGroup(L"Default");
 
 	if (!ProcessPasswordLength(password, accountName, fullName, setOperation, reg))
 	{

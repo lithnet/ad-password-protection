@@ -156,5 +156,5 @@ extern "C" __declspec(dllexport) int __stdcall PasswordFilterEx(
 extern "C" __declspec(dllexport) void __stdcall GetUserPolicySettings(
 	LPCWSTR AccountName, user_policy* policy)
 {
-	*policy = policy::getpolicy(AccountName);
+	*policy = policy::GetPolicyForUser(AccountName);
 }

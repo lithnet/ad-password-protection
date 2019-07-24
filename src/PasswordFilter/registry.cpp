@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "registry.h"
+#include "sddl.h"
 
 registry::registry()
 {
@@ -27,10 +28,42 @@ DWORD registry::GetRegValue(const std::wstring & valueName, DWORD defaultValue) 
 	return GetPolicyOrSettingsValue(valueName, defaultValue);
 }
 
-registry registry::GetRegistryForUser(const std::wstring & user)
+registry registry::GetRegistryForGroup(const std::wstring &groupName)
 {
-	return registry(L"default");
+	return registry(groupName);
 }
+
+std::vector<SidGroupMap> registry::GetActivePolicyGroupSids()
+{
+	std::vector<SidGroupMap> sids;
+	registry baseReg;
+
+	for (size_t i = 0; i < baseReg.GetPolicyOrSettingsValue(L"PolicyCount", 10); i++)
+	{
+		const std::wstring groupName = std::to_wstring(i);
+
+		registry groupReg(groupName);
+
+		if (groupReg.GetRegValue(L"IsEnabled", 0) == 1)
+		{
+			std::wstring sid = groupReg.GetRegValue(L"GroupSid", L"");
+
+			if (!sid.empty())
+			{
+				PSID sidbytes;
+				if (!ConvertStringSidToSid(sid.c_str(), &sidbytes))
+				{
+					throw std::system_error(GetLastError(), std::system_category(), "ConvertStringSidToSid failed for group");
+				}
+
+				sids.emplace_back(sidbytes, groupName);
+			}
+		}
+	}
+
+	return sids;
+}
+
 
 DWORD registry::GetPolicyOrSettingsValue(const std::wstring & valueName, DWORD defaultValue) const
 {
@@ -66,7 +99,7 @@ DWORD registry::GetPolicyOrSettingsValue(const std::wstring & valueName, DWORD d
 	return defaultValue;
 }
 
-const std::wstring registry::GetKeyName(LPCWSTR & key) const
+std::wstring registry::GetKeyName(LPCWSTR & key) const
 {
 	std::wstring name(key);
 	if (!this->policyGroup.empty())
@@ -78,7 +111,7 @@ const std::wstring registry::GetKeyName(LPCWSTR & key) const
 	return name;
 }
 
-const std::wstring registry::GetPolicyOrSettingsValue(const std::wstring & valueName, const std::wstring & defaultValue) const
+std::wstring registry::GetPolicyOrSettingsValue(const std::wstring & valueName, const std::wstring & defaultValue) const
 {
 	DWORD dwBufferSize = 0;
 
@@ -111,11 +144,11 @@ const std::wstring registry::GetPolicyOrSettingsValue(const std::wstring & value
 	return defaultValue;
 }
 
-const std::wstring registry::GetValueString(DWORD & dwBufferSize, const std::wstring & keyName, const std::wstring & valueName, const std::wstring & defaultValue) const
+std::wstring registry::GetValueString(DWORD & dwBufferSize, const std::wstring & keyName, const std::wstring & valueName, const std::wstring & defaultValue) const
 {
 	std::unique_ptr<WCHAR[]> szBuffer = std::make_unique<WCHAR[]>(dwBufferSize / sizeof(WCHAR));
 
-	long result = RegGetValue(HKEY_LOCAL_MACHINE,
+	const long result = RegGetValue(HKEY_LOCAL_MACHINE,
 		keyName.c_str(),
 		valueName.c_str(),
 		RRF_RT_REG_SZ,
