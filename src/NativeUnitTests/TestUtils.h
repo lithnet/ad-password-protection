@@ -1,5 +1,4 @@
 #pragma once
-#include <stdio.h>
 
 typedef enum _SYSTEM_MEMORY_LIST_COMMAND
 {
@@ -31,8 +30,10 @@ int ClearStandbyCache();
 
 void ClearCache();
 
-void SetValue(std::wstring key, DWORD value);
+void SetUnitTestPolicyValue(std::wstring key, DWORD value);
 
-void SetValue(std::wstring key, std::wstring value);
+void SetUnitTestPolicyValue(std::wstring key, std::wstring value);
 
-void DeleteValue(std::wstring key);
+void DeleteUnitTestPolicyValue(std::wstring key);
+
+std::wstring GetGuid();

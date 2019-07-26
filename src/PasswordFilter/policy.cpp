@@ -89,9 +89,9 @@ std::wstring policy::GetPolicyNameForUser(const std::wstring &accountName)
 		{
 			bool matched = false;
 
-			for (DWORD i = 0; i < ((PTOKEN_GROUPS)pvTokenGroupsBuf)->GroupCount; i++)
+			for (DWORD i = 0; i < static_cast<PTOKEN_GROUPS>(pvTokenGroupsBuf)->GroupCount; i++)
 			{
-				if (EqualSid(map.Sid, ((PTOKEN_GROUPS)pvTokenGroupsBuf)->Groups[i].Sid))
+				if (EqualSid(map.Sid, static_cast<PTOKEN_GROUPS>(pvTokenGroupsBuf)->Groups[i].Sid))
 				{
 					effectivePolicyName = map.GroupName;
 					matched = true;
@@ -142,7 +142,6 @@ std::wstring policy::GetPolicyNameForUser(const std::wstring &accountName)
 		if (pUserSid)
 		{
 			LocalFree(pUserSid);
-			pUserSid = NULL;
 		}
 
 		if (hResourceManager)
@@ -152,17 +151,18 @@ std::wstring policy::GetPolicyNameForUser(const std::wstring &accountName)
 
 		throw;
 	}
-
-	// https://github.com/mnkeddy/Windows-Classic-Samples/blob/1d363ff4bd17d8e20415b92e2ee989d615cc0d91/Samples/Win7Samples/security/authorization/authz/AuthzSvr.c
-
-
 }
 
 user_policy policy::GetPolicyForUser(const std::wstring &accountName)
 {
 	const std::wstring policyName = policy::GetPolicyNameForUser(accountName);
 
-	registry reg = registry::GetRegistryForGroup(policyName);
+	return GetPolicyForGroup(policyName);
+}
+
+user_policy policy::GetPolicyForGroup(const std::wstring &groupName)
+{
+	registry reg = registry::GetRegistryForGroup(groupName);
 
 	user_policy policy{};
 
@@ -204,18 +204,23 @@ user_policy policy::GetPolicyForUser(const std::wstring &accountName)
 	policy.GeneralPolicy.MinimumLength = reg.GetRegValue(REG_VALUE_MINIMUMLENGTH, 0);
 	policy.GeneralPolicy.ValidatePasswordDoesntContainAccountName = reg.GetRegValue(REG_VALUE_PASSWORDDOESNTCONTAINACCOUNTNAME, 0) != 0;
 	policy.GeneralPolicy.ValidatePasswordDoesntContainFullName = reg.GetRegValue(REG_VALUE_PASSWORDDOESNTCONTAINFULLNAME, 0) != 0;
-
 	policy.GeneralPolicy.RegexApprove = GetInteropString(reg.GetRegValue(REG_VALUE_REGEXAPPROVE, L"").c_str());
 	policy.GeneralPolicy.RegexReject = GetInteropString(reg.GetRegValue(REG_VALUE_REGEXREJECT, L"").c_str());
+	
+	policy.StorePolicy.CheckNormalizedPasswordNotInBannedWordStoreOnChange = reg.GetRegValue(REG_VALUE_CHECKNORMALIZEDBANNEDWORDONCHANGE, 0) != 0;
+	policy.StorePolicy.CheckNormalizedPasswordNotInBannedWordStoreOnSet = reg.GetRegValue(REG_VALUE_CHECKNORMALIZEDBANNEDWORDONSET, 0) != 0;
 
+	policy.StorePolicy.CheckNormalizedPasswordNotInCompromisedPasswordStoreOnChange = reg.GetRegValue(REG_VALUE_CHECKNORMALIZEDCOMPROMISEDPASSWORDONCHANGE, 0) != 0;
+	policy.StorePolicy.CheckNormalizedPasswordNotInCompromisedPasswordStoreOnSet = reg.GetRegValue(REG_VALUE_CHECKNORMALIZEDCOMPROMISEDPASSWORDONSET, 0) != 0;
+
+	policy.StorePolicy.CheckPasswordNotInCompromisedPasswordStoreOnChange = reg.GetRegValue(REG_VALUE_CHECKCOMPROMISEDPASSWORDONCHANGE, 0) != 0;
+	policy.StorePolicy.CheckPasswordNotInCompromisedPasswordStoreOnSet= reg.GetRegValue(REG_VALUE_CHECKCOMPROMISEDPASSWORDONSET, 0) != 0;
 
 	return policy;
 }
 
 policy::policy()
-{
-}
+= default;
 
 policy::~policy()
-{
-}
+= default;

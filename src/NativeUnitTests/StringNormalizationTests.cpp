@@ -8,46 +8,45 @@ namespace NativeUnitTests
 	TEST_CLASS(StringNormalizationTests)
 	{
 	public:
-
 		TEST_METHOD(NormalizedStringTestLowerCase)
 		{
-			TestString password(L"Password");
+			const TestString password(L"Password");
 			Assert::AreEqual(L"password", NormalizePassword(password));
 		}
 
 		TEST_METHOD(NormalizedStringTestLTrim)
 		{
-			TestString password(L"!@#$%^&*()091234567890password");
+			const TestString password(L"!@#$%^&*()091234567890password");
 			Assert::AreEqual(L"password", NormalizePassword(password));
 		}
 
 		TEST_METHOD(NormalizedStringTestRTrim)
 		{
-			TestString password(L"password!@#$%^&*()091234567890");
+			const TestString password(L"password!@#$%^&*()091234567890");
 			Assert::AreEqual(L"password", NormalizePassword(password));
 		}
 
 		TEST_METHOD(NormalizedStringTestRemoveWhitespace)
 		{
-			TestString password(L"pas     sw\tord");
+			const TestString password(L"pas     sw\tord");
 			Assert::AreEqual(L"password", NormalizePassword(password));
 		}
 
 		TEST_METHOD(NormalizedStringTestReplaceSubstitutions)
 		{
-			TestString password(L"p@$5w0rd");
+			const TestString password(L"p@$5w0rd");
 			Assert::AreEqual(L"password", NormalizePassword(password));
 		}
 
 		TEST_METHOD(NormalizedStringTestReplaceSubstitutions2)
 		{
-			TestString password(L"Password345!");
+			const TestString password(L"Password345!");
 			Assert::AreEqual(L"password", NormalizePassword(password));
 		}
 
 		TEST_METHOD(NormalizedStringNoLetters)
 		{
-			TestString password(L"123456789");
+			const TestString password(L"123456789");
 			Assert::AreEqual(L"123456789", NormalizePassword(password));
 		}
 	};

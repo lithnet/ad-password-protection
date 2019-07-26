@@ -13,27 +13,24 @@ namespace NativeUnitTests
 {
 	TEST_CLASS(StorePerformanceTests)
 	{
-		registry reg;
 
 	private:
-		void LoopGoodRandomPasswords()
+		static void LoopGoodRandomPasswords()
 		{
-			ClearCache();
+			//ClearCache();
 
-			std::wstring accountName = std::wstring(L"accountName");
-			std::wstring fullname = std::wstring(L"full name");
+			const std::wstring accountName = std::wstring(L"accountName");
+			const std::wstring fullname = std::wstring(L"full name");
+			const user_policy pol = policy::GetPolicyForGroup(L"UnitTests");
 
 			for (size_t i = 0; i < 1000; i++)
 			{
-				GUID gidReference;
-				HRESULT hCreateGuid = CoCreateGuid(&gidReference);
-				WCHAR* wszUuid = NULL;
-				UuidToStringW(&gidReference, (RPC_WSTR*)&wszUuid);
+				const std::wstring guid = GetGuid();
 				std::wstringstream ss;
-				ss << i << L": " << wszUuid << L": ";
-				TestString password(wszUuid);
+				ss << i << L": " << guid << L": ";
+				TestString password(guid);
 
-				bool result = ProcessPasswordRaw(password, accountName, fullname, TRUE, reg);
+				const bool result = ProcessPasswordRaw(password, accountName, fullname, TRUE, pol);
 
 				ss << (result ? "passed" : "rejected");
 
@@ -41,19 +38,20 @@ namespace NativeUnitTests
 			}
 		}
 
-		void LoopKnownBadPasswords()
+		void LoopKnownBadPasswords() const
 		{
-			ClearCache();
+			//ClearCache();
+			const user_policy pol = policy::GetPolicyForGroup(L"UnitTests");
 
-			std::wstring accountName = std::wstring(L"accountName");
-			std::wstring fullname = std::wstring(L"full name");
+			const std::wstring accountName = std::wstring(L"accountName");
+			const std::wstring fullname = std::wstring(L"full name");
 
 			std::wstring filename = L"D:\\pwnedpwds\\raw\\words.txt";
 
 			std::wifstream file(filename.c_str());
 			std::wstring line;
 
-			int limit = 1000;
+			const int limit = 1000;
 			int count = 0;
 
 			while (std::getline(file, line))
@@ -65,7 +63,7 @@ namespace NativeUnitTests
 				ss << count << L": " << line << L": ";
 				TestString password(&line.front());
 
-				bool result = ProcessPasswordRaw(password, accountName, fullname, TRUE, reg);
+				const bool result = ProcessPasswordRaw(password, accountName, fullname, TRUE, pol);
 
 				ss << (result ? "passed" : "rejected");
 
@@ -92,7 +90,7 @@ namespace NativeUnitTests
 
 		TEST_CLASS_INITIALIZE(Initialize)
 		{
-			SetValue(REG_VALUE_CHECKBANNEDPASSWORDONSET, 1);
+			SetUnitTestPolicyValue(REG_VALUE_CHECKCOMPROMISEDPASSWORDONSET, 1);
 		}
 	};
 }

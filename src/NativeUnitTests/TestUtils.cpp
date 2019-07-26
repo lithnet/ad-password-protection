@@ -8,7 +8,7 @@ HKEY OpenSettingsKeyWritable()
 	key += L"\\UnitTests";
 
 	HKEY hKey;
-	LSTATUS result = RegCreateKeyEx(HKEY_LOCAL_MACHINE, key.c_str(), 0, NULL, NULL, KEY_WRITE | KEY_WOW64_64KEY, NULL, &hKey, NULL);
+	const LSTATUS result = RegCreateKeyEx(HKEY_LOCAL_MACHINE, key.c_str(), 0, NULL, NULL, KEY_WRITE | KEY_WOW64_64KEY, NULL, &hKey, NULL);
 
 	if (result == ERROR_FILE_NOT_FOUND)
 	{
@@ -23,11 +23,11 @@ HKEY OpenSettingsKeyWritable()
 	return hKey;
 }
 
-void SetValue(std::wstring key, DWORD value)
+void SetUnitTestPolicyValue(std::wstring key, DWORD value)
 {
-	HKEY hkey = OpenSettingsKeyWritable();
+	const HKEY hkey = OpenSettingsKeyWritable();
 
-	LSTATUS result = RegSetValueEx(hkey, key.c_str(), 0, REG_DWORD, (const BYTE*)&value, sizeof(value));
+	const LSTATUS result = RegSetValueEx(hkey, key.c_str(), 0, REG_DWORD, (const BYTE*)&value, sizeof(value));
 
 	if (result != ERROR_SUCCESS)
 	{
@@ -40,11 +40,11 @@ void SetValue(std::wstring key, DWORD value)
 	}
 }
 
-void SetValue(std::wstring key, std::wstring value)
+void SetUnitTestPolicyValue(const std::wstring key, const std::wstring value)
 {
-	HKEY hkey = OpenSettingsKeyWritable();
+	const HKEY hkey = OpenSettingsKeyWritable();
 
-	LSTATUS result = RegSetValueEx(hkey, key.c_str(), 0, REG_SZ, (LPBYTE)value.c_str(), (value.size() + 1) * sizeof(wchar_t));
+	const LSTATUS result = RegSetValueEx(hkey, key.c_str(), 0, REG_SZ, (LPBYTE)value.c_str(), (value.size() + 1) * sizeof(wchar_t));
 
 	if (result != ERROR_SUCCESS)
 	{
@@ -57,11 +57,11 @@ void SetValue(std::wstring key, std::wstring value)
 	}
 }
 
-void DeleteValue(std::wstring key)
+void DeleteUnitTestPolicyValue(const std::wstring key)
 {
-	HKEY hkey = OpenSettingsKeyWritable();
+	const HKEY hkey = OpenSettingsKeyWritable();
 
-	LSTATUS result = RegDeleteValue(hkey, key.c_str());
+	const LSTATUS result = RegDeleteValue(hkey, key.c_str());
 
 	if (result != ERROR_SUCCESS)
 	{
@@ -98,13 +98,13 @@ BOOL SetPrivilege(HANDLE hToken, LPCTSTR lpszPrivilege, BOOL bEnablePrivilege)
 int ClearStandbyCache()
 {
 	//return 0;
-	HMODULE ntdll = LoadLibrary(L"ntdll.dll");
+	const HMODULE ntdll = LoadLibrary(L"ntdll.dll");
 	if (!ntdll)
 	{
 		fprintf(stderr, "Can't load ntdll.dll\n");
 		return -1;
 	}
-
+	
 	NTSTATUS(WINAPI *NtSetSystemInformation)(INT, PVOID, ULONG) = (NTSTATUS(WINAPI *)(INT, PVOID, ULONG))GetProcAddress(ntdll, "NtSetSystemInformation");
 	if (!NtSetSystemInformation)
 	{
@@ -138,7 +138,7 @@ int ClearStandbyCache()
 	if (SetPrivilege(processToken, L"SeProfileSingleProcessPrivilege", TRUE))
 	{
 		SYSTEM_MEMORY_LIST_COMMAND command = (SYSTEM_MEMORY_LIST_COMMAND)4;
-		NTSTATUS ret = NtSetSystemInformation(80, &command, sizeof(command));
+		const NTSTATUS ret = NtSetSystemInformation(80, &command, sizeof(command));
 		if (ret >= 0) {
 			printf("Purge Memory Standby : ok\n");
 		}
@@ -164,4 +164,30 @@ void ClearCache()
 	{
 		OutputDebugString(L"Cleared OS file cache");
 	}
+}
+
+std::wstring GetGuid()
+{
+	GUID gidReference;
+	HRESULT result = CoCreateGuid(&gidReference);
+
+	if (result != S_OK)
+	{
+		throw std::system_error(result, std::system_category(), "CoCreateGuid failed");
+	}
+
+	RPC_WSTR uuidString = NULL;
+
+	result = UuidToString(&gidReference, &uuidString);
+
+	if (result != RPC_S_OK)
+	{
+		throw std::system_error(result, std::system_category(), "CoCreateGuid failed");
+	}
+
+	std::wstring value = (wchar_t*)uuidString;
+
+	RpcStringFree(&uuidString);
+
+	return value;
 }

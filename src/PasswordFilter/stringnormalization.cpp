@@ -2,7 +2,7 @@
 #include "utils.h"
 #include "stringnormalization.h"
 #include <cwctype>
-#include "shlwapi.h"
+#include "Shlwapi.h"
 #include "SecureArrayT.h"
 
 SecureArrayT<WCHAR> ToLowerInvariant(const SecureArrayT<WCHAR> &s)

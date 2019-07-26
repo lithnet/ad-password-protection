@@ -5,11 +5,12 @@
 #include <cwctype>
 #include  "eventlog.h"
 #include "messages.h"
+#include "policy.h"
 
-BOOLEAN ProcessPasswordComplexityThreshold(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
+BOOLEAN ProcessPasswordComplexityThreshold(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const user_policy &pol)
 {
-	const int threshold1 = reg.GetRegValue(REG_VALUE_CT1, 0);
-	const int threshold2 = reg.GetRegValue(REG_VALUE_CT2, 0);
+	const unsigned int threshold1 = pol.ComplexityThreshold1.ComplexityThreshold; // reg.GetRegValue(REG_VALUE_CT1, 0);
+	const unsigned int threshold2 = pol.ComplexityThreshold2.ComplexityThreshold; // reg.GetRegValue(REG_VALUE_CT2, 0);
 
 	if (threshold1 <= 0)
 	{
@@ -25,7 +26,7 @@ BOOLEAN ProcessPasswordComplexityThreshold(const SecureArrayT<WCHAR> &password, 
 
 	for (size_t i = 0; i < pwdlength; i++)
 	{
-		WCHAR c = password[i];
+		const WCHAR c = password[i];
 
 		if (std::iswdigit(c))
 		{
@@ -48,62 +49,55 @@ BOOLEAN ProcessPasswordComplexityThreshold(const SecureArrayT<WCHAR> &password, 
 		hasSymbol = true;
 	}
 
-	std::wstring thresholdID;
+	complexity_threshold threshold{};
+	std::wstring thresholdName;
+
 	if (pwdlength < threshold1 || threshold2 <= 0)
 	{
-		thresholdID = REG_VALUE_CT1;
+		threshold = pol.ComplexityThreshold1;
+		thresholdName = L"level 1";
 	}
 	else if (pwdlength < threshold2)
 	{
-		thresholdID = REG_VALUE_CT2;
+		threshold = pol.ComplexityThreshold2;
+		thresholdName = L"level 2";
 	}
 	else
 	{
-		thresholdID = REG_VALUE_CT3;
+		threshold = pol.ComplexityThreshold3;
+		thresholdName = L"level 3";
 	}
 
-	const bool requiresLower = (reg.GetRegValue(thresholdID + REG_VALUE_CTREQUIRESLOWER, 0) != 0);
-	const bool requiresUpper = (reg.GetRegValue(thresholdID + REG_VALUE_CTREQUIRESUPPER, 0) != 0);
-	const bool requiresNumber = (reg.GetRegValue(thresholdID + REG_VALUE_CTREQUIRESNUMBER, 0) != 0);
-	const bool requiresSymbol = (reg.GetRegValue(thresholdID + REG_VALUE_CTREQUIRESSYMBOL, 0) != 0);
-	const bool requiresSymbolOrNumber = (reg.GetRegValue(thresholdID + REG_VALUE_CTREQUIRESSYMBOLORNUMBER, 0) != 0);
+	const bool requiresLower = (threshold.ComplexityThresholdRequiresLower /*reg.GetRegValue(thresholdID + REG_VALUE_CTREQUIRESLOWER, 0)*/ != 0);
+	const bool requiresUpper = (threshold.ComplexityThresholdRequiresUpper /*reg.GetRegValue(thresholdID + REG_VALUE_CTREQUIRESUPPER, 0)*/ != 0);
+	const bool requiresNumber = (threshold.ComplexityThresholdRequiresNumber /*reg.GetRegValue(thresholdID + REG_VALUE_CTREQUIRESNUMBER, 0)*/ != 0);
+	const bool requiresSymbol = (threshold.ComplexityThresholdRequiresSymbol /*reg.GetRegValue(thresholdID + REG_VALUE_CTREQUIRESSYMBOL, 0)*/ != 0);
+	const bool requiresSymbolOrNumber = (threshold.ComplexityThresholdRequiresSymbolOrNumber /*reg.GetRegValue(thresholdID + REG_VALUE_CTREQUIRESSYMBOLORNUMBER, 0)*/ != 0);
 
-	const int charSetsRequired = min(reg.GetRegValue(thresholdID + REG_VALUE_CTCHARSETSREQUIRED, 0), 4);
+	const int charSetsRequired = min(threshold.ComplexityThresholdCharsetsRequired /*reg.GetRegValue(thresholdID + REG_VALUE_CTCHARSETSREQUIRED, 0)*/, 4);
 	const int charSetsPresent = (hasLower ? 1 : 0) + (hasUpper ? 1 : 0) + (hasSymbol ? 1 : 0) + (hasNumber ? 1 : 0);
 
 	if ((charSetsPresent < charSetsRequired) || (requiresLower && !hasLower) || (requiresUpper && !hasUpper) || (requiresNumber && !hasNumber) || (requiresSymbol && !hasSymbol) || (requiresSymbolOrNumber && !(hasSymbol || hasNumber)))
 	{
-		OutputDebugString(std::wstring(L"Password did not meet the " + thresholdID + L" complexity requirements").c_str());
+		OutputDebugString(std::wstring(L"Password did not meet the " + thresholdName + L" complexity requirements").c_str());
 		eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_THRESHOLD_COMPLEXITY, 4, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str(), std::to_wstring(pwdlength).c_str());
 		return FALSE;
 	}
 
-	OutputDebugString(std::wstring(L"Password met the " + thresholdID + L" complexity requirements").c_str());
+	OutputDebugString(std::wstring(L"Password met the " + thresholdName + L" complexity requirements").c_str());
 
 	return true;
 }
 
 
-BOOLEAN ProcessPasswordComplexityPoints(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
+BOOLEAN ProcessPasswordComplexityPoints(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const user_policy &pol)
 {
-	int requiredPoints = reg.GetRegValue(REG_VALUE_COMPLEXITYPOINTSREQUIRED, 0);
+	const int requiredPoints = pol.ComplexityPoints.Required; //reg.GetRegValue(REG_VALUE_COMPLEXITYPOINTSREQUIRED, 0);
 
 	if (requiredPoints > 0)
 	{
 		OutputDebugString(L"Checking for complexity points");
-
-		int perChar = reg.GetRegValue(REG_VALUE_COMPLEXITYPOINTSPERCHAR, 2);
-
-		int perNumber = reg.GetRegValue(REG_VALUE_COMPLEXITYPOINTSPERNUMBER, 0);
-		int perSymbol = reg.GetRegValue(REG_VALUE_COMPLEXITYPOINTSPERSYMBOL, 0);
-		int perUpper = reg.GetRegValue(REG_VALUE_COMPLEXITYPOINTSPERUPPER, 0);
-		int perLower = reg.GetRegValue(REG_VALUE_COMPLEXITYPOINTSPERLOWER, 0);
-
-		int useNumber = reg.GetRegValue(REG_VALUE_COMPLEXITYPOINTSUSEOFNUMBER, 1);
-		int useSymbol = reg.GetRegValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 1);
-		int useUpper = reg.GetRegValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 1);
-		int useLower = reg.GetRegValue(REG_VALUE_COMPLEXITYPOINTSUSEOFLOWER, 1);
-
+		
 		bool hasLower = false;
 		bool hasUpper = false;
 		bool hasSymbol = false;
@@ -113,52 +107,52 @@ BOOLEAN ProcessPasswordComplexityPoints(const SecureArrayT<WCHAR> &password, con
 
 		for (size_t i = 0; i < wcslen(password); i++)
 		{
-			WCHAR c = password[i];
-			pointCount += perChar;
+			const WCHAR c = password[i];
+			pointCount += pol.ComplexityPoints.PerCharacter;
 
 			if (std::iswdigit(c))
 			{
 				hasNumber = true;
-				pointCount += perNumber;
+				pointCount += pol.ComplexityPoints.PerNumber;
 				continue;
 			}
 
 			if (std::iswupper(c))
 			{
-				pointCount += perUpper;
+				pointCount += pol.ComplexityPoints.PerUpper;
 				hasUpper = true;
 				continue;
 			}
 
 			if (std::iswlower(c))
 			{
-				pointCount += perLower;
+				pointCount += pol.ComplexityPoints.PerLower;
 				hasLower = true;
 				continue;
 			}
 
-			pointCount += perSymbol;
+			pointCount += pol.ComplexityPoints.PerSymbol;
 			hasSymbol = true;
 		}
 
 		if (hasLower)
 		{
-			pointCount += useLower;
+			pointCount += pol.ComplexityPoints.UseOfLower;
 		}
 
 		if (hasUpper)
 		{
-			pointCount += useUpper;
+			pointCount += pol.ComplexityPoints.UseOfUpper;
 		}
 
 		if (hasSymbol)
 		{
-			pointCount += useSymbol;
+			pointCount += pol.ComplexityPoints.UseOfSymbol;
 		}
 
 		if (hasNumber)
 		{
-			pointCount += useNumber;
+			pointCount += pol.ComplexityPoints.UseOfNumber;
 		}
 
 		if (pointCount < requiredPoints)

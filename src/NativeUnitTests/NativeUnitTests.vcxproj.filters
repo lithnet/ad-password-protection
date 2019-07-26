@@ -24,6 +24,9 @@
     <ClInclude Include="TestUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TestString.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -63,6 +66,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PolicyTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TestString.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

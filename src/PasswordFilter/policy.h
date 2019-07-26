@@ -27,12 +27,12 @@ struct complexity_points
 
 struct store_policy
 {
-	bool CheckNormalizedPasswordNotInBannedPasswordStoreOnChange;
-	bool CheckNormalizedPasswordNotInBannedPasswordStoreOnSet;
+	bool CheckNormalizedPasswordNotInCompromisedPasswordStoreOnChange;
+	bool CheckNormalizedPasswordNotInCompromisedPasswordStoreOnSet;
 	bool CheckNormalizedPasswordNotInBannedWordStoreOnChange;
 	bool CheckNormalizedPasswordNotInBannedWordStoreOnSet;
-	bool CheckPasswordNotInBannedPasswordStoreOnChange;
-	bool CheckPasswordNotInBannedPasswordStoreOnSet;
+	bool CheckPasswordNotInCompromisedPasswordStoreOnChange;
+	bool CheckPasswordNotInCompromisedPasswordStoreOnSet;
 };
 
 struct general_policy
@@ -59,7 +59,8 @@ struct user_policy
 class policy
 {
 public:
-	static struct user_policy GetPolicyForUser(const std::wstring &account);
+	static user_policy GetPolicyForUser(const std::wstring &account);
+	static user_policy GetPolicyForGroup(const std::wstring &groupName);
 
 	policy();
 

@@ -231,6 +231,7 @@
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="TestString.h" />
     <ClInclude Include="TestUtils.h" />
   </ItemGroup>
   <ItemGroup>
@@ -252,6 +253,7 @@
     <ClCompile Include="StorePerformanceTests.cpp" />
     <ClCompile Include="StringNormalizationTests.cpp" />
     <ClCompile Include="FilterTests.cpp" />
+    <ClCompile Include="TestString.cpp" />
     <ClCompile Include="TestUtils.cpp" />
     <ClCompile Include="v3StoreTests.cpp" />
   </ItemGroup>

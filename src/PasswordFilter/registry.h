@@ -1,6 +1,5 @@
 #pragma once
 #include "stdafx.h"
-#include "SecureArrayT.h"
 #include <vector>
 
 static LPCWSTR REG_BASE_SETTINGS_KEY = L"SOFTWARE\\Lithnet\\PasswordFilter";
@@ -12,12 +11,12 @@ static LPCWSTR REG_VALUE_SIMULATE = L"Disabled";
 
 static LPCWSTR REG_VALUE_MINIMUMLENGTH = L"MinimumLength";
 
-static LPCWSTR REG_VALUE_CHECKNORMALIZEDBANNEDPASSWORDONCHANGE = L"CheckNormalizedPasswordNotInBannedPasswordStoreOnChange";
-static LPCWSTR REG_VALUE_CHECKNORMALIZEDBANNEDPASSWORDONSET = L"CheckNormalizedPasswordNotInBannedPasswordStoreOnSet";
+static LPCWSTR REG_VALUE_CHECKNORMALIZEDCOMPROMISEDPASSWORDONCHANGE = L"CheckNormalizedPasswordNotInBannedPasswordStoreOnChange";
+static LPCWSTR REG_VALUE_CHECKNORMALIZEDCOMPROMISEDPASSWORDONSET = L"CheckNormalizedPasswordNotInBannedPasswordStoreOnSet";
 static LPCWSTR REG_VALUE_CHECKNORMALIZEDBANNEDWORDONCHANGE = L"CheckNormalizedPasswordNotInBannedWordStoreOnChange";
 static LPCWSTR REG_VALUE_CHECKNORMALIZEDBANNEDWORDONSET = L"CheckNormalizedPasswordNotInBannedWordStoreOnSet";
-static LPCWSTR REG_VALUE_CHECKBANNEDPASSWORDONCHANGE = L"CheckPasswordNotInBannedPasswordStoreOnChange";
-static LPCWSTR REG_VALUE_CHECKBANNEDPASSWORDONSET = L"CheckPasswordNotInBannedPasswordStoreOnSet";
+static LPCWSTR REG_VALUE_CHECKCOMPROMISEDPASSWORDONCHANGE = L"CheckPasswordNotInBannedPasswordStoreOnChange";
+static LPCWSTR REG_VALUE_CHECKCOMPROMISEDPASSWORDONSET = L"CheckPasswordNotInBannedPasswordStoreOnSet";
 static LPCWSTR REG_VALUE_COMPLEXITYPOINTSPERCHAR = L"ComplexityPointsPerCharacter";
 static LPCWSTR REG_VALUE_COMPLEXITYPOINTSPERLOWER = L"ComplexityPointsPerLower";
 static LPCWSTR REG_VALUE_COMPLEXITYPOINTSPERNUMBER = L"ComplexityPointsPerNumber";
