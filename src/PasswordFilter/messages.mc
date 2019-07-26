@@ -171,3 +171,13 @@ SymbolicName=MSG_PASSWORD_REJECTED_BANNED_NORMALIZED_WORD
 Language=English
 The password %1 request for %2 (%3) was rejected after being normalized because it matched a password in the banned word store.
 .
+
+MessageId=0x3000
+Severity=Error
+Facility=Runtime
+SymbolicName=MSG_GROUP_MAPPING_ERROR
+Language=English
+An error occurring during the process of mapping policy groups to Active Directory groups. Check that the group name listed in password policy set %3 exists.
+Error code: %1
+Message: %2
+.

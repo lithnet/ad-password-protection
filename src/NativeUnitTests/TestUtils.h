@@ -31,9 +31,15 @@ int ClearStandbyCache();
 void ClearCache();
 
 void SetUnitTestPolicyValue(std::wstring key, DWORD value);
+void SetUnitTestPolicyValue(std::wstring policySetName, std::wstring key, DWORD value);
+
 
 void SetUnitTestPolicyValue(std::wstring key, std::wstring value);
+void SetUnitTestPolicyValue(std::wstring policySetName, std::wstring key, std::wstring value);
 
 void DeleteUnitTestPolicyValue(std::wstring key);
+void DeleteUnitTestPolicyValue(std::wstring policySetName, std::wstring key);
 
 std::wstring GetGuid();
+
+HKEY OpenSettingsKeyWritable(std::wstring policySetName);

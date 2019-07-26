@@ -14,7 +14,7 @@ int ProcessPassword(const SecureArrayT<WCHAR> &password, const std::wstring &acc
 {
 	eventlog::getInstance().logw(EVENTLOG_INFORMATION_TYPE, MSG_PROCESSING_REQUEST, 3, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
 
-	const user_policy pol = policy::GetPolicyForUser(accountName);
+	const user_policy pol = policy::GetPolicySetForUser(accountName);
 
 	if (!ProcessPasswordLength(password, accountName, fullName, setOperation, pol))
 	{

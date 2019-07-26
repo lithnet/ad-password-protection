@@ -16,6 +16,8 @@ SecureArrayT<WCHAR> StringToWcharArray(const LPCWSTR str);
 
 bool DirectoryExists(const std::wstring& dirName);
 
+PSID ConvertNameToBinarySid(const std::wstring &accountName);
+
 template<typename T>
 std::wstring ToHexString(T first, T last, bool use_uppercase = true, bool insert_spaces = false)
 {

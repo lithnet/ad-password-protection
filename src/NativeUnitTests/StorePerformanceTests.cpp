@@ -21,7 +21,7 @@ namespace NativeUnitTests
 
 			const std::wstring accountName = std::wstring(L"accountName");
 			const std::wstring fullname = std::wstring(L"full name");
-			const user_policy pol = policy::GetPolicyForGroup(L"UnitTests");
+			const user_policy pol = policy::GetPolicySet(L"UnitTests");
 
 			for (size_t i = 0; i < 1000; i++)
 			{
@@ -41,7 +41,7 @@ namespace NativeUnitTests
 		void LoopKnownBadPasswords() const
 		{
 			//ClearCache();
-			const user_policy pol = policy::GetPolicyForGroup(L"UnitTests");
+			const user_policy pol = policy::GetPolicySet(L"UnitTests");
 
 			const std::wstring accountName = std::wstring(L"accountName");
 			const std::wstring fullname = std::wstring(L"full name");

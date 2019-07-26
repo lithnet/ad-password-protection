@@ -4,53 +4,25 @@
 #include "utils.h"
 #include <AuthZ.h>
 
-PSID policy::ConvertNameToBinarySid(const std::wstring &pAccountName)
+std::wstring policy::GetPolicySetNameForUser(const std::wstring &accountName)
 {
-	LPTSTR szDomainName = NULL;
-	DWORD cbDomainName = 0;
-	PSID pSid = NULL;
-	DWORD cbSid = 0;
-	SID_NAME_USE sidType;
-
-	while (!LookupAccountName(NULL, pAccountName.c_str(), pSid, &cbSid, szDomainName, &cbDomainName, &sidType))
-	{
-		const DWORD result = GetLastError();
-
-		if (result != ERROR_INSUFFICIENT_BUFFER)
-		{
-			throw std::system_error(result, std::system_category(), "LookupAccountName failed");
-		}
-
-		pSid = LocalAlloc(LPTR, cbSid);
-		szDomainName = static_cast<LPTSTR>(LocalAlloc(LPTR, cbDomainName * sizeof(TCHAR)));
-
-		if (szDomainName == NULL || pSid == NULL)
-		{
-			throw std::system_error(GetLastError(), std::system_category(), "Out of memory");
-		}
-	}
-
-	if (szDomainName != NULL)
-	{
-		LocalFree(szDomainName);
-	}
-
-	return pSid;
+	registry reg;
+	return policy::GetPolicySetNameForUser(accountName, reg);
 }
 
-std::wstring policy::GetPolicyNameForUser(const std::wstring &accountName)
+std::wstring policy::GetPolicySetNameForUser(const std::wstring &accountName, const registry &reg)
 {
-	std::wstring effectivePolicyName = L"Default";
+	std::wstring effectivePolicySetName = L"Default";
 
-	auto policySids = registry::GetActivePolicyGroupSids();
+	auto policySetMap = reg.GetActivePolicySetMap();
 
-	if (policySids.empty())
+	if (policySetMap.empty())
 	{
-		return effectivePolicyName;
+		return effectivePolicySetName;
 	}
 
 	AUTHZ_RESOURCE_MANAGER_HANDLE hResourceManager = 0;
-	LUID unusedId = { 0 };
+	const LUID unusedId = { 0, 0 };
 	AUTHZ_CLIENT_CONTEXT_HANDLE hCtx = NULL;
 	DWORD dwTokenGroupsSize = 0;
 	PVOID pvTokenGroupsBuf = NULL;
@@ -85,7 +57,7 @@ std::wstring policy::GetPolicyNameForUser(const std::wstring &accountName)
 			pvTokenGroupsBuf = malloc(dwTokenGroupsSize);
 		}
 
-		for (const SidGroupMap &map : policySids)
+		for (const PolicySetMap &map : policySetMap)
 		{
 			bool matched = false;
 
@@ -93,7 +65,7 @@ std::wstring policy::GetPolicyNameForUser(const std::wstring &accountName)
 			{
 				if (EqualSid(map.Sid, static_cast<PTOKEN_GROUPS>(pvTokenGroupsBuf)->Groups[i].Sid))
 				{
-					effectivePolicyName = map.GroupName;
+					effectivePolicySetName = map.PolicySetName;
 					matched = true;
 					break;
 				}
@@ -125,7 +97,7 @@ std::wstring policy::GetPolicyNameForUser(const std::wstring &accountName)
 			AuthzFreeResourceManager(hResourceManager);
 		}
 
-		return effectivePolicyName;
+		return effectivePolicySetName;
 	}
 	catch (...)
 	{
@@ -153,16 +125,16 @@ std::wstring policy::GetPolicyNameForUser(const std::wstring &accountName)
 	}
 }
 
-user_policy policy::GetPolicyForUser(const std::wstring &accountName)
+user_policy policy::GetPolicySetForUser(const std::wstring &accountName)
 {
-	const std::wstring policyName = policy::GetPolicyNameForUser(accountName);
+	const std::wstring policyName = policy::GetPolicySetNameForUser(accountName);
 
-	return GetPolicyForGroup(policyName);
+	return GetPolicySet(policyName);
 }
 
-user_policy policy::GetPolicyForGroup(const std::wstring &groupName)
+user_policy policy::GetPolicySet(const std::wstring &policySetName)
 {
-	registry reg = registry::GetRegistryForGroup(groupName);
+	registry reg = registry(policySetName);
 
 	user_policy policy{};
 
@@ -206,7 +178,7 @@ user_policy policy::GetPolicyForGroup(const std::wstring &groupName)
 	policy.GeneralPolicy.ValidatePasswordDoesntContainFullName = reg.GetRegValue(REG_VALUE_PASSWORDDOESNTCONTAINFULLNAME, 0) != 0;
 	policy.GeneralPolicy.RegexApprove = GetInteropString(reg.GetRegValue(REG_VALUE_REGEXAPPROVE, L"").c_str());
 	policy.GeneralPolicy.RegexReject = GetInteropString(reg.GetRegValue(REG_VALUE_REGEXREJECT, L"").c_str());
-	
+
 	policy.StorePolicy.CheckNormalizedPasswordNotInBannedWordStoreOnChange = reg.GetRegValue(REG_VALUE_CHECKNORMALIZEDBANNEDWORDONCHANGE, 0) != 0;
 	policy.StorePolicy.CheckNormalizedPasswordNotInBannedWordStoreOnSet = reg.GetRegValue(REG_VALUE_CHECKNORMALIZEDBANNEDWORDONSET, 0) != 0;
 
@@ -214,7 +186,7 @@ user_policy policy::GetPolicyForGroup(const std::wstring &groupName)
 	policy.StorePolicy.CheckNormalizedPasswordNotInCompromisedPasswordStoreOnSet = reg.GetRegValue(REG_VALUE_CHECKNORMALIZEDCOMPROMISEDPASSWORDONSET, 0) != 0;
 
 	policy.StorePolicy.CheckPasswordNotInCompromisedPasswordStoreOnChange = reg.GetRegValue(REG_VALUE_CHECKCOMPROMISEDPASSWORDONCHANGE, 0) != 0;
-	policy.StorePolicy.CheckPasswordNotInCompromisedPasswordStoreOnSet= reg.GetRegValue(REG_VALUE_CHECKCOMPROMISEDPASSWORDONSET, 0) != 0;
+	policy.StorePolicy.CheckPasswordNotInCompromisedPasswordStoreOnSet = reg.GetRegValue(REG_VALUE_CHECKCOMPROMISEDPASSWORDONSET, 0) != 0;
 
 	return policy;
 }

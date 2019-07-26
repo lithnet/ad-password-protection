@@ -65,10 +65,10 @@
     <ClCompile Include="v3StoreTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PolicyTest.cpp">
+    <ClCompile Include="TestString.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TestString.cpp">
+    <ClCompile Include="PolicySetTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

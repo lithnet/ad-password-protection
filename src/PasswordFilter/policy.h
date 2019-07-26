@@ -1,4 +1,5 @@
 #pragma once
+#include "registry.h";
 
 struct complexity_threshold
 {
@@ -59,13 +60,11 @@ struct user_policy
 class policy
 {
 public:
-	static user_policy GetPolicyForUser(const std::wstring &account);
-	static user_policy GetPolicyForGroup(const std::wstring &groupName);
+	static user_policy GetPolicySetForUser(const std::wstring &accountName);
+	static user_policy GetPolicySet(const std::wstring &policySetName);
+	static std::wstring GetPolicySetNameForUser(const std::wstring &accountName);
+	static std::wstring GetPolicySetNameForUser(const std::wstring &accountName, const registry &reg);
 
 	policy();
-
 	~policy();
-private:
-	static std::wstring GetPolicyNameForUser(const std::wstring &account);
-	static PSID ConvertNameToBinarySid(const std::wstring &pAccountName);
 };

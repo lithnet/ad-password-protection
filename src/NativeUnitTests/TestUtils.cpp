@@ -2,10 +2,11 @@
 #include "TestUtils.h"
 #include "../PasswordFilter/registry.h"
 
-HKEY OpenSettingsKeyWritable()
+
+HKEY OpenSettingsKeyWritable(std::wstring policySetName)
 {
 	std::wstring key = REG_BASE_POLICY_KEY;
-	key += L"\\UnitTests";
+	key += L"\\UnitTests\\" + policySetName;
 
 	HKEY hKey;
 	const LSTATUS result = RegCreateKeyEx(HKEY_LOCAL_MACHINE, key.c_str(), 0, NULL, NULL, KEY_WRITE | KEY_WOW64_64KEY, NULL, &hKey, NULL);
@@ -23,9 +24,9 @@ HKEY OpenSettingsKeyWritable()
 	return hKey;
 }
 
-void SetUnitTestPolicyValue(std::wstring key, DWORD value)
+void SetUnitTestPolicyValue(std::wstring policySetName, std::wstring key, DWORD value)
 {
-	const HKEY hkey = OpenSettingsKeyWritable();
+	const HKEY hkey = OpenSettingsKeyWritable(policySetName);
 
 	const LSTATUS result = RegSetValueEx(hkey, key.c_str(), 0, REG_DWORD, (const BYTE*)&value, sizeof(value));
 
@@ -40,9 +41,19 @@ void SetUnitTestPolicyValue(std::wstring key, DWORD value)
 	}
 }
 
+void SetUnitTestPolicyValue(std::wstring key, DWORD value)
+{
+	SetUnitTestPolicyValue(L"Default", key, value);
+}
+
 void SetUnitTestPolicyValue(const std::wstring key, const std::wstring value)
 {
-	const HKEY hkey = OpenSettingsKeyWritable();
+	SetUnitTestPolicyValue(L"Default", key, value);
+}
+
+void SetUnitTestPolicyValue(std::wstring policySetName, const std::wstring key, const std::wstring value)
+{
+	const HKEY hkey = OpenSettingsKeyWritable(policySetName);
 
 	const LSTATUS result = RegSetValueEx(hkey, key.c_str(), 0, REG_SZ, (LPBYTE)value.c_str(), (value.size() + 1) * sizeof(wchar_t));
 
@@ -59,7 +70,12 @@ void SetUnitTestPolicyValue(const std::wstring key, const std::wstring value)
 
 void DeleteUnitTestPolicyValue(const std::wstring key)
 {
-	const HKEY hkey = OpenSettingsKeyWritable();
+	DeleteUnitTestPolicyValue(L"Default", key);
+}
+
+void DeleteUnitTestPolicyValue(const std::wstring policySetName, const std::wstring key)
+{
+	const HKEY hkey = OpenSettingsKeyWritable(policySetName);
 
 	const LSTATUS result = RegDeleteValue(hkey, key.c_str());
 

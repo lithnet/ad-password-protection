@@ -26,7 +26,7 @@ namespace NativeUnitTests
 			SetUnitTestPolicyValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 0);
 			SetUnitTestPolicyValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 0);
 
-			const user_policy pol = policy::GetPolicyForGroup(L"UnitTests");
+			const user_policy pol = policy::GetPolicySet(L"UnitTests");
 			const TestString password(L"password1@Pp");
 			Assert::IsTrue(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, pol));
 		}
@@ -46,7 +46,7 @@ namespace NativeUnitTests
 			SetUnitTestPolicyValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 0);
 			SetUnitTestPolicyValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 0);
 
-			const user_policy pol = policy::GetPolicyForGroup(L"UnitTests");
+			const user_policy pol = policy::GetPolicySet(L"UnitTests");
 			const TestString password(L"password1@Pp");
 
 			Assert::IsFalse(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, pol));
@@ -67,7 +67,7 @@ namespace NativeUnitTests
 			SetUnitTestPolicyValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 0);
 			SetUnitTestPolicyValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 0);
 
-			const user_policy pol = policy::GetPolicyForGroup(L"UnitTests");
+			const user_policy pol = policy::GetPolicySet(L"UnitTests");
 			const TestString password(L"password1@Pp");
 
 			Assert::IsTrue(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, pol));
@@ -88,7 +88,7 @@ namespace NativeUnitTests
 			SetUnitTestPolicyValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 0);
 			SetUnitTestPolicyValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 0);
 
-			const user_policy pol = policy::GetPolicyForGroup(L"UnitTests");
+			const user_policy pol = policy::GetPolicySet(L"UnitTests");
 			const TestString password(L"password1@Pp");
 
 			Assert::IsFalse(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, pol));
@@ -109,7 +109,7 @@ namespace NativeUnitTests
 			SetUnitTestPolicyValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 0);
 			SetUnitTestPolicyValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 0);
 
-			const user_policy pol = policy::GetPolicyForGroup(L"UnitTests");
+			const user_policy pol = policy::GetPolicySet(L"UnitTests");
 			const TestString password(L"password1@Pp3");
 
 			Assert::IsTrue(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, pol));
@@ -130,7 +130,7 @@ namespace NativeUnitTests
 			SetUnitTestPolicyValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 0);
 			SetUnitTestPolicyValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 0);
 
-			const user_policy pol = policy::GetPolicyForGroup(L"UnitTests");
+			const user_policy pol = policy::GetPolicySet(L"UnitTests");
 			const TestString password(L"password1@Pp");
 			Assert::IsFalse(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, pol));
 		}
@@ -150,7 +150,7 @@ namespace NativeUnitTests
 			SetUnitTestPolicyValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 0);
 			SetUnitTestPolicyValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 0);
 
-			const user_policy pol = policy::GetPolicyForGroup(L"UnitTests");
+			const user_policy pol = policy::GetPolicySet(L"UnitTests");
 			const TestString password(L"password1@Pp!");
 			Assert::IsTrue(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, pol));
 		}
@@ -170,7 +170,7 @@ namespace NativeUnitTests
 			SetUnitTestPolicyValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 0);
 			SetUnitTestPolicyValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 0);
 
-			const user_policy pol = policy::GetPolicyForGroup(L"UnitTests");
+			const user_policy pol = policy::GetPolicySet(L"UnitTests");
 			const TestString password(L"password1@Pp");
 			Assert::IsFalse(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, pol));
 		}
@@ -190,7 +190,7 @@ namespace NativeUnitTests
 			SetUnitTestPolicyValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 0);
 			SetUnitTestPolicyValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 0);
 
-			const user_policy pol = policy::GetPolicyForGroup(L"UnitTests");
+			const user_policy pol = policy::GetPolicySet(L"UnitTests");
 			const TestString password(L"password1@PpW");
 			Assert::IsTrue(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, pol));
 		}
@@ -210,7 +210,7 @@ namespace NativeUnitTests
 			SetUnitTestPolicyValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 0);
 			SetUnitTestPolicyValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 0);
 			
-			const user_policy pol = policy::GetPolicyForGroup(L"UnitTests");
+			const user_policy pol = policy::GetPolicySet(L"UnitTests");
 			const TestString password (L"password1@Pp");
 			Assert::IsFalse(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, pol));
 		}
@@ -230,7 +230,7 @@ namespace NativeUnitTests
 			SetUnitTestPolicyValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 0);
 			SetUnitTestPolicyValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 0);
 			
-			const user_policy pol = policy::GetPolicyForGroup(L"UnitTests");
+			const user_policy pol = policy::GetPolicySet(L"UnitTests");
 			const TestString password (L"password1@PpW");
 			Assert::IsTrue(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, pol));
 		}
@@ -250,7 +250,7 @@ namespace NativeUnitTests
 			SetUnitTestPolicyValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 0);
 			SetUnitTestPolicyValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 0);
 			
-			const user_policy pol = policy::GetPolicyForGroup(L"UnitTests");
+			const user_policy pol = policy::GetPolicySet(L"UnitTests");
 			const TestString password (L"PASSWORD");
 			Assert::IsFalse(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, pol));
 		}
@@ -271,7 +271,7 @@ namespace NativeUnitTests
 			SetUnitTestPolicyValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 0);
 			SetUnitTestPolicyValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 0);
 			
-			const user_policy pol = policy::GetPolicyForGroup(L"UnitTests");
+			const user_policy pol = policy::GetPolicySet(L"UnitTests");
 			const TestString password (L"password1@PpW");
 			Assert::IsTrue(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, pol));
 		}
@@ -291,7 +291,7 @@ namespace NativeUnitTests
 			SetUnitTestPolicyValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 0);
 			SetUnitTestPolicyValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 0);
 
-			const user_policy pol = policy::GetPolicyForGroup(L"UnitTests");
+			const user_policy pol = policy::GetPolicySet(L"UnitTests");
 			const TestString password (L"PASSWORD");
 			Assert::IsFalse(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, pol));
 		}
@@ -312,7 +312,7 @@ namespace NativeUnitTests
 			SetUnitTestPolicyValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 100);
 			SetUnitTestPolicyValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 0);
 
-			const user_policy pol = policy::GetPolicyForGroup(L"UnitTests");
+			const user_policy pol = policy::GetPolicySet(L"UnitTests");
 			const TestString password (L"password1@PpW");
 			Assert::IsTrue(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, pol));
 		}
@@ -332,7 +332,7 @@ namespace NativeUnitTests
 			SetUnitTestPolicyValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 100);
 			SetUnitTestPolicyValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 0);
 
-			const user_policy pol = policy::GetPolicyForGroup(L"UnitTests");
+			const user_policy pol = policy::GetPolicySet(L"UnitTests");
 			const TestString password (L"PASSWORD");
 			Assert::IsFalse(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, pol));
 		}
@@ -352,7 +352,7 @@ namespace NativeUnitTests
 			SetUnitTestPolicyValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 0);
 			SetUnitTestPolicyValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 100);
 
-			const user_policy pol = policy::GetPolicyForGroup(L"UnitTests");
+			const user_policy pol = policy::GetPolicySet(L"UnitTests");
 			const TestString password (L"password1@PpW");
 			Assert::IsTrue(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, pol));
 		}
@@ -372,7 +372,7 @@ namespace NativeUnitTests
 			SetUnitTestPolicyValue(REG_VALUE_COMPLEXITYPOINTSUSEOFSYMBOL, 0);
 			SetUnitTestPolicyValue(REG_VALUE_COMPLEXITYPOINTSUSEOFUPPER, 100);
 
-			const user_policy pol = policy::GetPolicyForGroup(L"UnitTests");
+			const user_policy pol = policy::GetPolicySet(L"UnitTests");
 			const TestString password (L"password");
 			Assert::IsFalse(ProcessPasswordComplexityPoints(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, pol));
 		}

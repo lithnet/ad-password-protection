@@ -218,3 +218,14 @@
 //
 #define MSG_PASSWORD_REJECTED_BANNED_NORMALIZED_WORD ((DWORD)0x8000200DL)
 
+//
+// MessageId: MSG_GROUP_MAPPING_ERROR
+//
+// MessageText:
+//
+// An error occurring during the process of mapping policy groups to Active Directory groups. Check that the group name listed in password policy set %3 exists.
+// Error code: %1
+// Message: %2
+//
+#define MSG_GROUP_MAPPING_ERROR          ((DWORD)0xC0023000L)
+
