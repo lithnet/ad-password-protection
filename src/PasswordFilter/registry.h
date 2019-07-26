@@ -65,42 +65,6 @@ static LPCWSTR REG_VALUE_REGEXREJECT = L"RegexReject";
 static LPCWSTR REG_VALUE_PASSWORDDOESNTCONTAINACCOUNTNAME = L"ValidatePasswordDoesntContainAccountName";
 static LPCWSTR REG_VALUE_PASSWORDDOESNTCONTAINFULLNAME = L"ValidatePasswordDoesntContainFullName";
 
-class PolicySetMap
-{
-public:
-	PSID Sid;
-	std::wstring PolicySetName;
-	std::wstring GroupName;
-	
-	PolicySetMap(const PSID &sid, const std::wstring &groupName, const std::wstring &policyName)
-	{
-		this->Sid = sid;
-		this->PolicySetName = policyName;
-		this->GroupName = groupName;
-	}
-
-	~PolicySetMap()
-	{
-		if (Sid)
-		{
-			LocalFree(Sid);
-			Sid = 0;
-		}
-	}
-
-	PolicySetMap(PolicySetMap&& other) noexcept
-	{
-		this->Sid = other.Sid;
-		other.Sid = 0;
-		this->GroupName = other.GroupName;
-		this->PolicySetName = other.PolicySetName;
-	}
-
-	PolicySetMap(const PolicySetMap& other) = delete;
-	PolicySetMap& operator=(const PolicySetMap& other) = delete;
-	PolicySetMap& operator=(const PolicySetMap&& other) = delete;
-};
-
 class registry
 {
 private:
@@ -111,10 +75,8 @@ private:
 public:
 	registry();
 	registry(std::wstring policySetName);
-	~registry();
 	std::wstring GetRegValue(const std::wstring & valueName, const std::wstring & defaultValue) const;
 	DWORD GetRegValue(const std::wstring & valueName, DWORD defaultValue) const;
-	std::vector<PolicySetMap> GetActivePolicySetMap() const;
 
 private:
 	DWORD GetPolicyOrSettingsValue(const std::wstring & valueName, DWORD defaultValue) const;

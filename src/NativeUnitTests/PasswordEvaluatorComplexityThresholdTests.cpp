@@ -48,7 +48,7 @@ namespace NativeUnitTests
 
 		static void TestThreshold(std::wstring passwordPass, std::wstring passwordFail)
 		{
-			const user_policy pol = policy::GetPolicySet(L"UnitTests");
+			const user_policy pol = policy::GetPolicySetByName(L"UnitTests\\Default");
 			const TestString pwdPass(passwordPass);
 			Assert::IsTrue(ProcessPasswordComplexityThreshold(pwdPass, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, pol));
 

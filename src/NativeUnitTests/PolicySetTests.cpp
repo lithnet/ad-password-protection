@@ -10,7 +10,7 @@ namespace NativeUnitTests
 	TEST_CLASS(PolicySetTests)
 	{
 	private:
-		registry reg = registry(L"UnitTests");
+		std::wstring baseKeyName = L"UnitTests";
 
 	public:
 		/*
@@ -57,67 +57,67 @@ namespace NativeUnitTests
 
 		TEST_METHOD(TestGetPolicySetNameForUser0)
 		{
-			auto setName = policy::GetPolicySetNameForUser(L"policy-test-user-0", reg);
+			auto setName = policy::GetPolicySetNameForUser(L"policy-test-user-0", baseKeyName);
 			Assert::AreEqual(L"0", setName.c_str());
 		}
 
 		TEST_METHOD(TestGetPolicySetNameForUser1)
 		{
-			auto setName = policy::GetPolicySetNameForUser(L"policy-test-user-1", reg);
+			auto setName = policy::GetPolicySetNameForUser(L"policy-test-user-1", baseKeyName);
 			Assert::AreEqual(L"1", setName.c_str());
 		}
 
 		TEST_METHOD(TestGetPolicySetNameForUser2)
 		{
-			auto setName = policy::GetPolicySetNameForUser(L"policy-test-user-2", reg);
+			auto setName = policy::GetPolicySetNameForUser(L"policy-test-user-2", baseKeyName);
 			Assert::AreEqual(L"2", setName.c_str());
 		}
 
 		TEST_METHOD(TestGetPolicySetNameForUser3)
 		{
-			auto setName = policy::GetPolicySetNameForUser(L"policy-test-user-3", reg);
+			auto setName = policy::GetPolicySetNameForUser(L"policy-test-user-3", baseKeyName);
 			Assert::AreEqual(L"3", setName.c_str());
 		}
 
 		TEST_METHOD(TestGetPolicySetNameForUser4)
 		{
-			auto setName = policy::GetPolicySetNameForUser(L"policy-test-user-4", reg);
+			auto setName = policy::GetPolicySetNameForUser(L"policy-test-user-4", baseKeyName);
 			Assert::AreEqual(L"4", setName.c_str());
 		}
 
 		TEST_METHOD(TestGetPolicySetNameForUser5)
 		{
-			auto setName = policy::GetPolicySetNameForUser(L"policy-test-user-5", reg);
+			auto setName = policy::GetPolicySetNameForUser(L"policy-test-user-5", baseKeyName);
 			Assert::AreEqual(L"5", setName.c_str());
 		}
 
 		TEST_METHOD(TestGetPolicySetNameForUser6)
 		{
-			auto setName = policy::GetPolicySetNameForUser(L"policy-test-user-6", reg);
+			auto setName = policy::GetPolicySetNameForUser(L"policy-test-user-6", baseKeyName);
 			Assert::AreEqual(L"6", setName.c_str());
 		}
 
 		TEST_METHOD(TestGetPolicySetNameForUser7)
 		{
-			auto setName = policy::GetPolicySetNameForUser(L"policy-test-user-7", reg);
+			auto setName = policy::GetPolicySetNameForUser(L"policy-test-user-7", baseKeyName);
 			Assert::AreEqual(L"7", setName.c_str());
 		}
 
 		TEST_METHOD(TestGetPolicySetNameForUser8)
 		{
-			auto setName = policy::GetPolicySetNameForUser(L"policy-test-user-8", reg);
+			auto setName = policy::GetPolicySetNameForUser(L"policy-test-user-8", baseKeyName);
 			Assert::AreEqual(L"8", setName.c_str());
 		}
 
 		TEST_METHOD(TestGetPolicySetNameForUser9)
 		{
-			auto setName = policy::GetPolicySetNameForUser(L"policy-test-user-9", reg);
+			auto setName = policy::GetPolicySetNameForUser(L"policy-test-user-9", baseKeyName);
 			Assert::AreEqual(L"9", setName.c_str());
 		}
-		
+
 		TEST_METHOD(TestGetPolicySetNameForUser10)
 		{
-			auto setName = policy::GetPolicySetNameForUser(L"policy-test-user-10", reg);
+			auto setName = policy::GetPolicySetNameForUser(L"policy-test-user-10", baseKeyName);
 			Assert::AreEqual(L"Default", setName.c_str());
 		}
 	};

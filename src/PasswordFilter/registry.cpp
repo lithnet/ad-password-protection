@@ -1,8 +1,6 @@
 #include "stdafx.h"
 #include "registry.h"
 #include "sddl.h"
-#include "eventlog.h"
-#include "messages.h"
 #include "utils.h"
 
 registry::registry()
@@ -18,9 +16,6 @@ registry::registry(std::wstring policySetName)
 	this->policyKeyName = GetKeyName(REG_BASE_POLICY_KEY);
 }
 
-registry::~registry()
-= default;
-
 std::wstring registry::GetRegValue(const std::wstring & valueName, const std::wstring & defaultValue) const
 {
 	return GetPolicyOrSettingsValue(valueName, defaultValue);
@@ -30,68 +25,6 @@ DWORD registry::GetRegValue(const std::wstring & valueName, DWORD defaultValue) 
 {
 	return GetPolicyOrSettingsValue(valueName, defaultValue);
 }
-
-std::vector<PolicySetMap> registry::GetActivePolicySetMap() const
-{
-	std::vector<PolicySetMap> sids;
-	registry baseReg;
-	const unsigned int maxAllowedPolicies = baseReg.GetPolicyOrSettingsValue(L"PolicyCount", 10);
-
-	for (size_t i = 0; i < maxAllowedPolicies; i++)
-	{
-		const std::wstring policySetName = std::to_wstring(i);
-		std::wstring policySetKeyName = policySetName;
-		if (!this->policySetName.empty())
-		{
-			policySetKeyName = this->policySetName + L"\\" + policySetName;
-		}
-
-		try 
-		{
-			registry policyReg = registry(policySetKeyName);
-
-			if (policyReg.GetRegValue(L"Enabled", 0) == 1)
-			{
-				std::wstring sid = policyReg.GetRegValue(L"GroupSid", L"");
-				std::wstring groupName = policyReg.GetRegValue(L"GroupName", L"");
-
-				if (sid.empty() && !groupName.empty())
-				{
-					PSID sidbytes = ConvertNameToBinarySid(groupName);
-					sids.emplace_back(sidbytes, groupName, policySetName);
-				}
-				else if (!sid.empty())
-				{
-					PSID sidbytes;
-					if (!ConvertStringSidToSid(sid.c_str(), &sidbytes))
-					{
-						throw std::system_error(GetLastError(), std::system_category(), "ConvertStringSidToSid failed for group");
-					}
-
-					sids.emplace_back(sidbytes, groupName, policySetName);
-				}
-			}
-		}
-		catch (std::system_error const& e)
-		{
-			OutputDebugString(L"Win32 error caught during policy set mapping");
-			eventlog::getInstance().log(EVENTLOG_ERROR_TYPE, MSG_GROUP_MAPPING_ERROR, 3, std::to_string(e.code().value()).c_str(), e.what(), policySetName.c_str());
-		}
-		catch (std::exception const& e)
-		{
-			OutputDebugString(L"Other error caught during policy set mapping");
-			eventlog::getInstance().log(EVENTLOG_ERROR_TYPE, MSG_GROUP_MAPPING_ERROR, 3, L"Unknown", e.what(), policySetName.c_str());
-		}
-		catch (...)
-		{
-			OutputDebugString(L"Unexpected error caught during policy set mapping");
-			eventlog::getInstance().log(EVENTLOG_ERROR_TYPE, MSG_GROUP_MAPPING_ERROR, 3, L"Unknown", L"No exception information was available", policySetName.c_str());
-		}
-	}
-
-	return sids;
-}
-
 
 DWORD registry::GetPolicyOrSettingsValue(const std::wstring & valueName, DWORD defaultValue) const
 {

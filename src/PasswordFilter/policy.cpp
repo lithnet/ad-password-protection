@@ -3,18 +3,21 @@
 #include "registry.h"
 #include "utils.h"
 #include <AuthZ.h>
+#include "policysetmap.h"
+#include <sddl.h>
+#include "eventlog.h"
+#include "messages.h"
 
 std::wstring policy::GetPolicySetNameForUser(const std::wstring &accountName)
 {
-	registry reg;
-	return policy::GetPolicySetNameForUser(accountName, reg);
+	return policy::GetPolicySetNameForUser(accountName,L"");
 }
 
-std::wstring policy::GetPolicySetNameForUser(const std::wstring &accountName, const registry &reg)
+std::wstring policy::GetPolicySetNameForUser(const std::wstring &accountName, const std::wstring baseKey)
 {
 	std::wstring effectivePolicySetName = L"Default";
 
-	auto policySetMap = reg.GetActivePolicySetMap();
+	auto policySetMap = policy::GetActivePolicySetMap(baseKey);
 
 	if (policySetMap.empty())
 	{
@@ -129,10 +132,10 @@ user_policy policy::GetPolicySetForUser(const std::wstring &accountName)
 {
 	const std::wstring policyName = policy::GetPolicySetNameForUser(accountName);
 
-	return GetPolicySet(policyName);
+	return GetPolicySetByName(policyName);
 }
 
-user_policy policy::GetPolicySet(const std::wstring &policySetName)
+user_policy policy::GetPolicySetByName(const std::wstring &policySetName)
 {
 	registry reg = registry(policySetName);
 
@@ -191,8 +194,68 @@ user_policy policy::GetPolicySet(const std::wstring &policySetName)
 	return policy;
 }
 
-policy::policy()
-= default;
+std::vector<PolicySetMap> policy::GetActivePolicySetMap()
+{
+	return policy::GetActivePolicySetMap(L"");
+}
 
-policy::~policy()
-= default;
+std::vector<PolicySetMap> policy::GetActivePolicySetMap(const std::wstring baseKey)
+{
+	std::vector<PolicySetMap> sids;
+	registry baseReg;
+	const unsigned int maxAllowedPolicies = baseReg.GetRegValue(L"PolicyCount", 10);
+
+	for (size_t i = 0; i < maxAllowedPolicies; i++)
+	{
+		const std::wstring policySetName = std::to_wstring(i);
+		std::wstring policySetKeyName = policySetName;
+		if (!baseKey.empty())
+		{
+			policySetKeyName = baseKey + L"\\" + policySetName;
+		}
+
+		try
+		{
+			registry policyReg = registry(policySetKeyName);
+
+			if (policyReg.GetRegValue(L"Enabled", 0) == 1)
+			{
+				std::wstring sid = policyReg.GetRegValue(L"GroupSid", L"");
+				std::wstring groupName = policyReg.GetRegValue(L"GroupName", L"");
+
+				if (sid.empty() && !groupName.empty())
+				{
+					PSID sidbytes = ConvertNameToBinarySid(groupName);
+					sids.emplace_back(sidbytes, groupName, policySetName);
+				}
+				else if (!sid.empty())
+				{
+					PSID sidbytes;
+					if (!ConvertStringSidToSid(sid.c_str(), &sidbytes))
+					{
+						throw std::system_error(GetLastError(), std::system_category(), "ConvertStringSidToSid failed for group");
+					}
+
+					sids.emplace_back(sidbytes, groupName, policySetName);
+				}
+			}
+		}
+		catch (std::system_error const& e)
+		{
+			OutputDebugString(L"Win32 error caught during policy set mapping");
+			eventlog::getInstance().log(EVENTLOG_ERROR_TYPE, MSG_GROUP_MAPPING_ERROR, 3, std::to_string(e.code().value()).c_str(), e.what(), policySetName.c_str());
+		}
+		catch (std::exception const& e)
+		{
+			OutputDebugString(L"Other error caught during policy set mapping");
+			eventlog::getInstance().log(EVENTLOG_ERROR_TYPE, MSG_GROUP_MAPPING_ERROR, 3, L"Unknown", e.what(), policySetName.c_str());
+		}
+		catch (...)
+		{
+			OutputDebugString(L"Unexpected error caught during policy set mapping");
+			eventlog::getInstance().log(EVENTLOG_ERROR_TYPE, MSG_GROUP_MAPPING_ERROR, 3, L"Unknown", L"No exception information was available", policySetName.c_str());
+		}
+	}
+
+	return sids;
+}
