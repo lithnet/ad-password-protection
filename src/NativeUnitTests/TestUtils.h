@@ -39,6 +39,8 @@ void SetUnitTestPolicyValue(std::wstring policySetName, std::wstring key, std::w
 
 void DeleteUnitTestPolicyValue(std::wstring key);
 void DeleteUnitTestPolicyValue(std::wstring policySetName, std::wstring key);
+void DeleteUnitTestPolicyKey(const std::wstring policySetName, const std::wstring key);
+UNICODE_STRING GetUnicodeString(std::wstring &str);
 
 std::wstring GetGuid();
 

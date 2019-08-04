@@ -14,7 +14,9 @@ int ProcessPassword(const SecureArrayT<WCHAR> &password, const std::wstring &acc
 {
 	eventlog::getInstance().logw(EVENTLOG_INFORMATION_TYPE, MSG_PROCESSING_REQUEST, 3, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
 
-	const user_policy pol = policy::GetPolicySetForUser(accountName);
+	const auto policySetName = policy::GetPolicySetNameForUser(accountName);
+	user_policy pol;
+	policy::PopulatePolicySetObject(policySetName, &pol);
 
 	if (!ProcessPasswordLength(password, accountName, fullName, setOperation, pol))
 	{
@@ -226,7 +228,12 @@ BOOLEAN ProcessPasswordDoesntContainFullName(const SecureArrayT<WCHAR> &password
 
 BOOLEAN ProcessPasswordRegexApprove(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const user_policy &pol)
 {
-	std::wstring regex = pol.GeneralPolicy.RegexApprove;// reg.GetRegValue(REG_VALUE_REGEXAPPROVE, L"");
+	if (pol.GeneralPolicy.RegexApprove == 0)
+	{
+		return TRUE;
+	}
+
+	std::wstring regex(pol.GeneralPolicy.RegexApprove);
 
 	if (regex.length() > 0)
 	{
@@ -249,7 +256,12 @@ BOOLEAN ProcessPasswordRegexApprove(const SecureArrayT<WCHAR> &password, const s
 
 BOOLEAN ProcessPasswordRegexReject(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const user_policy &pol)
 {
-	std::wstring regex = pol.GeneralPolicy.RegexReject;// reg.GetRegValue(REG_VALUE_REGEXREJECT, L"");
+	if (pol.GeneralPolicy.RegexReject == 0)
+	{
+		return TRUE;
+	}
+
+	std::wstring regex(pol.GeneralPolicy.RegexReject);
 
 	if (regex.length() > 0)
 	{

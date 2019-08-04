@@ -229,3 +229,30 @@
 //
 #define MSG_GROUP_MAPPING_ERROR          ((DWORD)0xC0023000L)
 
+//
+// MessageId: MSG_POLICY_MAPPING_NOT_CONFIGURED
+//
+// MessageText:
+//
+// There were no policy sets configured. User %1 will recieve default policies
+//
+#define MSG_POLICY_MAPPING_NOT_CONFIGURED ((DWORD)0x4002D001L)
+
+//
+// MessageId: MSG_POLICY_MAPPING_COMPLETE
+//
+// MessageText:
+//
+// User '%1' was mapped to policy set '%2' due to membership in group '%3'
+//
+#define MSG_POLICY_MAPPING_COMPLETE      ((DWORD)0x4002D002L)
+
+//
+// MessageId: MSG_POLICY_MAPPING_DEFAULTED
+//
+// MessageText:
+//
+// User '%1' was mapped to the defauly policy set as they did not match any policy set groups
+//
+#define MSG_POLICY_MAPPING_DEFAULTED     ((DWORD)0x4002D003L)
+

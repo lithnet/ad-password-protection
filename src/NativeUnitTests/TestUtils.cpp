@@ -2,11 +2,25 @@
 #include "TestUtils.h"
 #include "../PasswordFilter/registry.h"
 
+UNICODE_STRING GetUnicodeString(std::wstring &str)
+{
+	UNICODE_STRING us;
+	us.Buffer = (wchar_t *)str.c_str();
+	us.Length = str.size() * sizeof(wchar_t);
+	us.MaximumLength = us.Length + 2;
+
+	return us;
+}
 
 HKEY OpenSettingsKeyWritable(std::wstring policySetName)
 {
 	std::wstring key = REG_BASE_POLICY_KEY;
-	key += L"\\UnitTests\\" + policySetName;
+	key += L"\\UnitTests";
+	
+	if (!policySetName.empty())
+	{
+		key += L"\\" + policySetName;
+	}
 
 	HKEY hKey;
 	const LSTATUS result = RegCreateKeyEx(HKEY_LOCAL_MACHINE, key.c_str(), 0, NULL, NULL, KEY_WRITE | KEY_WOW64_64KEY, NULL, &hKey, NULL);
@@ -80,6 +94,23 @@ void DeleteUnitTestPolicyValue(const std::wstring policySetName, const std::wstr
 	const LSTATUS result = RegDeleteValue(hkey, key.c_str());
 
 	if (result != ERROR_SUCCESS)
+	{
+		throw std::system_error(GetLastError(), std::system_category(), "Could not delete value");
+	}
+
+	if (hkey)
+	{
+		RegCloseKey(hkey);
+	}
+}
+
+void DeleteUnitTestPolicyKey(const std::wstring policySetName, const std::wstring key)
+{
+	const HKEY hkey = OpenSettingsKeyWritable(policySetName);
+
+	const LSTATUS result = RegDeleteKey(hkey, key.c_str());
+
+	if (result != ERROR_SUCCESS && result != ERROR_FILE_NOT_FOUND)
 	{
 		throw std::system_error(GetLastError(), std::system_category(), "Could not delete value");
 	}

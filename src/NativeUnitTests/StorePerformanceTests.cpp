@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
-#include <iostream>
 #include <sstream>
 #include <iomanip>
 #include <fstream>
@@ -13,17 +12,18 @@ namespace NativeUnitTests
 {
 	TEST_CLASS(StorePerformanceTests)
 	{
+		
 
 	private:
 		static void LoopGoodRandomPasswords()
 		{
 			//ClearCache();
-
+			user_policy pol;
 			const std::wstring accountName = std::wstring(L"accountName");
 			const std::wstring fullname = std::wstring(L"full name");
-			const user_policy pol = policy::GetPolicySetByName(L"UnitTests\\Default");
+			policy::PopulatePolicySetObject(L"UnitTests\\Default", &pol);
 
-			for (size_t i = 0; i < 1000; i++)
+			for (size_t i = 0; i < 10000; i++)
 			{
 				const std::wstring guid = GetGuid();
 				std::wstringstream ss;
@@ -41,7 +41,8 @@ namespace NativeUnitTests
 		void LoopKnownBadPasswords() const
 		{
 			//ClearCache();
-			const user_policy pol = policy::GetPolicySetByName(L"UnitTests\\Default");
+			user_policy pol;
+			policy::PopulatePolicySetObject(L"UnitTests\\Default", &pol);
 
 			const std::wstring accountName = std::wstring(L"accountName");
 			const std::wstring fullname = std::wstring(L"full name");
@@ -51,7 +52,7 @@ namespace NativeUnitTests
 			std::wifstream file(filename.c_str());
 			std::wstring line;
 
-			const int limit = 1000;
+			const int limit = 10000;
 			int count = 0;
 
 			while (std::getline(file, line))

@@ -1,6 +1,8 @@
 #pragma once
 #include "policy.h"
 
+#define ERROR_UNSUPPORTEDVERSION            ((DWORD)0xA0010001)
+
 extern "C" __declspec(dllexport)  BOOLEAN __stdcall InitializeChangeNotify(void);
 
 extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
@@ -20,5 +22,8 @@ extern "C" __declspec(dllexport) int __stdcall PasswordFilterEx(
 	LPCWSTR Password,
 	BOOLEAN SetOperation);
 
-extern "C" __declspec(dllexport) void __stdcall GetUserPolicySettings(
-	LPCWSTR AccountName, user_policy* policy);
+extern "C" __declspec(dllexport) int __stdcall GetUserPolicySettings(
+	__in LPCWSTR accountName, __in int version, __out user_policy* &pPolicy);
+
+extern "C" __declspec(dllexport) void __stdcall FreeUserPolicySettings(
+	__in user_policy* pPolicy);

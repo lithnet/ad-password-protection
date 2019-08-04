@@ -10,6 +10,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     public struct GeneralPolicy
     {
+        [MarshalAs(UnmanagedType.I4)]
         public int MinimumLength;
 
         [MarshalAs(UnmanagedType.LPWStr)]

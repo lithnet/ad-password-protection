@@ -181,3 +181,27 @@ An error occurring during the process of mapping policy groups to Active Directo
 Error code: %1
 Message: %2
 .
+
+MessageId=0xD001
+Severity=Informational
+Facility=Runtime
+SymbolicName=MSG_POLICY_MAPPING_NOT_CONFIGURED
+Language=English
+There were no policy sets configured. User %1 will recieve default policies
+.
+
+MessageId=0xD002
+Severity=Informational
+Facility=Runtime
+SymbolicName=MSG_POLICY_MAPPING_COMPLETE
+Language=English
+User '%1' was mapped to policy set '%2' due to membership in group '%3'
+.
+
+MessageId=0xD003
+Severity=Informational
+Facility=Runtime
+SymbolicName=MSG_POLICY_MAPPING_DEFAULTED
+Language=English
+User '%1' was mapped to the defauly policy set as they did not match any policy set groups
+.

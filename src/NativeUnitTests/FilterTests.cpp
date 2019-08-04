@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
 #include "../PasswordFilter/filter.h"
+#include "passwordevaluator.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -8,64 +9,57 @@ namespace NativeUnitTests
 {
 	TEST_CLASS(FilterTests)
 	{
-	private:
-		void TestBannedPassword()
+		TEST_METHOD_INITIALIZE(Cleanup)
 		{
-			auto username = new UNICODE_STRING();
-			RtlInitUnicodeString(username, L"test");
-
-			auto fullname = new UNICODE_STRING();
-			RtlInitUnicodeString(fullname, L"fullname");
-
-			const wchar_t * pwd = L"Password345!";
-
-			size_t  len = wcslen(pwd);
-			auto* p = (wchar_t*)malloc((len + 1) * sizeof(wchar_t));
-			wcscpy(p, pwd);
-
-			auto password = new UNICODE_STRING();
-			RtlInitUnicodeString(password, p);
-
-			Assert::IsFalse(PasswordFilter(username, fullname, password, TRUE));
-
-			free(p);
-
-			delete username;
-			delete fullname;
-			delete password;
+			DeleteUnitTestPolicyKey(L"", L"Default");
 		}
 
-		void TestBannedPassword2()
+		TEST_METHOD(PasswordFilterSetNormalizedBannedWord)
 		{
-			auto username = new UNICODE_STRING();
-			RtlInitUnicodeString(username, L"test");
+			std::wstring username_raw = L"username";
+			std::wstring fullname_raw = L"fullname";
+			std::wstring bad_password_normalize = L"Password345!";
 
-			auto fullname = new UNICODE_STRING();
-			RtlInitUnicodeString(fullname, L"fullname");
+			UNICODE_STRING username = GetUnicodeString(username_raw);
+			UNICODE_STRING fullname = GetUnicodeString(fullname_raw);
+			UNICODE_STRING password = GetUnicodeString(bad_password_normalize);
 
-			const wchar_t * pwd = L"!!$P@s sw_o+rd$#%^$";
+			const auto result = PasswordFilter(&username, &fullname, &password, TRUE);
 
-			size_t  len = wcslen(pwd);
-			auto* p = (wchar_t*)malloc((len + 1) * sizeof(wchar_t));
-			wcscpy(p, pwd);
-
-			auto password = new UNICODE_STRING();
-			RtlInitUnicodeString(password, p);
-
-			Assert::IsFalse(PasswordFilter(username, fullname, password, TRUE));
-
-			free(p);
-
-			delete username;
-			delete fullname;
-			delete password;
+			Assert::IsFalse(result);
 		}
 
-	public:
-
-		TEST_METHOD(TestBadPasswordv3Store)
+		TEST_METHOD(PasswordFilterChangeNormalizedBannedWord)
 		{
-			TestBannedPassword();
+			std::wstring username_raw = L"username";
+			std::wstring fullname_raw = L"fullname";
+			std::wstring bad_password_normalize = L"Password345!";
+			UNICODE_STRING username = GetUnicodeString(username_raw);
+			UNICODE_STRING fullname = GetUnicodeString(fullname_raw);
+			UNICODE_STRING password = GetUnicodeString(bad_password_normalize);
+
+			const auto result = PasswordFilter(&username, &fullname, &password, FALSE);
+
+			Assert::IsFalse(result);
+		}
+
+		TEST_METHOD(PasswordFilterExSetNormalizedBannedWord)
+		{
+			std::wstring username_raw = L"username";
+			std::wstring fullname_raw = L"fullname";
+			std::wstring bad_password_normalize = L"Password345!";
+
+			const auto result = PasswordFilterEx(username_raw.c_str(), fullname_raw.c_str(), bad_password_normalize.c_str(), TRUE);
+			Assert::AreEqual(PASSWORD_REJECTED_BANNED_NORMALIZED_WORD, result);
+		}
+
+		TEST_METHOD(PasswordFilterExChangeNormalizedBannedWord)
+		{
+  			std::wstring username_raw = L"username";
+			std::wstring fullname_raw = L"fullname";
+			std::wstring bad_password_normalize = L"Password345!";
+			const auto result = PasswordFilterEx(username_raw.c_str(), fullname_raw.c_str(), bad_password_normalize.c_str(), FALSE);
+			Assert::AreEqual(PASSWORD_REJECTED_BANNED_NORMALIZED_WORD, result);
 		}
 	};
 }

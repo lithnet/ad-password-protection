@@ -9,11 +9,14 @@ namespace NativeUnitTests
 {
 	TEST_CLASS(PasswordEvaluatorLengthTests)
 	{
+		user_policy pol;
+
 	public:
 		TEST_METHOD(PasswordLengthNotMetOnSet)
 		{
 			SetUnitTestPolicyValue(REG_VALUE_MINIMUMLENGTH, 9);
-			const user_policy pol = policy::GetPolicySetByName(L"UnitTests\\Default");
+			policy::PopulatePolicySetObject(L"UnitTests\\Default", &pol);
+
 			const TestString password(L"password");
 			Assert::IsFalse(ProcessPasswordLength(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, pol));
 		}
@@ -21,7 +24,8 @@ namespace NativeUnitTests
 		TEST_METHOD(PasswordLengthNotMetOnChange)
 		{
 			SetUnitTestPolicyValue(REG_VALUE_MINIMUMLENGTH, 9);
-			const user_policy pol = policy::GetPolicySetByName(L"UnitTests\\Default");
+			policy::PopulatePolicySetObject(L"UnitTests\\Default", &pol);
+
 			const TestString password(L"password");
 			Assert::IsFalse(ProcessPasswordLength(password, std::wstring(L"accountName"), std::wstring(L"full name"), FALSE, pol));
 		}
@@ -29,7 +33,8 @@ namespace NativeUnitTests
 		TEST_METHOD(PasswordLengthMetOnSet)
 		{
 			SetUnitTestPolicyValue(REG_VALUE_MINIMUMLENGTH, 8);
-			const user_policy pol = policy::GetPolicySetByName(L"UnitTests\\Default");
+			policy::PopulatePolicySetObject(L"UnitTests\\Default", &pol);
+
 			const TestString password(L"password");
 			Assert::IsTrue(ProcessPasswordLength(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, pol));
 		}
@@ -37,7 +42,8 @@ namespace NativeUnitTests
 		TEST_METHOD(PasswordLengthMetOnChange)
 		{
 			SetUnitTestPolicyValue(REG_VALUE_MINIMUMLENGTH, 8);
-			const user_policy pol = policy::GetPolicySetByName(L"UnitTests\\Default");
+			policy::PopulatePolicySetObject(L"UnitTests\\Default", &pol);
+
 			const TestString password(L"password");
 			Assert::IsTrue(ProcessPasswordLength(password, std::wstring(L"accountName"), std::wstring(L"full name"), FALSE, pol));
 		}

@@ -11,10 +11,10 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
     public struct StorePolicy
     {
         [MarshalAs(UnmanagedType.I1)]
-        public bool CheckNormalizedPasswordNotInBannedPasswordStoreOnChange;
+        public bool CheckNormalizedPasswordNotInCompromisedPasswordStoreOnChange;
 
         [MarshalAs(UnmanagedType.I1)]
-        public bool CheckNormalizedPasswordNotInBannedPasswordStoreOnSet;
+        public bool CheckNormalizedPasswordNotInCompromisedPasswordStoreOnSet;
 
         [MarshalAs(UnmanagedType.I1)]
         public bool CheckNormalizedPasswordNotInBannedWordStoreOnChange;
@@ -23,9 +23,9 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
         public bool CheckNormalizedPasswordNotInBannedWordStoreOnSet;
 
         [MarshalAs(UnmanagedType.I1)]
-        public bool CheckPasswordNotInBannedPasswordStoreOnChange;
+        public bool CheckPasswordNotInCompromisedPasswordStoreOnChange;
 
         [MarshalAs(UnmanagedType.I1)]
-        public bool CheckPasswordNotInBannedPasswordStoreOnSet;
+        public bool CheckPasswordNotInCompromisedPasswordStoreOnSet;
     }
 }

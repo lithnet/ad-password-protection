@@ -145,6 +145,10 @@
         <Util:EventSource xmlns:Util="http://schemas.microsoft.com/wix/UtilExtension"
                           Name="LithnetPasswordProtection" Log="Application" EventMessageFile="[APPROOTDIR]messages.dll" SupportsErrors="yes" SupportsInformationals="yes" SupportsWarnings="yes" KeyPath="yes"/>
       </Component>
+      <Component Id="cmpa4c25597d0a647388892b9581f56b0b3" Guid="*" Win64="yes" >
+        <Util:EventSource xmlns:Util="http://schemas.microsoft.com/wix/UtilExtension"
+                          Name="LithnetPasswordProtectionDebug" Log="Lithnet Password Protection" EventMessageFile="[APPROOTDIR]messages.dll" SupportsErrors="yes" SupportsInformationals="yes" SupportsWarnings="yes" KeyPath="yes"/>
+      </Component>
     </DirectoryRef>
 
     <DirectoryRef Id="GAC">
@@ -232,6 +236,7 @@
       <ComponentRef Id="cmpbdb687be91364145aa7b44287c14be38"/>
       <ComponentRef Id="cmp5aebe5a182914904ad6fe7ced1dfc5d6"/>
       <ComponentRef Id="cmp3d41c57e8c89436994a394bf0b01c885"/>
+      <ComponentRef Id="cmpa4c25597d0a647388892b9581f56b0b3"/>
       <ComponentRef Id="cmp4ad81ba1ff4447269a6b9b34af6560f4"/>
     </ComponentGroup>
   </Product>

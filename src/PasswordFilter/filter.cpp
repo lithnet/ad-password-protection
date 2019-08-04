@@ -153,8 +153,33 @@ extern "C" __declspec(dllexport) int __stdcall PasswordFilterEx(
 	return FILTER_ERROR;
 }
 
-extern "C" __declspec(dllexport) void __stdcall GetUserPolicySettings(
-	LPCWSTR AccountName, user_policy* policy)
+extern "C" __declspec(dllexport) void __stdcall FreeUserPolicySettings(
+	__in user_policy* pPolicy)
 {
-	*policy = policy::GetPolicySetForUser(AccountName);
+	delete pPolicy;
+}
+
+
+extern "C" __declspec(dllexport) int __stdcall GetUserPolicySettings(
+	__in LPCWSTR accountName, __in int version, __out user_policy* &pPolicy)
+{
+	if (version != 1)
+	{
+		return ERROR_UNSUPPORTEDVERSION;
+	}
+
+	if (accountName == NULL)
+	{
+		return ERROR_INVALID_PARAMETER;
+	}
+
+	const auto policySetName = policy::GetPolicySetNameForUser(accountName);
+
+	const auto policy = new user_policy();
+
+	policy::PopulatePolicySetObject(policySetName, policy);
+
+	pPolicy = policy;
+
+	return 0;
 }

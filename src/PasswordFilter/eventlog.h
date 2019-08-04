@@ -4,6 +4,7 @@ class eventlog
 public:
 	void logw(const WORD &severity, const DWORD &eventID, const int argCount, ...);
 	void log(const WORD &severity, const DWORD &eventID, const int argCount, ...);
+	void debugw(const WORD &severity, const DWORD &eventID, const int argCount, ...);
 
 	static eventlog& getInstance()
 	{
