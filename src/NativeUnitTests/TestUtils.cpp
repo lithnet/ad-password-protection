@@ -93,7 +93,7 @@ void DeleteUnitTestPolicyValue(const std::wstring policySetName, const std::wstr
 
 	const LSTATUS result = RegDeleteValue(hkey, key.c_str());
 
-	if (result != ERROR_SUCCESS)
+	if (result != ERROR_SUCCESS && result != 2)
 	{
 		throw std::system_error(GetLastError(), std::system_category(), "Could not delete value");
 	}

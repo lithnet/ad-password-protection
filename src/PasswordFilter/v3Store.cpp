@@ -13,7 +13,7 @@ v3store::~v3store()
 
 std::wstring v3store::GetRangeFromHash(const SecureArrayT<BYTE> &hash)
 {
-	return ToHexString(hash.get(), hash.get() + 2);
+	return ToHexWString(hash.get(), hash.get() + 2);
 }
 
 SecureArrayT<BYTE> v3store::GetHashFromPassword(const SecureArrayT<WCHAR> &password)

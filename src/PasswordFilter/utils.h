@@ -19,7 +19,7 @@ bool DirectoryExists(const std::wstring& dirName);
 PSID ConvertNameToBinarySid(const std::wstring &accountName);
 
 template<typename T>
-std::wstring ToHexString(T first, T last, bool use_uppercase = true, bool insert_spaces = false)
+std::wstring ToHexWString(T first, T last, bool use_uppercase = true, bool insert_spaces = false)
 {
 	std::wstringstream ss;
 	ss << std::hex << std::setfill(L'0');
@@ -41,5 +41,30 @@ std::wstring ToHexString(T first, T last, bool use_uppercase = true, bool insert
 
 	return ss.str();
 }
+
+template<typename T>
+std::string ToHexString(T first, T last, bool use_uppercase = true, bool insert_spaces = false)
+{
+	std::stringstream ss;
+	ss << std::hex << std::setfill('0');
+
+	if (use_uppercase)
+	{
+		ss << std::uppercase;
+	}
+
+	while (first != last)
+	{
+		ss << std::setw(2) << static_cast<int>(*first++);
+
+		if (insert_spaces && first != last)
+		{
+			ss << " ";
+		}
+	}
+
+	return ss.str();
+}
+
 
 LPCWSTR GetInteropString(LPCWSTR value);

@@ -65,6 +65,9 @@
     <ClCompile Include="v3StoreTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="HibpTests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="TestString.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

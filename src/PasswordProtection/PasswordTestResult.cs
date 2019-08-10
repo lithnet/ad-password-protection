@@ -20,6 +20,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
         CompromisedNormalizedPassword = 9,
         BannedNormalizedWord = 10,
         PasswordWasBlank = 11,
+        FoundInHibpApi = 12,
         FilterError = 100,
     }
 }
