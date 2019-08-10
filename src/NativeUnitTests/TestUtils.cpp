@@ -12,7 +12,27 @@ UNICODE_STRING GetUnicodeString(std::wstring &str)
 	return us;
 }
 
-HKEY OpenSettingsKeyWritable(std::wstring policySetName)
+HKEY OpenGlobalSettingsKeyWritable()
+{
+	std::wstring key = REG_BASE_POLICY_KEY;
+
+	HKEY hKey;
+	const LSTATUS result = RegCreateKeyEx(HKEY_LOCAL_MACHINE, key.c_str(), 0, NULL, NULL, KEY_WRITE | KEY_WOW64_64KEY, NULL, &hKey, NULL);
+
+	if (result == ERROR_FILE_NOT_FOUND)
+	{
+		return 0;
+	}
+
+	if (result != ERROR_SUCCESS)
+	{
+		throw std::system_error(result, std::system_category(), "Could not open key");
+	}
+
+	return hKey;
+}
+
+HKEY OpenUnitTestSettingsKeyWritable(std::wstring policySetName)
 {
 	std::wstring key = REG_BASE_POLICY_KEY;
 	key += L"\\UnitTests";
@@ -40,9 +60,45 @@ HKEY OpenSettingsKeyWritable(std::wstring policySetName)
 
 void SetUnitTestPolicyValue(std::wstring policySetName, std::wstring key, DWORD value)
 {
-	const HKEY hkey = OpenSettingsKeyWritable(policySetName);
+	const HKEY hkey = OpenUnitTestSettingsKeyWritable(policySetName);
 
 	const LSTATUS result = RegSetValueEx(hkey, key.c_str(), 0, REG_DWORD, (const BYTE*)&value, sizeof(value));
+
+	if (result != ERROR_SUCCESS)
+	{
+		throw std::system_error(GetLastError(), std::system_category(), "Could not set value");
+	}
+
+	if (hkey)
+	{
+		RegCloseKey(hkey);
+	}
+}
+
+
+void SetGlobalPolicyValue(std::wstring key, DWORD value)
+{
+	const HKEY hkey = OpenGlobalSettingsKeyWritable();
+
+	const LSTATUS result = RegSetValueEx(hkey, key.c_str(), 0, REG_DWORD, (const BYTE*)&value, sizeof(value));
+
+	if (result != ERROR_SUCCESS)
+	{
+		throw std::system_error(GetLastError(), std::system_category(), "Could not set value");
+	}
+
+	if (hkey)
+	{
+		RegCloseKey(hkey);
+	}
+}
+
+
+void SetGlobalPolicyValue(const std::wstring key, const std::wstring value)
+{
+	const HKEY hkey = OpenGlobalSettingsKeyWritable();
+
+	const LSTATUS result = RegSetValueEx(hkey, key.c_str(), 0, REG_SZ, (LPBYTE)value.c_str(), (value.size() + 1) * sizeof(wchar_t));
 
 	if (result != ERROR_SUCCESS)
 	{
@@ -67,7 +123,7 @@ void SetUnitTestPolicyValue(const std::wstring key, const std::wstring value)
 
 void SetUnitTestPolicyValue(std::wstring policySetName, const std::wstring key, const std::wstring value)
 {
-	const HKEY hkey = OpenSettingsKeyWritable(policySetName);
+	const HKEY hkey = OpenUnitTestSettingsKeyWritable(policySetName);
 
 	const LSTATUS result = RegSetValueEx(hkey, key.c_str(), 0, REG_SZ, (LPBYTE)value.c_str(), (value.size() + 1) * sizeof(wchar_t));
 
@@ -89,7 +145,24 @@ void DeleteUnitTestPolicyValue(const std::wstring key)
 
 void DeleteUnitTestPolicyValue(const std::wstring policySetName, const std::wstring key)
 {
-	const HKEY hkey = OpenSettingsKeyWritable(policySetName);
+	const HKEY hkey = OpenUnitTestSettingsKeyWritable(policySetName);
+
+	const LSTATUS result = RegDeleteValue(hkey, key.c_str());
+
+	if (result != ERROR_SUCCESS && result != 2)
+	{
+		throw std::system_error(GetLastError(), std::system_category(), "Could not delete value");
+	}
+
+	if (hkey)
+	{
+		RegCloseKey(hkey);
+	}
+}
+
+void DeleteGlobalPolicyValue(const std::wstring key)
+{
+	const HKEY hkey = OpenGlobalSettingsKeyWritable();
 
 	const LSTATUS result = RegDeleteValue(hkey, key.c_str());
 
@@ -106,7 +179,7 @@ void DeleteUnitTestPolicyValue(const std::wstring policySetName, const std::wstr
 
 void DeleteUnitTestPolicyKey(const std::wstring policySetName, const std::wstring key)
 {
-	const HKEY hkey = OpenSettingsKeyWritable(policySetName);
+	const HKEY hkey = OpenUnitTestSettingsKeyWritable(policySetName);
 
 	const LSTATUS result = RegDeleteKey(hkey, key.c_str());
 

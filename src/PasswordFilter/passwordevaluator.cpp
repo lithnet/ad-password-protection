@@ -69,7 +69,7 @@ int ProcessPassword(const SecureArrayT<WCHAR> &password, const std::wstring &acc
 		return PASSWORD_REJECTED_BANNED_NORMALIZED_PASSWORD;
 	}
 
-	if (!ProcessPasswordHibp(password, accountName, fullName, setOperation, reg))
+	if (!ProcessPasswordHibp(password, accountName, fullName, setOperation, pol))
 	{
 		return PASSWORD_REJECTED_HIBP_API;
 	}
@@ -82,16 +82,17 @@ int ProcessPassword(const SecureArrayT<WCHAR> &password, const std::wstring &acc
 }
 
 
-BOOLEAN ProcessPasswordHibp(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
+BOOLEAN ProcessPasswordHibp(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const user_policy &pol)
 {
-	if ((setOperation && reg.GetRegValue(REG_VALUE_CHECKHIBPONSET, 0) != 0) ||
-		(!setOperation && reg.GetRegValue(REG_VALUE_CHECKHIBPONCHANGE, 0) != 0))
+	if ((setOperation && pol.StorePolicy.CheckPasswordNotInHibpOnSet != 0) ||
+		(!setOperation && pol.StorePolicy.CheckPasswordNotInHibpOnChange != 0))
 	{
 		OutputDebugString(L"Checking password in HIBP API");
+		registry reg;
 
 		try
 		{
-			if (IsInHibp(password, reg))
+			if (IsInHibp(password))
 			{
 				OutputDebugString(L"Rejected password as it was found in the HIBP API");
 				eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_HIBP_API, 3, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());

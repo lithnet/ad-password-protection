@@ -32,8 +32,6 @@ void ClearCache();
 
 void SetUnitTestPolicyValue(std::wstring key, DWORD value);
 void SetUnitTestPolicyValue(std::wstring policySetName, std::wstring key, DWORD value);
-
-
 void SetUnitTestPolicyValue(std::wstring key, std::wstring value);
 void SetUnitTestPolicyValue(std::wstring policySetName, std::wstring key, std::wstring value);
 
@@ -44,4 +42,8 @@ UNICODE_STRING GetUnicodeString(std::wstring &str);
 
 std::wstring GetGuid();
 
-HKEY OpenSettingsKeyWritable(std::wstring policySetName);
+HKEY OpenUnitTestSettingsKeyWritable(std::wstring policySetName);
+HKEY OpenGlobalSettingsKeyWritable();
+void SetGlobalPolicyValue(std::wstring key, std::wstring value);
+void SetGlobalPolicyValue(std::wstring key, DWORD value);
+void DeleteGlobalPolicyValue(std::wstring key);

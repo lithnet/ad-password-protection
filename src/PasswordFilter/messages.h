@@ -102,6 +102,27 @@
 #define MSG_STOREERROR                   ((DWORD)0xC0020009L)
 
 //
+// MessageId: MSG_WIN32_HIBP_ERROR
+//
+// MessageText:
+//
+// An error occurred calling the HIBP API.
+// Error code: %1
+// Message: %2
+//
+#define MSG_WIN32_HIBP_ERROR             ((DWORD)0xC002000AL)
+
+//
+// MessageId: MSG_OTHER_HIBP_ERROR
+//
+// MessageText:
+//
+// An error occurred calling the HIBP API.
+// Message: %1
+//
+#define MSG_OTHER_HIBP_ERROR             ((DWORD)0xC002000BL)
+
+//
 // MessageId: MSG_PASSWORD_REJECTED_ON_ERROR
 //
 // MessageText:
@@ -217,6 +238,33 @@
 // The password %1 request for %2 (%3) was rejected after being normalized because it matched a password in the banned word store.
 //
 #define MSG_PASSWORD_REJECTED_BANNED_NORMALIZED_WORD ((DWORD)0x8000200DL)
+
+//
+// MessageId: MSG_PASSWORD_REJECTED_HIBP_API
+//
+// MessageText:
+//
+// The password %1 request for %2 (%3) was rejected as it was found in the HIBP API.
+//
+#define MSG_PASSWORD_REJECTED_HIBP_API   ((DWORD)0x8000200EL)
+
+//
+// MessageId: MSG_PASSWORD_REJECTED_ON_HIBP_ERROR
+//
+// MessageText:
+//
+// The password %1 request was rejected. The module is configured to deny password requests when an error occurs when communicating with the HIBP API.
+//
+#define MSG_PASSWORD_REJECTED_ON_HIBP_ERROR ((DWORD)0x8000200FL)
+
+//
+// MessageId: MSG_PASSWORD_PASSED_ON_HIBP_ERROR
+//
+// MessageText:
+//
+// The password %1 request passed through the HIBP API module without being tested. The HIBP module is currently configured to silently pass through password requests when an error occurs when communicating with the HIBP API. Other modules may yet reject this password change.
+//
+#define MSG_PASSWORD_PASSED_ON_HIBP_ERROR ((DWORD)0x80002010L)
 
 //
 // MessageId: MSG_GROUP_MAPPING_ERROR

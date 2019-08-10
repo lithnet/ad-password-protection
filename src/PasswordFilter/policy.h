@@ -35,6 +35,8 @@ struct store_policy
 	bool CheckNormalizedPasswordNotInBannedWordStoreOnSet;
 	bool CheckPasswordNotInCompromisedPasswordStoreOnChange;
 	bool CheckPasswordNotInCompromisedPasswordStoreOnSet;
+	bool CheckPasswordNotInHibpOnChange;
+	bool CheckPasswordNotInHibpOnSet;
 };
 
 struct general_policy

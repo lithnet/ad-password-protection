@@ -137,7 +137,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <AdditionalLibraryDirectories>$(SolutionDir)PasswordFilter\$(Platform)\$(Configuration);$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ntdll.lib;advapi32.lib;Rpcrt4.lib;shlwapi.lib;AuthZ.lib;policy.obj;v3store.obj;binarystore.obj;registry.obj;passwordevaluator.obj;complexityevaluator.obj;eventlog.obj;hasher.obj;utils.obj;stringnormalization.obj;filter.obj;stdafx.obj;policysetmap.obj;hibp.obj%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ntdll.lib;advapi32.lib;Rpcrt4.lib;shlwapi.lib;AuthZ.lib;winhttp.lib;policy.obj;v3store.obj;binarystore.obj;registry.obj;passwordevaluator.obj;complexityevaluator.obj;eventlog.obj;hasher.obj;utils.obj;stringnormalization.obj;filter.obj;stdafx.obj;policysetmap.obj;hibp.obj;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -206,7 +206,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib;$(SolutionDir)PasswordFilter\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ntdll.lib;advapi32.lib;Rpcrt4.lib;shlwapi.lib;winhttp.lib;policy.obj;v3store.obj;binarystore.obj;registry.obj;passwordevaluator.obj;complexityevaluator.obj;eventlog.obj;hasher.obj;utils.obj;stringnormalization.obj;filter.obj;stdafx.obj;hibp.obj;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ntdll.lib;advapi32.lib;Rpcrt4.lib;shlwapi.lib;AuthZ.lib;winhttp.lib;policy.obj;v3store.obj;binarystore.obj;registry.obj;passwordevaluator.obj;complexityevaluator.obj;eventlog.obj;hasher.obj;utils.obj;stringnormalization.obj;filter.obj;stdafx.obj;policysetmap.obj;hibp.obj;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MicrosoftSignedRelease|x64'">
@@ -225,7 +225,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib;$(SolutionDir)PasswordFilter\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ntdll.lib;advapi32.lib;Rpcrt4.lib;shlwapi.lib;policy.obj;v3store.obj;binarystore.obj;registry.obj;passwordevaluator.obj;complexityevaluator.obj;eventlog.obj;hasher.obj;utils.obj;stringnormalization.obj;filter.obj;stdafx.obj;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ntdll.lib;advapi32.lib;Rpcrt4.lib;shlwapi.lib;AuthZ.lib;winhttp.lib;policy.obj;v3store.obj;binarystore.obj;registry.obj;passwordevaluator.obj;complexityevaluator.obj;eventlog.obj;hasher.obj;utils.obj;stringnormalization.obj;filter.obj;stdafx.obj;policysetmap.obj;hibp.obj;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

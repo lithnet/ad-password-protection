@@ -35,4 +35,4 @@ BOOLEAN ProcessPasswordRegexApprove(const SecureArrayT<WCHAR> &password, const s
 
 BOOLEAN ProcessPasswordRegexReject(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const user_policy &pol);
 
-BOOLEAN ProcessPasswordHibp(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg);
+BOOLEAN ProcessPasswordHibp(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const user_policy &pol);

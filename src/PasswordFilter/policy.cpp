@@ -225,6 +225,9 @@ void policy::PopulatePolicySetObject(const registry &reg, user_policy *policy)
 
 	policy->StorePolicy.CheckPasswordNotInCompromisedPasswordStoreOnChange = reg.GetRegValue(REG_VALUE_CHECKCOMPROMISEDPASSWORDONCHANGE, 0) != 0;
 	policy->StorePolicy.CheckPasswordNotInCompromisedPasswordStoreOnSet = reg.GetRegValue(REG_VALUE_CHECKCOMPROMISEDPASSWORDONSET, 0) != 0;
+
+	policy->StorePolicy.CheckPasswordNotInHibpOnChange = reg.GetRegValue(REG_VALUE_CHECKHIBPONCHANGE, 0) != 0;
+	policy->StorePolicy.CheckPasswordNotInHibpOnSet = reg.GetRegValue(REG_VALUE_CHECKHIBPONSET, 0) != 0;
 }
 
 std::vector<PolicySetMap> policy::GetActivePolicySetMap()

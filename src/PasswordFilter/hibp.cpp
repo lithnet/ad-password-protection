@@ -7,7 +7,7 @@
 #include "registry.h"
 #include <algorithm>
 
-bool IsInHibp(const SecureArrayT<WCHAR> &password, const registry &reg)
+bool IsInHibp(const SecureArrayT<WCHAR> &password)
 {
 	if (password.getSize() <= 0)
 	{
@@ -31,18 +31,58 @@ bool IsInHibp(const SecureArrayT<WCHAR> &password, const registry &reg)
 	const std::wstring range = hashstring.substr(0, 5);
 	const std::wstring matchtext = hashstring.substr(5, 35);
 
-	const std::wstring hashes = GetHibpRangeData(range, reg);
-	
-	return hashes.find(matchtext + L":") != std::string::npos;
+	const std::wstring hashes = GetHibpRangeData(range);
+
+	return IsInRangeData(hashes, matchtext);
+	//return hashes.find(matchtext + L":") != std::string::npos;
 }
 
-std::wstring GetHibpRangeData(const std::wstring &range, const registry &reg)
+bool IsInRangeData(const std::wstring &rangeData, const std::wstring &value)
+{
+	size_t startPos = 0, currentPos = 0;
+	auto lastPos = rangeData.length();
+	const auto match_length = value.length();
+
+	while (startPos <= lastPos)
+	{
+		currentPos = (startPos + lastPos) / 2;
+
+		while (currentPos > startPos && rangeData.at(currentPos - 1) != '\n')
+		{
+			currentPos--;
+		}
+
+		const int result = rangeData.compare(currentPos, match_length, value, 0, match_length);
+
+		if (result < 0)
+		{
+			startPos = currentPos + match_length;
+		}
+		else if (result > 0)
+		{
+			lastPos = currentPos - 1;
+		}
+		else
+		{
+			std::wstring message = L"Hash found at position " + std::to_wstring(currentPos);
+			OutputDebugString(message.c_str());
+			return true;
+		}
+	}
+
+	OutputDebugString(L"Hash not found");
+	return false;
+}
+
+std::wstring GetHibpRangeData(const std::wstring &range)
 {
 	const std::wstring path = L"range/" + range;
 
 	HINTERNET hSession = NULL;
 	HINTERNET hConnect = NULL;
 	HINTERNET hRequest = NULL;
+
+	const registry reg;
 
 	try
 	{
@@ -52,7 +92,7 @@ std::wstring GetHibpRangeData(const std::wstring &range, const registry &reg)
 		{
 			throw std::system_error(GetLastError(), std::system_category(), "WinHttpOpen failed");
 		}
-		
+
 		hConnect = WinHttpConnect(hSession, reg.GetRegValue(REG_VALUE_HIBPHOSTNAME, DefaultHibpAddress).c_str(), INTERNET_DEFAULT_HTTPS_PORT, 0);
 
 		if (!hConnect)

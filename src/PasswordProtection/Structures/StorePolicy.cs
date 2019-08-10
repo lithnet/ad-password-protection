@@ -27,5 +27,11 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
         [MarshalAs(UnmanagedType.I1)]
         public bool CheckPasswordNotInCompromisedPasswordStoreOnSet;
+
+        [MarshalAs(UnmanagedType.I1)]
+        public bool CheckPasswordNotInHibpOnChange;
+
+        [MarshalAs(UnmanagedType.I1)]
+        public bool CheckPasswordNotInHibpOnSet;
     }
 }
