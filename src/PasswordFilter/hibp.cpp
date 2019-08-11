@@ -7,7 +7,7 @@
 #include "registry.h"
 #include <algorithm>
 
-bool IsInHibp(const SecureArrayT<WCHAR> &password)
+bool IsInSha1HibpApi(const SecureArrayT<WCHAR> &password)
 {
 	if (password.getSize() <= 0)
 	{
@@ -31,21 +31,29 @@ bool IsInHibp(const SecureArrayT<WCHAR> &password)
 	const std::wstring range = hashstring.substr(0, 5);
 	const std::wstring matchtext = hashstring.substr(5, 35);
 
-	const std::wstring hashes = GetHibpRangeData(range);
+	registry reg;
 
-	return IsInRangeData(hashes, matchtext);
-	//return hashes.find(matchtext + L":") != std::string::npos;
+	const std::wstring host = reg.GetRegValue(REG_VALUE_HIBPHOSTNAME, DefaultHibpAddress);
+	const unsigned short port = reg.GetRegValue(REG_VALUE_HIBPPORT, INTERNET_DEFAULT_HTTPS_PORT);
+	std::wstring path = reg.GetRegValue(REG_VALUE_HIBPSHA1PATH, L"range/{range}");
+	path = ReplaceToken(path, L"{range}", range);
+
+	const std::wstring hashes = GetHttpResponse(host, port, path);
+
+	return IsInVariableWidthRangeData(hashes, matchtext);
 }
 
-bool IsInRangeData(const std::wstring &rangeData, const std::wstring &value)
+bool IsInVariableWidthRangeData(const std::wstring &rangeData, const std::wstring &value)
 {
 	size_t startPos = 0, currentPos = 0;
 	auto lastPos = rangeData.length();
 	const auto match_length = value.length();
+	int count = 0;
 
 	while (startPos <= lastPos)
 	{
 		currentPos = (startPos + lastPos) / 2;
+		count++;
 
 		while (currentPos > startPos && rangeData.at(currentPos - 1) != '\n')
 		{
@@ -64,25 +72,20 @@ bool IsInRangeData(const std::wstring &rangeData, const std::wstring &value)
 		}
 		else
 		{
-			std::wstring message = L"Hash found at position " + std::to_wstring(currentPos);
-			OutputDebugString(message.c_str());
+			OutputDebugString(L"Hash found at position " + std::to_wstring(currentPos) + L" on loop " + std::to_wstring(count));
 			return true;
 		}
 	}
 
-	OutputDebugString(L"Hash not found");
+	OutputDebugString(std::wstring(L"Hash not found after " + std::to_wstring(count) + L" loops"));
 	return false;
 }
 
-std::wstring GetHibpRangeData(const std::wstring &range)
+std::wstring GetHttpResponse(const std::wstring &host, const INTERNET_PORT port, const std::wstring &path)
 {
-	const std::wstring path = L"range/" + range;
-
 	HINTERNET hSession = NULL;
 	HINTERNET hConnect = NULL;
 	HINTERNET hRequest = NULL;
-
-	const registry reg;
 
 	try
 	{
@@ -93,7 +96,7 @@ std::wstring GetHibpRangeData(const std::wstring &range)
 			throw std::system_error(GetLastError(), std::system_category(), "WinHttpOpen failed");
 		}
 
-		hConnect = WinHttpConnect(hSession, reg.GetRegValue(REG_VALUE_HIBPHOSTNAME, DefaultHibpAddress).c_str(), INTERNET_DEFAULT_HTTPS_PORT, 0);
+		hConnect = WinHttpConnect(hSession, host.c_str(), port, 0);
 
 		if (!hConnect)
 		{
@@ -124,10 +127,8 @@ std::wstring GetHibpRangeData(const std::wstring &range)
 
 		if (dwStatusCode != 200)
 		{
-			std::stringstream ss;
-			ss << "The web request failed with HTTP status code ";
-			ss << dwStatusCode;
-			throw std::runtime_error(ss.str());
+			const std::string message("The web request failed with HTTP status code" + std::to_string(dwStatusCode));
+			throw std::runtime_error(message);
 		}
 
 		std::wstringstream data;

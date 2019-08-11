@@ -92,7 +92,7 @@ BOOLEAN ProcessPasswordHibp(const SecureArrayT<WCHAR> &password, const std::wstr
 
 		try
 		{
-			if (IsInHibp(password))
+			if (IsInSha1HibpApi(password))
 			{
 				OutputDebugString(L"Rejected password as it was found in the HIBP API");
 				eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_HIBP_API, 3, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());

@@ -2,6 +2,7 @@
 #include "CppUnitTest.h"
 #include "../PasswordFilter/hibp.h"
 #include "passwordevaluator.h"
+#include "utils.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -15,7 +16,7 @@ namespace NativeUnitTests
 		TEST_METHOD(TestIsInHibp)
 		{
 			TestString password(L"Password");
-			Assert::IsTrue(IsInHibp(password));
+			Assert::IsTrue(IsInSha1HibpApi(password));
 		}
 
 		TEST_METHOD(TestBadPasswordSetIsRejectedWhenEnabled)
@@ -129,9 +130,19 @@ namespace NativeUnitTests
 			}
 		}
 
+		static std::wstring GetHttpResponseFromMockApi(const std::wstring range)
+		{
+			registry reg;
+			const std::wstring host = reg.GetRegValue(L"UnitTest-HibpHostName", L"localhost");
+			const unsigned short port = INTERNET_DEFAULT_HTTPS_PORT;
+			std::wstring path = L"range/{range}";
+			path = ReplaceToken(path, L"{range}", range);
+			return GetHttpResponse(host, port, path);
+		}
+
 		TEST_METHOD(ValidateAllHashesAreFoundInRange)
 		{
-			const auto rangeData = GetHibpRangeData(L"00000");
+			const auto rangeData = GetHttpResponseFromMockApi(L"00000");
 
 			std::wstring line;
 			std::vector<std::wstring> hashes;
@@ -144,7 +155,7 @@ namespace NativeUnitTests
 
 			for each (std::wstring hash in hashes)
 			{
-				auto result = IsInRangeData(rangeData, hash);
+				auto result = IsInVariableWidthRangeData(rangeData, hash);
 
 				if (!result)
 				{
@@ -152,52 +163,52 @@ namespace NativeUnitTests
 				}
 			}
 		}
+
 		TEST_METHOD(PerfTestStringContains)
 		{
-			const auto rangeData = GetHibpRangeData(L"00000");
+			const auto rangeData = GetHttpResponseFromMockApi(L"00000");
 			for (size_t i = 0; i < 100000; i++)
 			{
+				//return hashes.find(matchtext + L":") != std::string::npos;
 				auto result = rangeData.find(L"0198748F3315F40B1A102BF18EEA0194CD9:");
 			}
 		}
 
-
 		TEST_METHOD(PerfTestBinarySearch)
 		{
-			const auto rangeData = GetHibpRangeData(L"00000");
+			const auto rangeData = GetHttpResponseFromMockApi(L"00000");
 			for (size_t i = 0; i < 100000; i++)
 			{
-				auto result = IsInRangeData(rangeData, L"0198748F3315F40B1A102BF18EEA0194CD9");
+				auto result = IsInVariableWidthRangeData(rangeData, L"0198748F3315F40B1A102BF18EEA0194CD9");
 			}
 		}
-
 
 		TEST_METHOD(TestRangeMatchAtStart)
 		{
 			std::wstring rangeData(L"003D68EB55068C33ACE09247EE4C639306B:3\r\n012C192B2F16F82EA0EB9EF18D9D539B0DD:1\r\n01330C689E5D64F660D6947A93AD634EF8F:1\r\n0198748F3315F40B1A102BF18EEA0194CD9:1\r\n");
 			std::wstring matchData(L"003D68EB55068C33ACE09247EE4C639306B");
-			Assert::IsTrue(IsInRangeData(rangeData, matchData));
+			Assert::IsTrue(IsInVariableWidthRangeData(rangeData, matchData));
 		}
 
 		TEST_METHOD(TestRangeMatchAtEnd)
 		{
 			std::wstring rangeData(L"003D68EB55068C33ACE09247EE4C639306B:3\r\n012C192B2F16F82EA0EB9EF18D9D539B0DD:1\r\n01330C689E5D64F660D6947A93AD634EF8F:1\r\n0198748F3315F40B1A102BF18EEA0194CD9:1\r\n");
 			std::wstring matchData(L"0198748F3315F40B1A102BF18EEA0194CD9");
-			Assert::IsTrue(IsInRangeData(rangeData, matchData));
+			Assert::IsTrue(IsInVariableWidthRangeData(rangeData, matchData));
 		}
 
 		TEST_METHOD(TestRangeMatchAtEof)
 		{
 			std::wstring rangeData(L"003D68EB55068C33ACE09247EE4C639306B:3\r\n012C192B2F16F82EA0EB9EF18D9D539B0DD:1\r\n01330C689E5D64F660D6947A93AD634EF8F:1\r\n0198748F3315F40B1A102BF18EEA0194CD9");
 			std::wstring matchData(L"0198748F3315F40B1A102BF18EEA0194CD9");
-			Assert::IsTrue(IsInRangeData(rangeData, matchData));
+			Assert::IsTrue(IsInVariableWidthRangeData(rangeData, matchData));
 		}
 
 		TEST_METHOD(TestRangeMatchInMiddle)
 		{
 			std::wstring rangeData(L"003D68EB55068C33ACE09247EE4C639306B:3\r\n012C192B2F16F82EA0EB9EF18D9D539B0DD:1\r\n01330C689E5D64F660D6947A93AD634EF8F:1\r\n0198748F3315F40B1A102BF18EEA0194CD9:1\r\n");
 			std::wstring matchData(L"01330C689E5D64F660D6947A93AD634EF8F");
-			Assert::IsTrue(IsInRangeData(rangeData, matchData));
+			Assert::IsTrue(IsInVariableWidthRangeData(rangeData, matchData));
 		}
 
 

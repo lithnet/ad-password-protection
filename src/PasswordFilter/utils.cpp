@@ -93,7 +93,7 @@ SecureArrayT<WCHAR> UnicodeStringToWcharArray(const UNICODE_STRING& str)
 	const int charCount = str.Length / sizeof(wchar_t);
 	const int len = charCount + 1;
 
-	SecureArrayT<WCHAR> ar (len);
+	SecureArrayT<WCHAR> ar(len);
 
 	wcsncpy_s(ar.get(), len, str.Buffer, charCount);
 
@@ -110,4 +110,17 @@ bool DirectoryExists(const std::wstring& dirName)
 	}
 
 	return (attributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+}
+
+std::wstring& ReplaceToken(std::wstring& sourceString, const std::wstring& token, const std::wstring& replacementValue)
+{
+	if (!token.empty())
+	{
+		for (size_t pos = 0; (pos = sourceString.find(token, pos)) != std::string::npos; pos += replacementValue.size())
+		{
+			sourceString.replace(pos, token.size(), replacementValue);
+		}
+	}
+
+	return sourceString;
 }

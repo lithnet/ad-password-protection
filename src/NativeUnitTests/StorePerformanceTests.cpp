@@ -23,7 +23,7 @@ namespace NativeUnitTests
 			const std::wstring fullname = std::wstring(L"full name");
 			policy::PopulatePolicySetObject(L"UnitTests\\Default", &pol);
 
-			for (size_t i = 0; i < 10000; i++)
+			for (size_t i = 0; i < 3000; i++)
 			{
 				const std::wstring guid = GetGuid();
 				std::wstringstream ss;
@@ -52,7 +52,7 @@ namespace NativeUnitTests
 			std::wifstream file(filename.c_str());
 			std::wstring line;
 
-			const int limit = 10000;
+			const int limit = 3000;
 			int count = 0;
 
 			while (std::getline(file, line))

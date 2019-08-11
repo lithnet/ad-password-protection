@@ -66,5 +66,9 @@ std::string ToHexString(T first, T last, bool use_uppercase = true, bool insert_
 	return ss.str();
 }
 
+std::wstring& ReplaceToken(std::wstring& sourceString, const std::wstring& token, const std::wstring& replacementValue);
 
-LPCWSTR GetInteropString(LPCWSTR value);
+inline void OutputDebugString(std::wstring message)
+{
+	OutputDebugStringW(message.c_str());
+}
