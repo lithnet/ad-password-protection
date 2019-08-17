@@ -15,14 +15,14 @@ namespace NativeUnitTests
 
 		TEST_METHOD(TestIsInHibp)
 		{
-			TestString password(L"Password");
-			Assert::IsTrue(IsInSha1HibpApi(password));
+			const TestString password(L"Password");
+			Assert::IsTrue(IsInHibpSha1Api(password));
 		}
 
 		TEST_METHOD(TestBadPasswordSetIsRejectedWhenEnabled)
 		{
 			SetUnitTestPolicyValue(REG_VALUE_CHECKHIBPONSET, 11);
-			TestString password(L"password");
+			const TestString password(L"password");
 			policy::PopulatePolicySetObject(L"UnitTests\\Default", &pol);
 
 			Assert::IsFalse(ProcessPasswordHibp(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, pol));
@@ -31,7 +31,7 @@ namespace NativeUnitTests
 		TEST_METHOD(TestBadPasswordSetIsApprovedWhenDisabled)
 		{
 			SetUnitTestPolicyValue(REG_VALUE_CHECKHIBPONSET, 0);
-			TestString password(L"password");
+			const TestString password(L"password");
 			policy::PopulatePolicySetObject(L"UnitTests\\Default", &pol);
 			Assert::IsTrue(ProcessPasswordHibp(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, pol));
 		}
@@ -39,7 +39,7 @@ namespace NativeUnitTests
 		TEST_METHOD(TestBadPasswordChangeIsRejectedWhenEnabled)
 		{
 			SetUnitTestPolicyValue(REG_VALUE_CHECKHIBPONCHANGE, 1);
-			TestString password(L"password");
+			const TestString password(L"password");
 			policy::PopulatePolicySetObject(L"UnitTests\\Default", &pol);
 			Assert::IsFalse(ProcessPasswordHibp(password, std::wstring(L"accountName"), std::wstring(L"full name"), FALSE, pol));
 		}
@@ -47,7 +47,7 @@ namespace NativeUnitTests
 		TEST_METHOD(TestBadPasswordChangeIsApprovedWhenDisabled)
 		{
 			SetUnitTestPolicyValue(REG_VALUE_CHECKHIBPONCHANGE, 0);
-			TestString password(L"password");
+			const TestString password(L"password");
 			policy::PopulatePolicySetObject(L"UnitTests\\Default", &pol);
 			Assert::IsTrue(ProcessPasswordHibp(password, std::wstring(L"accountName"), std::wstring(L"full name"), FALSE, pol));
 		}
@@ -55,7 +55,7 @@ namespace NativeUnitTests
 		TEST_METHOD(TestGoodPasswordChangeIsApprovedWhenEnabled)
 		{
 			SetUnitTestPolicyValue(REG_VALUE_CHECKHIBPONCHANGE, 1);
-			TestString password(L"asfdadsfasdjhk348925hjksdgfhjksdfhgjkdsfAASDFASD23423432sdgasd$#$#");
+			const TestString password(L"asfdadsfasdjhk348925hjksdgfhjksdfhgjkdsfAASDFASD23423432sdgasd$#$#");
 			policy::PopulatePolicySetObject(L"UnitTests\\Default", &pol);
 			Assert::IsTrue(ProcessPasswordHibp(password, std::wstring(L"accountName"), std::wstring(L"full name"), FALSE, pol));
 		}
@@ -63,66 +63,63 @@ namespace NativeUnitTests
 		TEST_METHOD(TestGoodPasswordSetIsApprovedWhenEnabled)
 		{
 			SetUnitTestPolicyValue(REG_VALUE_CHECKHIBPONSET, 1);
-			TestString password(L"asfdadsfasdjhk348925hjksdgfhjksdfhgjkdsfAASDFASD23423432sdgasd$#$#");
+			const TestString password(L"asfdadsfasdjhk348925hjksdgfhjksdfhgjkdsfAASDFASD23423432sdgasd$#$#");
 			policy::PopulatePolicySetObject(L"UnitTests\\Default", &pol);
 			Assert::IsTrue(ProcessPasswordHibp(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, pol));
 		}
 
 		TEST_METHOD(TestPasswordSetIsApprovedWhenHibpErrors)
 		{
-			SetGlobalPolicyValue(REG_VALUE_HIBPHOSTNAME, L"nowhere.local");
+			SetGlobalPolicyValue(REG_VALUE_HIBPSHA1APIURL, L"http://nowhere.local");
 			SetGlobalPolicyValue(REG_VALUE_REJECTPASSWORDONHIBPERROR, 0);
 			SetUnitTestPolicyValue(REG_VALUE_CHECKHIBPONSET, 1);
-			TestString password(L"asfdadsfasdjhk348925hjksdgfhjksdfhgjkdsfAASDFASD23423432sdgasd$#$#");
+			const TestString password(L"asfdadsfasdjhk348925hjksdgfhjksdfhgjkdsfAASDFASD23423432sdgasd$#$#");
 			policy::PopulatePolicySetObject(L"UnitTests\\Default", &pol);
 			Assert::IsTrue(ProcessPasswordHibp(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, pol));
 		}
 
 		TEST_METHOD(TestPasswordSetIsRejectedWhenHibpErrors)
 		{
-			SetGlobalPolicyValue(REG_VALUE_HIBPHOSTNAME, L"nowhere.local");
+			SetGlobalPolicyValue(REG_VALUE_HIBPSHA1APIURL, L"http://nowhere.local");
 			SetGlobalPolicyValue(REG_VALUE_REJECTPASSWORDONHIBPERROR, 1);
 			SetUnitTestPolicyValue(REG_VALUE_CHECKHIBPONSET, 1);
-			TestString password(L"asfdadsfasdjhk348925hjksdgfhjksdfhgjkdsfAASDFASD23423432sdgasd$#$#");
+			const TestString password(L"asfdadsfasdjhk348925hjksdgfhjksdfhgjkdsfAASDFASD23423432sdgasd$#$#");
 			policy::PopulatePolicySetObject(L"UnitTests\\Default", &pol);
 			Assert::IsFalse(ProcessPasswordHibp(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, pol));
 		}
 
 		TEST_METHOD(TestPasswordChangeIsApprovedWhenHibpErrors)
 		{
-			SetGlobalPolicyValue(REG_VALUE_HIBPHOSTNAME, L"nowhere.local");
+			SetGlobalPolicyValue(REG_VALUE_HIBPSHA1APIURL, L"http://nowhere.local");
 			SetGlobalPolicyValue(REG_VALUE_REJECTPASSWORDONHIBPERROR, 0);
 			SetUnitTestPolicyValue(REG_VALUE_CHECKHIBPONCHANGE, 1);
-			TestString password(L"asfdadsfasdjhk348925hjksdgfhjksdfhgjkdsfAASDFASD23423432sdgasd$#$#");
+			const TestString password(L"asfdadsfasdjhk348925hjksdgfhjksdfhgjkdsfAASDFASD23423432sdgasd$#$#");
 			policy::PopulatePolicySetObject(L"UnitTests\\Default", &pol);
 			Assert::IsTrue(ProcessPasswordHibp(password, std::wstring(L"accountName"), std::wstring(L"full name"), FALSE, pol));
 		}
 
 		TEST_METHOD(TestPasswordChangeIsRejectedWhenHibpErrors)
 		{
-			SetGlobalPolicyValue(REG_VALUE_HIBPHOSTNAME, L"nowhere.local");
+			SetGlobalPolicyValue(REG_VALUE_HIBPSHA1APIURL, L"http://nowhere.local");
 			SetGlobalPolicyValue(REG_VALUE_REJECTPASSWORDONHIBPERROR, 1);
 			SetUnitTestPolicyValue(REG_VALUE_CHECKHIBPONCHANGE, 1);
-			TestString password(L"asfdadsfasdjhk348925hjksdgfhjksdfhgjkdsfAASDFASD23423432sdgasd$#$#");
+			const TestString password(L"asfdadsfasdjhk348925hjksdgfhjksdfhgjkdsfAASDFASD23423432sdgasd$#$#");
 			policy::PopulatePolicySetObject(L"UnitTests\\Default", &pol);
 			Assert::IsFalse(ProcessPasswordHibp(password, std::wstring(L"accountName"), std::wstring(L"full name"), FALSE, pol));
 		}
 
 		TEST_METHOD(LoadTestOnMockApi)
 		{
-			return;
-
-			SetGlobalPolicyValue(REG_VALUE_HIBPHOSTNAME, L"localhost");
+			SetGlobalPolicyValue(REG_VALUE_HIBPSHA1APIURL, L"http://localhost/range/{range}");
 			SetUnitTestPolicyValue(REG_VALUE_CHECKHIBPONSET, 1);
 			policy::PopulatePolicySetObject(L"UnitTests\\Default", &pol);
 
-			for (size_t i = 0; i < 1000000; i++)
+			for (size_t i = 0; i < 1000; i++)
 			{
-				std::wstringstream ss;
-				ss << L"asfdadsfasdjhk348925hjksdgfhjksdfhgjkdsfAASDFASD23423432sdgasd$#$#";
-				ss << i;
+				std::wstring pwd (L"asfdadsfasdjhk348925hjksdgfhjksdfhgjkdsfAASDFASD23423432sdgasd$#$#");
+				pwd.append(std::to_wstring(i));
 
-				TestString password(ss.str());
+				const TestString password(pwd);
 				if (!ProcessPasswordHibp(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, pol))
 				{
 					Assert::Fail(L"Password check failed");
@@ -130,14 +127,23 @@ namespace NativeUnitTests
 			}
 		}
 
-		static std::wstring GetHttpResponseFromMockApi(const std::wstring range)
+		static std::wstring GetHttpResponseFromMockApi(const std::wstring& range)
 		{
 			registry reg;
-			const std::wstring host = reg.GetRegValue(L"UnitTest-HibpHostName", L"localhost");
-			const unsigned short port = INTERNET_DEFAULT_HTTPS_PORT;
-			std::wstring path = L"range/{range}";
+			const std::wstring apiurl = reg.GetRegValue(L"UnitTest-HibpUrl", L"http://localhost/range/{range}");
+			URL_COMPONENTS urlComponents;
+			CrackUrl(apiurl, urlComponents);
+
+			const std::wstring host(urlComponents.lpszHostName, urlComponents.dwHostNameLength);
+			std::wstring path(urlComponents.lpszUrlPath, urlComponents.dwUrlPathLength);
+			if (urlComponents.dwExtraInfoLength > 0)
+			{
+				path.append(urlComponents.lpszExtraInfo, urlComponents.dwExtraInfoLength);
+			}
+
 			path = ReplaceToken(path, L"{range}", range);
-			return GetHttpResponse(host, port, path);
+
+			return  GetHttpResponse(host, urlComponents.nPort, path, (urlComponents.nScheme == INTERNET_SCHEME_HTTPS));
 		}
 
 		TEST_METHOD(ValidateAllHashesAreFoundInRange)
@@ -185,36 +191,35 @@ namespace NativeUnitTests
 
 		TEST_METHOD(TestRangeMatchAtStart)
 		{
-			std::wstring rangeData(L"003D68EB55068C33ACE09247EE4C639306B:3\r\n012C192B2F16F82EA0EB9EF18D9D539B0DD:1\r\n01330C689E5D64F660D6947A93AD634EF8F:1\r\n0198748F3315F40B1A102BF18EEA0194CD9:1\r\n");
-			std::wstring matchData(L"003D68EB55068C33ACE09247EE4C639306B");
+			const std::wstring rangeData(L"003D68EB55068C33ACE09247EE4C639306B:3\r\n012C192B2F16F82EA0EB9EF18D9D539B0DD:1\r\n01330C689E5D64F660D6947A93AD634EF8F:1\r\n0198748F3315F40B1A102BF18EEA0194CD9:1\r\n");
+			const std::wstring matchData(L"003D68EB55068C33ACE09247EE4C639306B");
 			Assert::IsTrue(IsInVariableWidthRangeData(rangeData, matchData));
 		}
 
 		TEST_METHOD(TestRangeMatchAtEnd)
 		{
-			std::wstring rangeData(L"003D68EB55068C33ACE09247EE4C639306B:3\r\n012C192B2F16F82EA0EB9EF18D9D539B0DD:1\r\n01330C689E5D64F660D6947A93AD634EF8F:1\r\n0198748F3315F40B1A102BF18EEA0194CD9:1\r\n");
-			std::wstring matchData(L"0198748F3315F40B1A102BF18EEA0194CD9");
+			const std::wstring rangeData(L"003D68EB55068C33ACE09247EE4C639306B:3\r\n012C192B2F16F82EA0EB9EF18D9D539B0DD:1\r\n01330C689E5D64F660D6947A93AD634EF8F:1\r\n0198748F3315F40B1A102BF18EEA0194CD9:1\r\n");
+			const std::wstring matchData(L"0198748F3315F40B1A102BF18EEA0194CD9");
 			Assert::IsTrue(IsInVariableWidthRangeData(rangeData, matchData));
 		}
 
 		TEST_METHOD(TestRangeMatchAtEof)
 		{
-			std::wstring rangeData(L"003D68EB55068C33ACE09247EE4C639306B:3\r\n012C192B2F16F82EA0EB9EF18D9D539B0DD:1\r\n01330C689E5D64F660D6947A93AD634EF8F:1\r\n0198748F3315F40B1A102BF18EEA0194CD9");
-			std::wstring matchData(L"0198748F3315F40B1A102BF18EEA0194CD9");
+			const std::wstring rangeData(L"003D68EB55068C33ACE09247EE4C639306B:3\r\n012C192B2F16F82EA0EB9EF18D9D539B0DD:1\r\n01330C689E5D64F660D6947A93AD634EF8F:1\r\n0198748F3315F40B1A102BF18EEA0194CD9");
+			const std::wstring matchData(L"0198748F3315F40B1A102BF18EEA0194CD9");
 			Assert::IsTrue(IsInVariableWidthRangeData(rangeData, matchData));
 		}
 
 		TEST_METHOD(TestRangeMatchInMiddle)
 		{
-			std::wstring rangeData(L"003D68EB55068C33ACE09247EE4C639306B:3\r\n012C192B2F16F82EA0EB9EF18D9D539B0DD:1\r\n01330C689E5D64F660D6947A93AD634EF8F:1\r\n0198748F3315F40B1A102BF18EEA0194CD9:1\r\n");
-			std::wstring matchData(L"01330C689E5D64F660D6947A93AD634EF8F");
+			const std::wstring rangeData(L"003D68EB55068C33ACE09247EE4C639306B:3\r\n012C192B2F16F82EA0EB9EF18D9D539B0DD:1\r\n01330C689E5D64F660D6947A93AD634EF8F:1\r\n0198748F3315F40B1A102BF18EEA0194CD9:1\r\n");
+			const std::wstring matchData(L"01330C689E5D64F660D6947A93AD634EF8F");
 			Assert::IsTrue(IsInVariableWidthRangeData(rangeData, matchData));
 		}
 
-
 		TEST_METHOD_CLEANUP(HibpCleanup)
 		{
-			DeleteGlobalPolicyValue(REG_VALUE_HIBPHOSTNAME);
+			DeleteGlobalPolicyValue(REG_VALUE_HIBPSHA1APIURL);
 		}
 	};
 }

@@ -7,7 +7,7 @@
 #include "registry.h"
 #include <algorithm>
 
-bool IsInSha1HibpApi(const SecureArrayT<WCHAR> &password)
+bool IsInHibpSha1Api(const SecureArrayT<WCHAR> &password)
 {
 	if (password.getSize() <= 0)
 	{
@@ -32,15 +32,43 @@ bool IsInSha1HibpApi(const SecureArrayT<WCHAR> &password)
 	const std::wstring matchtext = hashstring.substr(5, 35);
 
 	registry reg;
+	const std::wstring apiurl = reg.GetRegValue(REG_VALUE_HIBPSHA1APIURL, DefaultHibpSha1ApiUrl);
 
-	const std::wstring host = reg.GetRegValue(REG_VALUE_HIBPHOSTNAME, DefaultHibpAddress);
-	const unsigned short port = reg.GetRegValue(REG_VALUE_HIBPPORT, INTERNET_DEFAULT_HTTPS_PORT);
-	std::wstring path = reg.GetRegValue(REG_VALUE_HIBPSHA1PATH, L"range/{range}");
+	URL_COMPONENTS urlComponents;
+	CrackUrl(apiurl, urlComponents);
+
+	const std::wstring host(urlComponents.lpszHostName, urlComponents.dwHostNameLength);
+	std::wstring path(urlComponents.lpszUrlPath, urlComponents.dwUrlPathLength);
+	if (urlComponents.dwExtraInfoLength > 0)
+	{
+		path.append(urlComponents.lpszExtraInfo, urlComponents.dwExtraInfoLength);
+	}
+
 	path = ReplaceToken(path, L"{range}", range);
+	if (range == L"0AD07")
+	{
+		int f = 1 / 2;
+	}
 
-	const std::wstring hashes = GetHttpResponse(host, port, path);
+	const std::wstring hashes = GetHttpResponse(host, urlComponents.nPort, path, (urlComponents.nScheme == INTERNET_SCHEME_HTTPS));
 
 	return IsInVariableWidthRangeData(hashes, matchtext);
+}
+
+void CrackUrl(const std::wstring &url, URL_COMPONENTS &urlComponents)
+{
+	ZeroMemory(&urlComponents, sizeof(urlComponents));
+
+	urlComponents.dwStructSize = sizeof(urlComponents);
+	urlComponents.dwSchemeLength = -1;
+	urlComponents.dwHostNameLength = -1;
+	urlComponents.dwUrlPathLength = -1;
+	urlComponents.dwExtraInfoLength = -1;
+
+	if (!WinHttpCrackUrl(url.c_str(), 0, 0, &urlComponents))
+	{
+		throw std::system_error(GetLastError(), std::system_category(), "WinHttpCrackUrl failed");
+	}
 }
 
 bool IsInVariableWidthRangeData(const std::wstring &rangeData, const std::wstring &value)
@@ -62,6 +90,17 @@ bool IsInVariableWidthRangeData(const std::wstring &rangeData, const std::wstrin
 
 		const int result = rangeData.compare(currentPos, match_length, value, 0, match_length);
 
+		if (result == 0)
+		{
+			OutputDebugString(L"Hash found at position " + std::to_wstring(currentPos) + L" on loop " + std::to_wstring(count));
+			return true;
+		}
+
+		if (currentPos == 0)
+		{
+			break;
+		}
+
 		if (result < 0)
 		{
 			startPos = currentPos + match_length;
@@ -70,18 +109,13 @@ bool IsInVariableWidthRangeData(const std::wstring &rangeData, const std::wstrin
 		{
 			lastPos = currentPos - 1;
 		}
-		else
-		{
-			OutputDebugString(L"Hash found at position " + std::to_wstring(currentPos) + L" on loop " + std::to_wstring(count));
-			return true;
-		}
 	}
 
 	OutputDebugString(std::wstring(L"Hash not found after " + std::to_wstring(count) + L" loops"));
 	return false;
 }
 
-std::wstring GetHttpResponse(const std::wstring &host, const INTERNET_PORT port, const std::wstring &path)
+std::wstring GetHttpResponse(const std::wstring &host, const INTERNET_PORT port, const std::wstring &path, const bool usetls)
 {
 	HINTERNET hSession = NULL;
 	HINTERNET hConnect = NULL;
@@ -103,7 +137,7 @@ std::wstring GetHttpResponse(const std::wstring &host, const INTERNET_PORT port,
 			throw std::system_error(GetLastError(), std::system_category(), "WinHttpConnect failed");
 		}
 
-		hRequest = WinHttpOpenRequest(hConnect, L"GET", path.c_str(), NULL, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, WINHTTP_FLAG_SECURE);
+		hRequest = WinHttpOpenRequest(hConnect, L"GET", path.c_str(), NULL, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, usetls ? WINHTTP_FLAG_SECURE : 0);
 
 		if (!hRequest)
 		{

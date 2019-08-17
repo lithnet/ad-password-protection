@@ -78,8 +78,8 @@ std::vector<std::wstring> SplitString(const std::wstring &text, const wchar_t se
 
 SecureArrayT<WCHAR> StringToWcharArray(const LPCWSTR str)
 {
-	const int charCount = wcslen(str);
-	const int len = charCount + 1;
+	const size_t charCount = wcslen(str);
+	const size_t len = charCount + 1;
 
 	SecureArrayT<WCHAR> ar(len);
 

@@ -4,17 +4,17 @@ class SecureArrayT
 {
 protected:
 	std::shared_ptr<T[]> internalptr;
-	int size;
+	size_t size;
 
 public:
 
-	SecureArrayT(T* item, const int size)
+	SecureArrayT(T* item, const size_t size)
 	{
 		this->internalptr = std::shared_ptr<T[]>(item);
 		this->size = size;
 	}
 
-	SecureArrayT(const int size)
+	SecureArrayT(const size_t size)
 	{
 		this->internalptr = std::make_unique<T[]>(size);
 		this->size = size;
@@ -39,7 +39,7 @@ public:
 		return this->internalptr.get();
 	}
 
-	int getSize() const
+	size_t getSize() const
 	{
 		return this->size;
 	}
