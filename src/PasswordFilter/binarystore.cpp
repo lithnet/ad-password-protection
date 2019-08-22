@@ -107,9 +107,7 @@ bool binarystore::IsHashInBinaryFile(const std::wstring &filename, const SecureA
 	std::ifstream file(filename, std::ios::binary | std::ios::ate | std::ios::in);
 
 	long firstRow = 0, currentRow = 0;
-	std::wstring message = L"Searching ";
-	message += filename;
-	OutputDebugString(message.c_str());
+	OutputDebugString(L"Searching " + filename);
 
 	long length = static_cast<long>(file.tellg());
 
@@ -145,9 +143,7 @@ bool binarystore::IsHashInBinaryFile(const std::wstring &filename, const SecureA
 		}
 		else
 		{
-			message = L"Hash found at row ";
-			message += std::to_wstring(currentRow);
-			OutputDebugString(message.c_str());
+			OutputDebugString(L"Hash found at row " + std::to_wstring(currentRow));
 			file.close();
 			return true;
 		}

@@ -8,6 +8,12 @@ protected:
 
 public:
 
+	SecureArrayT(const T* item, const size_t size)
+	{
+		this->internalptr = std::shared_ptr<T[]>(item);
+		this->size = size;
+	}
+
 	SecureArrayT(T* item, const size_t size)
 	{
 		this->internalptr = std::shared_ptr<T[]>(item);

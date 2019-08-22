@@ -90,9 +90,9 @@ void RemoveChars(SecureArrayT<WCHAR> &s, const WCHAR *charsToRemove)
 	{
 		bool matched = false;
 
-		for (size_t i = 0; i < wcslen(charsToRemove); i++)
+		for (size_t j = 0; i < wcslen(charsToRemove); j++)
 		{
-			if (charsToRemove[i] == *cpy)
+			if (charsToRemove[j] == *cpy)
 			{
 				matched = true;
 				break;

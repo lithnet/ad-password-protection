@@ -10,13 +10,38 @@ namespace NativeUnitTests
 {
 	TEST_CLASS(HibpTests)
 	{
+		size_t validation_upper_bound = 0x0FFFF;
+
+
 	public:
 		user_policy pol;
 
-		TEST_METHOD(TestIsInHibp)
+		TEST_METHOD(TestIsInHibpSha1Api)
 		{
+			registry reg;
 			const TestString password(L"Password");
-			Assert::IsTrue(IsInHibpSha1Api(password));
+			Assert::IsTrue(IsInHibpSha1Api(password, reg));
+		}
+
+		TEST_METHOD(TestIsInHibpHtlmHexApi)
+		{
+			registry reg;
+			const TestString password(L"Password");
+			Assert::IsTrue(IsInHibpNtlmHexApi(password, reg));
+		}
+
+		TEST_METHOD(TestIsInHibpNtlmBinaryApi)
+		{
+			registry reg;
+			const TestString password(L"Password");
+			Assert::IsTrue(IsInHibpNtlmBinaryApi(password, reg));
+		}
+
+		TEST_METHOD(TestIsInHibpNtlmBinaryPwnCountApi)
+		{
+			registry reg;
+			const TestString password(L"Password");
+			Assert::IsTrue(IsInHibpNtlmBinaryPwnCountApi(password, reg));
 		}
 
 		TEST_METHOD(TestBadPasswordSetIsRejectedWhenEnabled)
@@ -108,15 +133,15 @@ namespace NativeUnitTests
 			Assert::IsFalse(ProcessPasswordHibp(password, std::wstring(L"accountName"), std::wstring(L"full name"), FALSE, pol));
 		}
 
-		TEST_METHOD(LoadTestOnMockApi)
+		TEST_METHOD(LoadTestOnSha1MockApi)
 		{
 			SetGlobalPolicyValue(REG_VALUE_HIBPSHA1APIURL, L"http://localhost/range/{range}");
 			SetUnitTestPolicyValue(REG_VALUE_CHECKHIBPONSET, 1);
 			policy::PopulatePolicySetObject(L"UnitTests\\Default", &pol);
 
-			for (size_t i = 0; i < 1000; i++)
+			for (size_t i = 0; i < 10000; i++)
 			{
-				std::wstring pwd (L"asfdadsfasdjhk348925hjksdgfhjksdfhgjkdsfAASDFASD23423432sdgasd$#$#");
+				std::wstring pwd(L"asfdadsfasdjhk348925hjksdgfhjksdfhgjkdsfAASDFASD23423432sdgasd$#$#");
 				pwd.append(std::to_wstring(i));
 
 				const TestString password(pwd);
@@ -127,52 +152,157 @@ namespace NativeUnitTests
 			}
 		}
 
-		static std::wstring GetHttpResponseFromMockApi(const std::wstring& range)
+		static std::wstring GetHttpResponseFromMockApiSha1Hex(const std::wstring& range)
 		{
 			registry reg;
-			const std::wstring apiurl = reg.GetRegValue(L"UnitTest-HibpUrl", L"http://localhost/range/{range}");
-			URL_COMPONENTS urlComponents;
-			CrackUrl(apiurl, urlComponents);
-
-			const std::wstring host(urlComponents.lpszHostName, urlComponents.dwHostNameLength);
-			std::wstring path(urlComponents.lpszUrlPath, urlComponents.dwUrlPathLength);
-			if (urlComponents.dwExtraInfoLength > 0)
-			{
-				path.append(urlComponents.lpszExtraInfo, urlComponents.dwExtraInfoLength);
-			}
-
-			path = ReplaceToken(path, L"{range}", range);
-
-			return  GetHttpResponse(host, urlComponents.nPort, path, (urlComponents.nScheme == INTERNET_SCHEME_HTTPS));
+			std::wstring apiurl = L"http://localhost/range/{range}";
+			apiurl = ReplaceToken(apiurl, L"{range}", range);
+			return  GetHttpResponseString(apiurl).str();
 		}
 
-		TEST_METHOD(ValidateAllHashesAreFoundInRange)
+
+		static std::wstring GetHttpResponseFromMockApiNtlmHex(const std::wstring& range)
 		{
-			const auto rangeData = GetHttpResponseFromMockApi(L"00000");
+			registry reg;
+			std::wstring apiurl = L"http://localhost/ntlm/hex/range/{range}";
+			apiurl = ReplaceToken(apiurl, L"{range}", range);
+			return  GetHttpResponseString(apiurl).str();
+		}
 
-			std::wstring line;
-			std::vector<std::wstring> hashes;
-			std::wstringstream wss(rangeData);
+		static std::vector<BYTE> GetBinaryHttpResponseFromMockApNtlmPwnCount(const std::wstring& range)
+		{
+			registry reg;
+			std::wstring apiurl = L"http://localhost/ntlm/binary-pwncount/range/{range}";
+			apiurl = ReplaceToken(apiurl, L"{range}", range);
+			return GetHttpResponseBinary(apiurl);
+		}
 
-			while (std::getline(wss, line, L'\n'))
+		static std::vector<BYTE> GetBinaryHttpResponseFromMockApNtlm(const std::wstring& range)
+		{
+			registry reg;
+			std::wstring apiurl = L"http://localhost/ntlm/binary-nopwncount/range/{range}";
+			apiurl = ReplaceToken(apiurl, L"{range}", range);
+			return GetHttpResponseBinary(apiurl);
+		}
+
+		static std::wstring IntToHex(int i)
+		{
+			std::wstringstream stream;
+			stream << std::setfill(L'0') << std::setw(5) << std::hex << i;
+			return stream.str();
+		}
+
+		TEST_METHOD(ValidateAllHashesAreFoundInSha1HexRange)
+		{
+			for (size_t x = 0; x <= validation_upper_bound; x++)
 			{
-				hashes.push_back(line.substr(0, 35));
-			}
+				const auto range = IntToHex(x);
+				const auto rangeData = GetHttpResponseFromMockApiSha1Hex(range);
 
-			for each (std::wstring hash in hashes)
-			{
-				auto result = IsInVariableWidthRangeData(rangeData, hash);
+				std::wstring line;
+				std::vector<std::wstring> hashes;
+				std::wstringstream wss(rangeData);
 
-				if (!result)
+				while (std::getline(wss, line, L'\n'))
 				{
-					Assert::Fail();
+					hashes.push_back(line.substr(0, 35));
+				}
+
+				for each (std::wstring hash in hashes)
+				{
+					auto result = IsInVariableWidthRangeData(rangeData, hash);
+
+					if (!result)
+					{
+						Assert::Fail();
+					}
+				}
+			}
+		}
+
+		TEST_METHOD(ValidateAllHashesAreFoundInNtlmHexRange)
+		{
+			for (size_t x = 0; x <= validation_upper_bound; x++)
+			{
+				const auto range = IntToHex(x);
+				const auto rangeData = GetHttpResponseFromMockApiNtlmHex(range);
+
+				std::wstring line;
+				std::vector<std::wstring> hashes;
+				std::wstringstream wss(rangeData);
+
+				while (std::getline(wss, line, L'\n'))
+				{
+					hashes.push_back(line.substr(0, 27));
+				}
+
+				for each (std::wstring hash in hashes)
+				{
+					auto result = IsInVariableWidthRangeData(rangeData, hash);
+
+					if (!result)
+					{
+						Assert::Fail();
+					}
+				}
+			}
+		}
+
+		TEST_METHOD(ValidateAllHashesAreFoundInBinaryNtlmWithPwnCount)
+		{
+			for (size_t x = 0; x <= validation_upper_bound; x++)
+			{
+				const auto range = IntToHex(x);
+				auto rangeData = GetBinaryHttpResponseFromMockApNtlmPwnCount(range);
+				size_t record_size = 16;
+				size_t hash_size = 14;
+				size_t hashCount = rangeData.size() / record_size;
+
+				for (size_t i = 0; i < hashCount; i++)
+				{
+					SecureArrayT<BYTE> data(hash_size);
+					memcpy_s(data.get(), hash_size, rangeData.data() + (i * record_size), hash_size);
+
+					auto result = IsInFixedWidthRangeData(rangeData, data, record_size);
+
+					if (!result)
+					{
+						Assert::Fail();
+					}
+				}
+			}
+		}
+
+		TEST_METHOD(ValidateAllHashesAreFoundInBinaryNtlm)
+		{
+			for (size_t x = 0; x <= validation_upper_bound; x++)
+			{
+				const auto range = IntToHex(x);
+				auto rangeData = GetBinaryHttpResponseFromMockApNtlm(range);
+				size_t record_size = 14;
+				const size_t hash_size = 14;
+				const size_t hashCount = rangeData.size() / record_size;
+
+				OutputDebugString(L"Processing range " + range);
+
+				for (size_t i = 0; i < hashCount; i++)
+				{
+					SecureArrayT<BYTE> data(hash_size);
+					memcpy_s(data.get(), hash_size, rangeData.data() + (i * record_size), hash_size);
+
+					const auto result = IsInFixedWidthRangeData(rangeData, data, record_size);
+
+					if (!result)
+					{
+						Assert::Fail();
+					}
 				}
 			}
 		}
 
 		TEST_METHOD(PerfTestStringContains)
 		{
-			const auto rangeData = GetHttpResponseFromMockApi(L"00000");
+			const auto rangeData = GetHttpResponseFromMockApiSha1Hex(L"00000");
 			for (size_t i = 0; i < 100000; i++)
 			{
 				//return hashes.find(matchtext + L":") != std::string::npos;
@@ -182,7 +312,7 @@ namespace NativeUnitTests
 
 		TEST_METHOD(PerfTestBinarySearch)
 		{
-			const auto rangeData = GetHttpResponseFromMockApi(L"00000");
+			const auto rangeData = GetHttpResponseFromMockApiSha1Hex(L"00000");
 			for (size_t i = 0; i < 100000; i++)
 			{
 				auto result = IsInVariableWidthRangeData(rangeData, L"0198748F3315F40B1A102BF18EEA0194CD9");

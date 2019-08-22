@@ -92,9 +92,10 @@ BOOLEAN ProcessPasswordHibp(const SecureArrayT<WCHAR> &password, const std::wstr
 
 		try
 		{
-			if (IsInHibpSha1Api(password))
+			const int pwnCount = IsInHibpSha1Api(password, reg);
+			if (pwnCount > 0)
 			{
-				OutputDebugString(L"Rejected password as it was found in the HIBP API");
+				OutputDebugString(L"Rejected password as it was found in the HIBP API " + std::to_wstring(pwnCount) + L" times");
 				eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_HIBP_API, 3, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
 				return FALSE;
 			}
@@ -159,7 +160,7 @@ BOOLEAN ProcessPasswordHibp(const SecureArrayT<WCHAR> &password, const std::wstr
 
 BOOLEAN ProcessPasswordRaw(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const user_policy &pol)
 {
-	if ((setOperation && pol.StorePolicy.CheckPasswordNotInCompromisedPasswordStoreOnSet /*reg.GetRegValue(REG_VALUE_CHECKBANNEDPASSWORDONSET, 0)*/ != 0) || 
+	if ((setOperation && pol.StorePolicy.CheckPasswordNotInCompromisedPasswordStoreOnSet /*reg.GetRegValue(REG_VALUE_CHECKBANNEDPASSWORDONSET, 0)*/ != 0) ||
 		(!setOperation && pol.StorePolicy.CheckPasswordNotInCompromisedPasswordStoreOnChange /*reg.GetRegValue(REG_VALUE_CHECKBANNEDPASSWORDONCHANGE, 0)*/ != 0))
 	{
 		OutputDebugString(L"Checking raw password");
@@ -180,7 +181,7 @@ BOOLEAN ProcessPasswordRaw(const SecureArrayT<WCHAR> &password, const std::wstri
 BOOLEAN ProcessPasswordNormalizedPasswordStore(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const user_policy &pol)
 {
 	if (setOperation &&  pol.StorePolicy.CheckNormalizedPasswordNotInCompromisedPasswordStoreOnSet /*reg.GetRegValue(REG_VALUE_CHECKNORMALIZEDBANNEDPASSWORDONSET, 0)*/ != 0 ||
-		!setOperation && pol.StorePolicy.CheckNormalizedPasswordNotInCompromisedPasswordStoreOnChange /*reg.GetRegValue(REG_VALUE_CHECKNORMALIZEDBANNEDPASSWORDONCHANGE, 0)*/ != 0 )
+		!setOperation && pol.StorePolicy.CheckNormalizedPasswordNotInCompromisedPasswordStoreOnChange /*reg.GetRegValue(REG_VALUE_CHECKNORMALIZEDBANNEDPASSWORDONCHANGE, 0)*/ != 0)
 	{
 		bool result = TRUE;
 
