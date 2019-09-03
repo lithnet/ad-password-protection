@@ -6,9 +6,35 @@
 #include "messages.h"
 #include "passwordevaluator.h"
 #include "SecureArrayT.h"
+#include "rpc_server.h"
 
-extern "C" __declspec(dllexport)  BOOLEAN __stdcall InitializeChangeNotify(void)
+rpc_server p;
+
+extern "C" __declspec(dllexport) BOOLEAN __stdcall InitializeChangeNotify(void)
 {
+	try
+	{
+		p.InitializeRpcServer();
+		p.Start(false);
+		OutputDebugString(L"Started RPC server");
+		eventlog::getInstance().log(EVENTLOG_INFORMATION_TYPE, MSG_SERVICE_STARTED, 0);
+	}
+	catch (std::system_error const& e)
+	{
+		OutputDebugString(L"Win32 error caught");
+		eventlog::getInstance().log(EVENTLOG_ERROR_TYPE, MSG_WIN32_RPC_INIT_ERROR, 2, std::to_string(e.code().value()).c_str(), e.what());
+	}
+	catch (std::exception const& e)
+	{
+		OutputDebugString(L"Other error caught");
+		eventlog::getInstance().log(EVENTLOG_ERROR_TYPE, MSG_OTHER_RPC_INIT_ERROR, 1, e.what());
+	}
+	catch (...)
+	{
+		OutputDebugString(L"Unexpected error caught");
+		eventlog::getInstance().logw(EVENTLOG_ERROR_TYPE, MSG_OTHER_RPC_INIT_ERROR, 1, L"No exception information was available");
+	}
+
 	return TRUE;
 }
 

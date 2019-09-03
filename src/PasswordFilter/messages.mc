@@ -87,6 +87,25 @@ An error occurred calling the HIBP API.
 Message: %1
 .
 
+MessageId=0xC
+Severity=Error
+Facility=Runtime
+SymbolicName=MSG_WIN32_RPC_INIT_ERROR
+Language=English
+The RPC server could not be initialized
+Error code: %1
+Message: %2
+.
+
+MessageId=0xD
+Severity=Error
+Facility=Runtime
+SymbolicName=MSG_OTHER_RPC_INIT_ERROR
+Language=English
+The RPC server could not be initialized
+Message: %1
+.
+
 MessageId=0x2001
 Severity=Warning
 Facility=System
@@ -247,4 +266,12 @@ Facility=Runtime
 SymbolicName=MSG_POLICY_MAPPING_DEFAULTED
 Language=English
 User '%1' was mapped to the defauly policy set as they did not match any policy set groups
+.
+
+MessageId=0xD004
+Severity=Informational
+Facility=Runtime
+SymbolicName=MSG_SERVICE_STARTED
+Language=English
+The LPP service has initialized
 .

@@ -1,0 +1,15 @@
+import "oaidl.idl";
+import "ocidl.idl";
+
+[uuid (1a5a3e3e-fdc9-4b21-b746-5897f93ef849),
+version(1.0),
+pointer_default(unique),
+]
+
+interface passwordfilter
+{
+	int GetPasswordFilterResult(
+		[in, string, max_is(257)] const wchar_t * username, //UNLEN + 1
+		[in, string, max_is(1024)] const wchar_t * fullname,
+		[in, string, max_is(1024)] const wchar_t * password);
+}

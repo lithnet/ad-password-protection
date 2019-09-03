@@ -123,6 +123,27 @@
 #define MSG_OTHER_HIBP_ERROR             ((DWORD)0xC002000BL)
 
 //
+// MessageId: MSG_WIN32_RPC_INIT_ERROR
+//
+// MessageText:
+//
+// The RPC server could not be initialized
+// Error code: %1
+// Message: %2
+//
+#define MSG_WIN32_RPC_INIT_ERROR         ((DWORD)0xC002000CL)
+
+//
+// MessageId: MSG_OTHER_RPC_INIT_ERROR
+//
+// MessageText:
+//
+// The RPC server could not be initialized
+// Message: %1
+//
+#define MSG_OTHER_RPC_INIT_ERROR         ((DWORD)0xC002000DL)
+
+//
 // MessageId: MSG_PASSWORD_REJECTED_ON_ERROR
 //
 // MessageText:
@@ -303,4 +324,13 @@
 // User '%1' was mapped to the defauly policy set as they did not match any policy set groups
 //
 #define MSG_POLICY_MAPPING_DEFAULTED     ((DWORD)0x4002D003L)
+
+//
+// MessageId: MSG_SERVICE_STARTED
+//
+// MessageText:
+//
+// The LPP service has initialized
+//
+#define MSG_SERVICE_STARTED              ((DWORD)0x4002D004L)
 
