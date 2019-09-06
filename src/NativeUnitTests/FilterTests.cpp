@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
 #include "../PasswordFilter/filter.h"
-#include "passwordevaluator.h"
+#include "../PasswordFilter/passwordevaluator.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -12,6 +12,11 @@ namespace NativeUnitTests
 		TEST_METHOD_INITIALIZE(Cleanup)
 		{
 			DeleteUnitTestPolicyKey(L"", L"Default");
+		}
+
+		TEST_METHOD(InitializeFilter)
+		{
+			InitializeChangeNotify();
 		}
 
 		TEST_METHOD(PasswordFilterSetNormalizedBannedWord)

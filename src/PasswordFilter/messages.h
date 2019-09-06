@@ -123,27 +123,6 @@
 #define MSG_OTHER_HIBP_ERROR             ((DWORD)0xC002000BL)
 
 //
-// MessageId: MSG_WIN32_RPC_INIT_ERROR
-//
-// MessageText:
-//
-// The RPC server could not be initialized
-// Error code: %1
-// Message: %2
-//
-#define MSG_WIN32_RPC_INIT_ERROR         ((DWORD)0xC002000CL)
-
-//
-// MessageId: MSG_OTHER_RPC_INIT_ERROR
-//
-// MessageText:
-//
-// The RPC server could not be initialized
-// Message: %1
-//
-#define MSG_OTHER_RPC_INIT_ERROR         ((DWORD)0xC002000DL)
-
-//
 // MessageId: MSG_PASSWORD_REJECTED_ON_ERROR
 //
 // MessageText:
@@ -332,5 +311,37 @@
 //
 // The LPP service has initialized
 //
-#define MSG_SERVICE_STARTED              ((DWORD)0x4002D004L)
+#define MSG_SERVICE_STARTED              ((DWORD)0x4002E001L)
+
+//
+// MessageId: MSG_WIN32_RPC_INIT_ERROR
+//
+// MessageText:
+//
+// The RPC server could not be initialized
+// Error code: %1
+// Message: %2
+//
+#define MSG_WIN32_RPC_INIT_ERROR         ((DWORD)0xC002E002L)
+
+//
+// MessageId: MSG_OTHER_RPC_INIT_ERROR
+//
+// MessageText:
+//
+// The RPC server could not be initialized
+// Message: %1
+//
+#define MSG_OTHER_RPC_INIT_ERROR         ((DWORD)0xC002E003L)
+
+//
+// MessageId: MSG_SPN_REGISTRATION_FAILURE
+//
+// MessageText:
+//
+// The SPN could not be registered. Please add an SPN registration for lpp/netbiosname and lpp/hostname.domain for this service in order to perform remote password testing
+// Error code: %1
+// Message: %2
+//
+#define MSG_SPN_REGISTRATION_FAILURE     ((DWORD)0x8002E004L)
 

@@ -87,25 +87,6 @@ An error occurred calling the HIBP API.
 Message: %1
 .
 
-MessageId=0xC
-Severity=Error
-Facility=Runtime
-SymbolicName=MSG_WIN32_RPC_INIT_ERROR
-Language=English
-The RPC server could not be initialized
-Error code: %1
-Message: %2
-.
-
-MessageId=0xD
-Severity=Error
-Facility=Runtime
-SymbolicName=MSG_OTHER_RPC_INIT_ERROR
-Language=English
-The RPC server could not be initialized
-Message: %1
-.
-
 MessageId=0x2001
 Severity=Warning
 Facility=System
@@ -268,10 +249,39 @@ Language=English
 User '%1' was mapped to the defauly policy set as they did not match any policy set groups
 .
 
-MessageId=0xD004
+MessageId=0xE001
 Severity=Informational
 Facility=Runtime
 SymbolicName=MSG_SERVICE_STARTED
 Language=English
 The LPP service has initialized
+.
+
+MessageId=0xE002
+Severity=Error
+Facility=Runtime
+SymbolicName=MSG_WIN32_RPC_INIT_ERROR
+Language=English
+The RPC server could not be initialized
+Error code: %1
+Message: %2
+.
+
+MessageId=0xE003
+Severity=Error
+Facility=Runtime
+SymbolicName=MSG_OTHER_RPC_INIT_ERROR
+Language=English
+The RPC server could not be initialized
+Message: %1
+.
+
+MessageId=0xE004
+Severity=Warning
+Facility=Runtime
+SymbolicName=MSG_SPN_REGISTRATION_FAILURE
+Language=English
+The SPN could not be registered. Please add an SPN registration for lpp/netbiosname and lpp/hostname.domain for this service in order to perform remote password testing
+Error code: %1
+Message: %2
 .

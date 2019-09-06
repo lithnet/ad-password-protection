@@ -55,6 +55,14 @@
     </WixExtension>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\LppService\LppService.vcxproj">
+      <Name>LppService</Name>
+      <Project>{7d29fbfc-ad39-454b-b365-1c359a106cdc}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLFOLDER</RefTargetDir>
+    </ProjectReference>
     <ProjectReference Include="..\PasswordFilter\PasswordFilter.vcxproj">
       <Name>PasswordFilter</Name>
       <Project>{850894df-b439-4daa-a574-f7cfea422a2f}</Project>

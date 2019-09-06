@@ -93,6 +93,7 @@
       <Feature Id="FeatureNotificationPackage" Title="Enable password filtering on this computer" Level="2" AllowAdvertise="no" TypicalDefault="install" Description="This feature registers the password filter with the Windows LSASS process. On domain controllers, this means all user password changes are processed by the filter. On workstations and member services, this only impacts passwords set for local users">
         <ComponentRef Id="cmp6339c3e064764797a0b4d747e655cb0e"/>
         <ComponentGroupRef Id="FilterDLL" />
+        <ComponentGroupRef Id="LppService" />
         <MergeRef Id="VCRedist"/>
       </Feature>
       <Feature Id="FeaturePSModule" Title="PowerShell module" Level="2" AllowAdvertise="no" TypicalDefault="install" Description="Installs the PowerShell module on this computer which allows you to manage the password store and test passwords">
@@ -139,6 +140,25 @@
     <DirectoryRef Id="APPROOTDIR">
       <Component Id="cmpbdb687be91364145aa7b44287c14be38" Win64="yes" Guid="*">
         <File Id="filf07cd47e42574680b2b8a690abac7806" KeyPath="yes" Source="$(var.PasswordFilter.ProjectDir)messages.dll" />
+      </Component>
+
+      <Component Id="cmp83ce4f8d756644d8bcdfe83a44a0c62a" Win64="yes" Guid="*">
+        <File Id="filfecefa2577bd47d59e83dd90ee50b139" KeyPath="yes" Source="$(var.LppService.TargetPath)" />
+        <ServiceInstall
+          Id="ServiceInstaller"
+          Type="ownProcess"
+          Vital="yes"
+          Name="LppService"
+          DisplayName="Lithnet Password Protection for Active Directory"
+          Description="Allows evaluation of passwords against the password policy that applies to this server"
+          Start="auto"
+          Account="NT Authority\Network Service"
+          ErrorControl="ignore"
+          Interactive="no"
+        >
+          <ServiceDependency Id="RpcSs"/>
+          <ServiceDependency Id="RpcEptMapper"/>
+        </ServiceInstall>
       </Component>
 
       <Component Id="cmp3d41c57e8c89436994a394bf0b01c885" Guid="*" Win64="yes" >
@@ -238,6 +258,10 @@
       <ComponentRef Id="cmp3d41c57e8c89436994a394bf0b01c885"/>
       <ComponentRef Id="cmpa4c25597d0a647388892b9581f56b0b3"/>
       <ComponentRef Id="cmp4ad81ba1ff4447269a6b9b34af6560f4"/>
+    </ComponentGroup>
+
+    <ComponentGroup Id="LppService">
+      <ComponentRef Id="cmp83ce4f8d756644d8bcdfe83a44a0c62a"/>
     </ComponentGroup>
   </Product>
 </Wix>
