@@ -9,6 +9,7 @@
 
 extern "C" __declspec(dllexport)  BOOLEAN __stdcall InitializeChangeNotify(void)
 {
+	eventlog::getInstance().logw(EVENTLOG_INFORMATION_TYPE, MSG_AGENT_INITIALIZED, 0);
 	return TRUE;
 }
 
