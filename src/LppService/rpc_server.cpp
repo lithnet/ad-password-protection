@@ -20,7 +20,6 @@ RPC_STATUS __stdcall rpc_server::RpcServerIfCallback(IN void *ifx, IN void *cont
 	ULONG authn_level;
 	ULONG authn_service;
 	RPC_AUTHZ_HANDLE privs;
-	
 
 	if (RpcBindingInqAuthClient(context, &privs, NULL, &authn_level, &authn_service, NULL) != RPC_S_OK)
 	{
@@ -43,11 +42,11 @@ RPC_STATUS __stdcall rpc_server::RpcServerIfCallback(IN void *ifx, IN void *cont
 	return RPC_S_OK;
 };
 
-int GetPasswordFilterResult(handle_t handle, const wchar_t *username, const wchar_t *fullname, const wchar_t *password)
+int GetPasswordFilterResult(handle_t handle, const wchar_t *username, const wchar_t *fullname, const wchar_t *password, const boolean isSetOperation)
 {
 	wprintf_s(L"Checking password for user: %s, full name: %s\n", username, fullname);
 
-	const int result = PasswordFilterEx(username, fullname, password, false);
+	const int result = PasswordFilterEx(username, fullname, password, isSetOperation);
 
 	wprintf_s(L"Password filter returned %d\n", result);
 
@@ -147,15 +146,7 @@ std::wstring rpc_server::GenerateSpn()
 	LPWSTR* spn_array = NULL;
 	std::wstring spn;
 
-	status = DsGetSpn(DS_SPN_DNS_HOST,
-		L"lpp",
-		NULL, // DN of this service.
-		0, // Use the default instance port.
-		0, // Number of additional instance names.
-		NULL, // No additional instance names.
-		NULL, // No additional instance ports.
-		&spn_array_count, // Size of SPN array.
-		&spn_array); // Returned SPN(s).	
+	status = DsGetSpn(DS_SPN_DNS_HOST, L"lpp", NULL, 0, 0, NULL, NULL, &spn_array_count, &spn_array);
 
 	if (status != ERROR_SUCCESS)
 	{
@@ -186,8 +177,7 @@ void rpc_server::TryRegisterSpn(const std::wstring& serviceClass)
 
 void rpc_server::RegisterSpn(const std::wstring& serviceClass)
 {
-	DWORD status = 0;
-	status = DsServerRegisterSpn(DS_SPN_ADD_SPN_OP, serviceClass.c_str(), NULL);
+	DWORD status = DsServerRegisterSpn(DS_SPN_ADD_SPN_OP, serviceClass.c_str(), NULL);
 
 	if (status != ERROR_SUCCESS)
 	{
@@ -197,7 +187,7 @@ void rpc_server::RegisterSpn(const std::wstring& serviceClass)
 
 void rpc_server::InitializeRpcServer()
 {
-	std::vector<std::wstring> protocols = {  L"ncalrpc" };
+	std::vector<std::wstring> protocols = { L"ncacn_ip_tcp" };
 	const LPCWSTR annotation = L"Lithnet Password Protection";
 	RPC_BINDING_VECTOR* pbindingVector = 0;
 	RPC_STATUS status;
@@ -320,11 +310,11 @@ void rpc_server::Stop() const
 
 	RPC_BINDING_VECTOR* pbindingVector;
 
-	RPC_STATUS status = RpcServerInqBindings(&pbindingVector);
+	const RPC_STATUS status = RpcServerInqBindings(&pbindingVector);
 
 	if (status == RPC_S_OK && pbindingVector)
 	{
-		status = RpcEpUnregister(passwordfilter_v1_0_s_ifspec, pbindingVector, NULL);
+		RpcEpUnregister(passwordfilter_v1_0_s_ifspec, pbindingVector, NULL);
 		RpcBindingVectorFree(&pbindingVector);
 	}
 

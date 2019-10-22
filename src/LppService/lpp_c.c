@@ -32,7 +32,7 @@
 #include "lpp.h"
 
 #define TYPE_FORMAT_STRING_SIZE   39                                
-#define PROC_FORMAT_STRING_SIZE   55                                
+#define PROC_FORMAT_STRING_SIZE   61                                
 #define EXPR_FORMAT_STRING_SIZE   1                                 
 #define TRANSMIT_AS_TABLE_SIZE    0            
 #define WIRE_MARSHAL_TABLE_SIZE   0            
@@ -100,7 +100,8 @@ int GetPasswordFilterResult(
     /* [in] */ handle_t IDL_handle,
     /* [max_is][string][in] */ const wchar_t *username,
     /* [max_is][string][in] */ const wchar_t *fullname,
-    /* [max_is][string][in] */ const wchar_t *password)
+    /* [max_is][string][in] */ const wchar_t *password,
+    /* [in] */ const boolean isSetOperation)
 {
 
     CLIENT_CALL_RETURN _RetVal;
@@ -112,7 +113,8 @@ int GetPasswordFilterResult(
                   IDL_handle,
                   username,
                   fullname,
-                  password);
+                  password,
+                  isSetOperation);
     return ( int  )_RetVal.Simple;
     
 }
@@ -133,14 +135,14 @@ static const lpp_MIDL_PROC_FORMAT_STRING lpp__MIDL_ProcFormatString =
 			0x48,		/* Old Flags:  */
 /*  2 */	NdrFcLong( 0x0 ),	/* 0 */
 /*  6 */	NdrFcShort( 0x0 ),	/* 0 */
-/*  8 */	NdrFcShort( 0x28 ),	/* X64 Stack size/offset = 40 */
+/*  8 */	NdrFcShort( 0x30 ),	/* X64 Stack size/offset = 48 */
 /* 10 */	0x32,		/* FC_BIND_PRIMITIVE */
 			0x0,		/* 0 */
 /* 12 */	NdrFcShort( 0x0 ),	/* X64 Stack size/offset = 0 */
-/* 14 */	NdrFcShort( 0x0 ),	/* 0 */
+/* 14 */	NdrFcShort( 0x5 ),	/* 5 */
 /* 16 */	NdrFcShort( 0x8 ),	/* 8 */
 /* 18 */	0x46,		/* Oi2 Flags:  clt must size, has return, has ext, */
-			0x4,		/* 4 */
+			0x5,		/* 5 */
 /* 20 */	0xa,		/* 10 */
 			0x5,		/* Ext Flags:  new corr desc, srv corr check, */
 /* 22 */	NdrFcShort( 0x0 ),	/* 0 */
@@ -166,11 +168,18 @@ static const lpp_MIDL_PROC_FORMAT_STRING lpp__MIDL_ProcFormatString =
 /* 44 */	NdrFcShort( 0x18 ),	/* X64 Stack size/offset = 24 */
 /* 46 */	NdrFcShort( 0x1e ),	/* Type Offset=30 */
 
+	/* Parameter isSetOperation */
+
+/* 48 */	NdrFcShort( 0x48 ),	/* Flags:  in, base type, */
+/* 50 */	NdrFcShort( 0x20 ),	/* X64 Stack size/offset = 32 */
+/* 52 */	0x3,		/* FC_SMALL */
+			0x0,		/* 0 */
+
 	/* Return value */
 
-/* 48 */	NdrFcShort( 0x70 ),	/* Flags:  out, return, base type, */
-/* 50 */	NdrFcShort( 0x20 ),	/* X64 Stack size/offset = 32 */
-/* 52 */	0x8,		/* FC_LONG */
+/* 54 */	NdrFcShort( 0x70 ),	/* Flags:  out, return, base type, */
+/* 56 */	NdrFcShort( 0x28 ),	/* X64 Stack size/offset = 40 */
+/* 58 */	0x8,		/* FC_LONG */
 			0x0,		/* 0 */
 
 			0x0
@@ -260,6 +269,11 @@ static const unsigned short passwordfilter_FormatStringOffsetTable[] =
 
 typedef 
 NDR64_FORMAT_CHAR
+__midl_frag13_t;
+extern const __midl_frag13_t __midl_frag13;
+
+typedef 
+NDR64_FORMAT_CHAR
 __midl_frag12_t;
 extern const __midl_frag12_t __midl_frag12;
 
@@ -312,6 +326,7 @@ struct
     struct _NDR64_PARAM_FORMAT frag4;
     struct _NDR64_PARAM_FORMAT frag5;
     struct _NDR64_PARAM_FORMAT frag6;
+    struct _NDR64_PARAM_FORMAT frag7;
 }
 __midl_frag2_t;
 extern const __midl_frag2_t __midl_frag2;
@@ -321,8 +336,11 @@ NDR64_FORMAT_UINT32
 __midl_frag1_t;
 extern const __midl_frag1_t __midl_frag1;
 
-static const __midl_frag12_t __midl_frag12 =
+static const __midl_frag13_t __midl_frag13 =
 0x5    /* FC64_INT32 */;
+
+static const __midl_frag12_t __midl_frag12 =
+0x2    /* FC64_INT8 */;
 
 static const __midl_frag11_t __midl_frag11 =
 { 
@@ -430,12 +448,12 @@ static const __midl_frag2_t __midl_frag2 =
     { 
     /* GetPasswordFilterResult */      /* procedure GetPasswordFilterResult */
         (NDR64_UINT32) 19660864 /* 0x12c0040 */,    /* explicit handle */ /* IsIntrepreted, ClientMustSize, HasReturn, ServerCorrelation, HasExtensions */
-        (NDR64_UINT32) 40 /* 0x28 */ ,  /* Stack size */
-        (NDR64_UINT32) 0 /* 0x0 */,
+        (NDR64_UINT32) 48 /* 0x30 */ ,  /* Stack size */
+        (NDR64_UINT32) 5 /* 0x5 */,
         (NDR64_UINT32) 8 /* 0x8 */,
         (NDR64_UINT16) 0 /* 0x0 */,
         (NDR64_UINT16) 0 /* 0x0 */,
-        (NDR64_UINT16) 4 /* 0x4 */,
+        (NDR64_UINT16) 5 /* 0x5 */,
         (NDR64_UINT16) 8 /* 0x8 */
     },
     { 
@@ -523,8 +541,32 @@ static const __midl_frag2_t __midl_frag2 =
         24 /* 0x18 */,   /* Stack offset */
     },
     { 
-    /* int */      /* parameter int */
+    /* isSetOperation */      /* parameter isSetOperation */
         &__midl_frag12,
+        { 
+        /* isSetOperation */
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            (NDR64_UINT16) 0 /* 0x0 */,
+            0
+        },    /* [in], Basetype, ByValue */
+        (NDR64_UINT16) 0 /* 0x0 */,
+        32 /* 0x20 */,   /* Stack offset */
+    },
+    { 
+    /* int */      /* parameter int */
+        &__midl_frag13,
         { 
         /* int */
             0,
@@ -544,7 +586,7 @@ static const __midl_frag2_t __midl_frag2 =
             0
         },    /* [out], IsReturn, Basetype, ByValue */
         (NDR64_UINT16) 0 /* 0x0 */,
-        32 /* 0x20 */,   /* Stack offset */
+        40 /* 0x28 */,   /* Stack offset */
     }
 };
 

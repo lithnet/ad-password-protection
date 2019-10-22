@@ -59,7 +59,8 @@ int GetPasswordFilterResult(
     /* [in] */ handle_t IDL_handle,
     /* [max_is][string][in] */ const wchar_t *username,
     /* [max_is][string][in] */ const wchar_t *fullname,
-    /* [max_is][string][in] */ const wchar_t *password);
+    /* [max_is][string][in] */ const wchar_t *password,
+    /* [in] */ const boolean isSetOperation);
 
 
 

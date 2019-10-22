@@ -180,7 +180,7 @@ namespace NativeUnitTests
 		static std::vector<BYTE> GetBinaryHttpResponseFromMockApNtlm(const std::wstring& range)
 		{
 			registry reg;
-			std::wstring apiurl = L"http://localhost/ntlm/binary-nopwncount/range/{range}";
+			std::wstring apiurl = L"https://api.lithiumblue.com/v1/ntlm/{range}";
 			apiurl = ReplaceToken(apiurl, L"{range}", range);
 			return GetHttpResponseBinary(apiurl);
 		}
@@ -188,7 +188,7 @@ namespace NativeUnitTests
 		static std::wstring IntToHex(int i)
 		{
 			std::wstringstream stream;
-			stream << std::setfill(L'0') << std::setw(5) << std::hex << i;
+			stream << std::uppercase << std::setfill(L'0') << std::setw(5) << std::hex << i;
 			return stream.str();
 		}
 

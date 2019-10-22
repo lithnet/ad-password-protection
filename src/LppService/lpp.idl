@@ -11,5 +11,6 @@ interface passwordfilter
 	int GetPasswordFilterResult(
 		[in, string, max_is(257)] const wchar_t * username, //UNLEN + 1
 		[in, string, max_is(1024)] const wchar_t * fullname,
-		[in, string, max_is(1024)] const wchar_t * password);
+		[in, string, max_is(1024)] const wchar_t * password,
+		[in] const boolean isSetOperation);
 }

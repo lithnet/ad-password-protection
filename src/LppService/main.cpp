@@ -9,7 +9,7 @@ int __cdecl wmain(__in long argc, __in_ecount(argc) TCHAR* argv[])
 {
 	try
 	{
-		if (argc > 0)
+		if (argc > 1)
 		{
 			if (lstrcmpi(argv[1], TEXT("-foreground")) == 0)
 			{
