@@ -36,7 +36,7 @@ The password filter is currently disabled and has not evaluated the password cha
 MessageId=0x3
 Severity=Success
 Facility=Io
-SymbolicName=MSG_MODULE_INITIALIZED
+SymbolicName=MSG_AGENT_INITIALIZED
 Language=English
 The password filter has been successfully loaded.
 .

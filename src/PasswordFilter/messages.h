@@ -63,13 +63,13 @@
 #define MSG_AGENT_DISABLED               ((DWORD)0x80040002L)
 
 //
-// MessageId: MSG_MODULE_INITIALIZED
+// MessageId: MSG_AGENT_INITIALIZED
 //
 // MessageText:
 //
 // The password filter has been successfully loaded.
 //
-#define MSG_AGENT_INITIALIZED           ((DWORD)0x00040003L)
+#define MSG_AGENT_INITIALIZED            ((DWORD)0x00040003L)
 
 //
 // MessageId: MSG_PROCESSING_REQUEST
