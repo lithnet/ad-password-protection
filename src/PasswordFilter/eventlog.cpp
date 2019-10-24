@@ -4,8 +4,10 @@
 #include <fstream>
 #include <Shlwapi.h>
 #include "messages.h"
+#include <mutex>
 
 HANDLE eventlog::hlog;
+std::mutex eventlog::lock;
 
 eventlog::eventlog()
 = default;
@@ -27,6 +29,9 @@ void eventlog::init()
 		{
 			if (count > 30)
 			{
+				std::string message = "Event log initialization error\r\n";
+				message += "Could not obtain a handle to the event log service";
+				OutputDebugStringA(message.c_str());
 				break;
 			}
 
@@ -111,13 +116,28 @@ HANDLE eventlog::getHandle()
 {
 	if (eventlog::hlog == NULL)
 	{
-		eventlog::hlog = RegisterEventSource(NULL, L"LithnetPasswordProtection");
-
-		if (eventlog::hlog == NULL)
+		try
 		{
-			const std::wstring message = L"Could not register event source LithnetPasswordProtection:" + std::to_wstring(GetLastError()) + L"\r\n";
-			writeToFileLog(message);
+			lock.lock();
+
+			if (eventlog::hlog == NULL)
+			{
+				eventlog::hlog = RegisterEventSource(NULL, L"LithnetPasswordProtection");
+
+				if (eventlog::hlog == NULL)
+				{
+					const std::wstring message = L"Could not register event source LithnetPasswordProtection: " + std::to_wstring(GetLastError()) + L"\r\n";
+					writeToFileLog(message);
+				}
+			}
 		}
+		catch (...)
+		{
+			lock.unlock();
+			throw;
+		}
+
+		lock.unlock();
 	}
 
 	return eventlog::hlog;

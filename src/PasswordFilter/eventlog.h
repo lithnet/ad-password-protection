@@ -1,4 +1,6 @@
 #pragma once
+#include <mutex>
+
 class eventlog
 {
 public:
@@ -21,6 +23,8 @@ public:
 private:
 	static HANDLE getHandle();
 	static HANDLE hlog;
+	static std::mutex lock;
+
 	eventlog();
 	~eventlog();
 };
