@@ -53,7 +53,7 @@ void eventlog::init()
 	}
 }
 
-void eventlog::writeToFileLog(std::string message)
+void eventlog::writeToFileLog(const std::string& message)
 {
 	std::ofstream outfile;
 	const LPCWSTR sourcepath = L"%windir%\\logs\\lpp.log";
@@ -80,7 +80,7 @@ void eventlog::writeToFileLog(std::string message)
 	outfile.close();
 }
 
-void eventlog::writeToFileLog(std::wstring message)
+void eventlog::writeToFileLog(const std::wstring& message)
 {
 	std::wofstream outfile;
 	const LPCWSTR sourcepath = L"%windir%\\logs\\lpp.log";
