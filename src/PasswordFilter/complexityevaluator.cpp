@@ -3,7 +3,7 @@
 #include "SecureArrayT.h"
 #include "registry.h"
 #include <cwctype>
-#include  "eventlog.h"
+#include "eventlog.h"
 #include "messages.h"
 
 BOOLEAN ProcessPasswordComplexityThreshold(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
