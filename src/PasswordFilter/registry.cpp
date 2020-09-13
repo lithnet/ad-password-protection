@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "registry.h"
+#include <memory>
 
 registry::registry()
 {

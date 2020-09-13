@@ -43,5 +43,13 @@ namespace NativeUnitTests
 			Assert::IsFalse(ProcessPasswordRegexReject(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
 			DeleteValue(REG_VALUE_REGEXREJECT);
 		}
+
+		TEST_METHOD(RegexRejectFail2)
+		{
+			SetValue(REG_VALUE_REGEXREJECT, L".+\\d{3,}$");
+			TestString password(L"reject me1234");
+			Assert::IsFalse(ProcessPasswordRegexReject(password, std::wstring(L"accountName"), std::wstring(L"full name"), TRUE, reg));
+			DeleteValue(REG_VALUE_REGEXREJECT);
+		}
 	};
 }

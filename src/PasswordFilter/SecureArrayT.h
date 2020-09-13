@@ -1,11 +1,15 @@
 #pragma once
+#include <memory>
+#include <winbase.h>
+
 template <class T>
+
 class SecureArrayT
 {
 protected:
-	std::shared_ptr<T[]> internalptr;
 	int size;
-
+	std::shared_ptr<T[]> internalptr;
+	
 public:
 
 	SecureArrayT(T* item, const int size)
