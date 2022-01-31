@@ -1,0 +1,37 @@
+2021-04-25 09:14:49.238 +10:00 [INF] MSBuild registered from C:\Program Files\dotnet\sdk\5.0.202\
+2021-04-25 09:14:49.393 +10:00 [INF] Registered 1 extensions:
+	Default extension
+2021-04-25 09:14:52.401 +10:00 [INF] Initializing upgrade step Select an entrypoint
+2021-04-25 09:14:52.406 +10:00 [INF] Setting entrypoint to only project in solution: D:\dev\git\lithnet\ad-password-protection\src\PasswordProtection\Lithnet.ActiveDirectory.PasswordProtection.csproj
+2021-04-25 09:14:52.416 +10:00 [INF] Initializing upgrade step Select project to upgrade
+2021-04-25 09:14:52.498 +10:00 [INF] Initializing upgrade step Back up project
+2021-04-25 09:15:01.345 +10:00 [INF] Applying upgrade step Back up project
+2021-04-25 09:15:04.061 +10:00 [INF] Backing up D:\dev\git\lithnet\ad-password-protection\src\PasswordProtection to D:\dev\git\lithnet\ad-password-protection\src\PasswordProtection.backup
+2021-04-25 09:15:06.391 +10:00 [INF] Project backed up to D:\dev\git\lithnet\ad-password-protection\src\PasswordProtection.backup
+2021-04-25 09:15:06.392 +10:00 [INF] Upgrade step Back up project applied successfully
+2021-04-25 09:15:08.415 +10:00 [INF] Initializing upgrade step Convert project file to SDK style
+2021-04-25 09:15:11.115 +10:00 [INF] Applying upgrade step Convert project file to SDK style
+2021-04-25 09:15:11.118 +10:00 [INF] Converting project file format with try-convert, version 0.7.217901
+2021-04-25 09:15:14.920 +10:00 [INF] [try-convert] Conversion complete!
+2021-04-25 09:15:15.460 +10:00 [INF] Project file converted successfully! The project may require additional changes to build successfully against the new .NET target.
+2021-04-25 09:15:16.716 +10:00 [INF] Upgrade step Convert project file to SDK style applied successfully
+2021-04-25 09:15:31.891 +10:00 [INF] Initializing upgrade step Clean up NuGet package references
+2021-04-25 09:15:34.986 +10:00 [INF] Reference to .NET Upgrade Assistant analyzer package (Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers, version 0.2.220602) needs added
+2021-04-25 09:15:34.995 +10:00 [INF] Packages to be addded:
+Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers, Version=0.2.220602
+2021-04-25 09:15:40.562 +10:00 [INF] Applying upgrade step Clean up NuGet package references
+2021-04-25 09:15:40.569 +10:00 [INF] Adding package reference: Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers, Version=0.2.220602
+2021-04-25 09:15:43.907 +10:00 [INF] Upgrade step Clean up NuGet package references applied successfully
+2021-04-25 09:15:46.452 +10:00 [INF] Initializing upgrade step Update TFM
+2021-04-25 09:15:46.458 +10:00 [INF] TFM needs updated to netstandard2.0
+2021-04-25 09:15:48.722 +10:00 [INF] Applying upgrade step Update TFM
+2021-04-25 09:15:54.000 +10:00 [INF] Updated TFM to netstandard2.0
+2021-04-25 09:15:54.001 +10:00 [INF] Upgrade step Update TFM applied successfully
+2021-04-25 09:15:56.277 +10:00 [INF] Initializing upgrade step Update NuGet Packages
+2021-04-25 09:15:57.386 +10:00 [INF] No package updates needed
+2021-04-25 09:15:57.387 +10:00 [INF] Initializing upgrade step Add template files
+2021-04-25 09:15:57.432 +10:00 [INF] 0 expected template items needed
+2021-04-25 09:15:57.434 +10:00 [INF] Initializing upgrade step Update C# source
+2021-04-25 09:15:58.936 +10:00 [INF] Initializing upgrade step Move to next project
+2021-04-25 09:15:58.961 +10:00 [INF] Applying upgrade step Move to next project
+2021-04-25 09:15:58.962 +10:00 [INF] Upgrade step Move to next project applied successfully

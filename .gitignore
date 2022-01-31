@@ -263,3 +263,4 @@ __pycache__/
 *.bin
 /src/enc_temp_folder/*
 *.cab
+/src/PasswordProtection.backup
