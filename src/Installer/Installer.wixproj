@@ -38,6 +38,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="CustomDialogs.wxs" />
+    <Compile Include="netfx472.wxs" />
     <Compile Include="Product.wxs" />
   </ItemGroup>
   <ItemGroup>

@@ -33,10 +33,10 @@
 
     <Property Id="INSTALLLEVEL" Value="2" />
 
-    <PropertyRef Id="WIX_IS_NETFRAMEWORK_46_OR_LATER_INSTALLED" />
+    <PropertyRef Id="WIX_IS_NETFRAMEWORK_472_OR_LATER_INSTALLED" />
 
-    <Condition Message="[ProductName] Requires .NET Framework 4.6 or later to be installed">
-      <![CDATA[Installed OR WIX_IS_NETFRAMEWORK_46_OR_LATER_INSTALLED]]>
+    <Condition Message="[ProductName] Requires .NET Framework 4.7.2 or later to be installed">
+      <![CDATA[Installed OR WIX_IS_NETFRAMEWORK_472_OR_LATER_INSTALLED]]>
     </Condition>
 
     <WixVariable Id="WixUILicenseRtf" Value="license.rtf" />
