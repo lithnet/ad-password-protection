@@ -35,7 +35,7 @@ namespace ManagedUnitTests
         [TestMethod]
         public void TestGoodHashTypes()
         {
-            Lithnet.ActiveDirectory.PasswordProtection.Store.ImportHexHashesFromSortedFile(this.Store, StoreType.Password, @"D:\pwnedpwds\raw\test-good-hash.txt", new CancellationToken());
+            Lithnet.ActiveDirectory.PasswordProtection.Store.ImportHexHashesFromSortedFile(this.Store, StoreType.Password, @"TestData\test-good-hash.txt", new CancellationToken());
         }
 
         [TestMethod]
@@ -43,7 +43,7 @@ namespace ManagedUnitTests
         {
             try
             {
-                Lithnet.ActiveDirectory.PasswordProtection.Store.ImportHexHashesFromSortedFile(this.Store, StoreType.Password, @"D:\pwnedpwds\raw\test-hash-too-long.txt", new CancellationToken());
+                Lithnet.ActiveDirectory.PasswordProtection.Store.ImportHexHashesFromSortedFile(this.Store, StoreType.Password, @"TestData\test-hash-too-long.txt", new CancellationToken());
                 Assert.Fail("Did not throw the expected exception");
             }
             catch (InvalidDataException)
@@ -56,7 +56,7 @@ namespace ManagedUnitTests
         {
             try
             {
-                Lithnet.ActiveDirectory.PasswordProtection.Store.ImportHexHashesFromSortedFile(this.Store, StoreType.Password, @"D:\pwnedpwds\raw\test-hash-too-short.txt", new CancellationToken());
+                Lithnet.ActiveDirectory.PasswordProtection.Store.ImportHexHashesFromSortedFile(this.Store, StoreType.Password, @"TestData\test-hash-too-short.txt", new CancellationToken());
                 Assert.Fail("Did not throw the expected exception");
             }
             catch (InvalidDataException)
@@ -85,7 +85,7 @@ namespace ManagedUnitTests
         [TestMethod]
         public void AddEnglishDictionaryToNewStoreAndValidate()
         {
-            string file = @"D:\pwnedpwds\raw\english.txt";
+            string file = @"TestData\english.txt";
             string path = Path.Combine(TestHelpers.TestStorePath, Guid.NewGuid().ToString());
             Directory.CreateDirectory(path);
             CancellationToken ct = new CancellationToken();

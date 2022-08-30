@@ -29,7 +29,7 @@
     <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'MicrosoftSignedRelease|x64' ">
-    <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
+    <OutputPath>D:\dev\installers\lpp\</OutputPath>
     <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'EVSignedRelease|x64' ">
@@ -92,12 +92,12 @@
   </Target>
   <PropertyGroup>
     <PostBuildEvent>if $(ConfigurationName) == EVSignedRelease (
-                    "C:\Program Files (x86)\Microsoft SDKs\ClickOnce\SignTool\signtool.exe" sign /sha1 "$(EVCSCERTTHUMBPRINT)" /t http://timestamp.digicert.com /fd sha256 /v "$(TargetFileName)"
+	%25BuildToolsPath%25\sign-ev.bat "$(TargetFileName)"
 ) else (
-    if $(ConfigurationName) == MicrosoftSignedRelease (
-                    "C:\Program Files (x86)\Microsoft SDKs\ClickOnce\SignTool\signtool.exe" sign /sha1 "$(EVCSCERTTHUMBPRINT)" /t http://timestamp.digicert.com /fd sha256 /v "$(TargetFileName)"
+    if $(ConfigurationName) == MicrosoftSignedRelease ( 
+	%25BuildToolsPath%25\sign-ev.bat "$(TargetFileName)"
     ) else (
-                    "C:\Program Files (x86)\Microsoft SDKs\ClickOnce\SignTool\signtool.exe" sign /sha1 "$(CSCERTTHUMBPRINT)" /t http://timestamp.digicert.com /fd sha256 /v "$(TargetFileName)"
+	%25BuildToolsPath%25\sign.bat "$(TargetFileName)"
     )
 )</PostBuildEvent>
   </PropertyGroup>

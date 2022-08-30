@@ -10,7 +10,7 @@ namespace ManagedUnitTests
 {
     public static class TestHelpers
     {
-        public static string TestStorePath = "D:\\pwnedpwds\\test";
+        public static string TestStorePath = @"D:\dev\lppstore";
 
         public static void AssertFileIsExpectedSize(string rawFile, int size)
         {
