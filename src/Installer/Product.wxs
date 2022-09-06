@@ -93,12 +93,12 @@
             <Feature Id="FeatureNotificationPackage" Title="Enable password filtering on this computer" Level="2" AllowAdvertise="no" TypicalDefault="install" Description="This feature registers the password filter with the Windows LSASS process. On domain controllers, this means all user password changes are processed by the filter. On workstations and member services, this only impacts passwords set for local users">
                 <ComponentRef Id="cmp6339c3e064764797a0b4d747e655cb0e"/>
                 <ComponentGroupRef Id="FilterDLL" />
-                <!--<MergeRef Id="VCRedist"/>-->
+                <MergeRef Id="VCRedist"/>
             </Feature>
             <Feature Id="FeaturePSModule" Title="PowerShell module" Level="2" AllowAdvertise="no" TypicalDefault="install" Description="Installs the PowerShell module on this computer which allows you to manage the password store and test passwords">
                 <ComponentGroupRef Id="PSModule"/>
                 <ComponentGroupRef Id="FilterDLL" />
-                <!--<MergeRef Id="VCRedist"/>-->
+                <MergeRef Id="VCRedist"/>
             </Feature>
         </Feature>
 
@@ -108,7 +108,7 @@
 
         <DirectoryRef Id="TARGETDIR">
             <!--<Merge Id="VCRedist" SourceFile="C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Redist\MSVC\v142\MergeModules\Microsoft_VC142_CRT_x64.msm" DiskId="1" Language="0"/>-->
-            <!--<Merge Id="VCRedist" SourceFile="C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Redist\MSVC\v143\MergeModules\Microsoft_VC143_CRT_x64.msm" DiskId="1" Language="0"/>-->
+            <Merge Id="VCRedist" SourceFile="C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Redist\MSVC\v143\MergeModules\Microsoft_VC143_CRT_x64.msm" DiskId="1" Language="0"/>
         </DirectoryRef>
 
         <DirectoryRef Id="System64Folder">
