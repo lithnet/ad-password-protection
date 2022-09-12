@@ -28,12 +28,17 @@
     <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'LsaProtectedModeRelease|x64' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'MicrosoftSignedRelease|x64' ">
+    <OutputPath>D:\dev\installers\lpp\</OutputPath>
+    <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'EVSignedRelease|x64' ">
     <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="CustomDialogs.wxs" />
+    <Compile Include="netfx472.wxs" />
     <Compile Include="Product.wxs" />
   </ItemGroup>
   <ItemGroup>
@@ -86,7 +91,15 @@
     <Error Text="The WiX Toolset v3.11 (or newer) build tools must be installed to build this project. To download the WiX Toolset, see http://wixtoolset.org/releases/" />
   </Target>
   <PropertyGroup>
-    <PostBuildEvent>"C:\Program Files (x86)\Microsoft SDKs\ClickOnce\SignTool\signtool.exe" sign /sha1 "$(CSCERTTHUMBPRINT)" /t http://timestamp.digicert.com /fd sha256 /v "$(TargetFileName)"</PostBuildEvent>
+    <PostBuildEvent>if $(ConfigurationName) == EVSignedRelease (
+	%25BuildToolsPath%25\sign-ev.bat "$(TargetFileName)"
+) else (
+    if $(ConfigurationName) == MicrosoftSignedRelease ( 
+	%25BuildToolsPath%25\sign-ev.bat "$(TargetFileName)"
+    ) else (
+	%25BuildToolsPath%25\sign.bat "$(TargetFileName)"
+    )
+)</PostBuildEvent>
   </PropertyGroup>
   <!--
 	To modify your build process, add your task inside one of the targets below and uncomment it.

@@ -313,9 +313,9 @@ BOOLEAN ProcessPasswordRegexApprove(const SecureArrayT<WCHAR> &password, const s
 	{
 		OutputDebugString(L"Checking for regular expression approval match");
 
-		std::wregex e(regex);
+		std::wregex e(regex, std::regex_constants::icase);
 
-		if (!std::regex_match(password.get(), e))
+		if (!std::regex_search(password.get(), e))
 		{
 			OutputDebugString(L"Password did not match the approval regular expression");
 			eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_APPROVAL_REGEX, 3, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
@@ -336,9 +336,9 @@ BOOLEAN ProcessPasswordRegexReject(const SecureArrayT<WCHAR> &password, const st
 	{
 		OutputDebugString(L"Checking for regular expression rejection match");
 
-		std::wregex e(regex);
+		std::wregex e(regex, std::regex_constants::icase);
 
-		if (std::regex_match(password.get(), e))
+		if (std::regex_search(password.get(), e))
 		{
 			OutputDebugString(L"Password matched the rejection regular expression");
 			eventlog::getInstance().logw(EVENTLOG_WARNING_TYPE, MSG_PASSWORD_REJECTED_REJECTION_REGEX, 3, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());

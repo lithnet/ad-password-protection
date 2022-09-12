@@ -1,4 +1,6 @@
 #pragma once
+#include <mutex>
+
 class eventlog
 {
 public:
@@ -10,11 +12,19 @@ public:
 		static eventlog instance;
 		return instance;
 	}
+	
+	static void init();
+	static void writeToFileLog(const std::wstring& message);
+	static void writeToFileLog(const std::string& message);
+
 	eventlog(eventlog const&) = delete;
 	void operator=(eventlog const&) = delete;
 
 private:
-	
+	static HANDLE getHandle();
+	static HANDLE hlog;
+	static std::mutex lock;
+
 	eventlog();
 	~eventlog();
 };

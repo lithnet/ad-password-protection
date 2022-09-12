@@ -282,12 +282,15 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             }
 
             int hashStringLength = hashBinaryLength * 2;
+            int lineCount = 0;
 
             foreach (string line in Store.GetLinesFromFile(sourceFile, progress))
             {
+                lineCount++;
+
                 if (line.Length < hashStringLength)
                 {
-                    throw new InvalidDataException("The file contained a line that was not recognized as a hexadecimal hash. Lines must end with a new line character or colon");
+                    throw new InvalidDataException($"Line #{lineCount} was not recognized as a hexadecimal hash. The line was not the expected length.\r\nThe following line was invalid:\r\n{line}");
                 }
 
                 if (line.Length == hashStringLength)
@@ -300,7 +303,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
                 if (!(next == ':' || next == '\r' || next == '\n'))
                 {
-                    throw new InvalidDataException("The file contained a line that was not recognized as a hexadecimal hash. Lines must end with a new line character or colon");
+                    throw new InvalidDataException($"Line #{lineCount} was not recognized as a hexadecimal hash. Lines must end with a new line character or colon\r\nThe following line was invalid:\r\n{line}");
                 }
 
                 yield return line.Substring(0, hashStringLength).HexStringToBytes();

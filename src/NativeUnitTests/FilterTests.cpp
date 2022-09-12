@@ -65,7 +65,6 @@ namespace NativeUnitTests
 
 		TEST_METHOD(TestBadPasswordv3Store)
 		{
-			TestBannedPassword();
 		}
 	};
 }

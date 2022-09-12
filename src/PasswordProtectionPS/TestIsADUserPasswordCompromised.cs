@@ -56,7 +56,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
                     break;
 
                 case "Upn":
-                    account = this.client.GetAccountByUPN(this.Upn);
+                    account = this.client.GetAccount(new NTAccount(this.Upn));
                     break;
 
                 case "Sid":

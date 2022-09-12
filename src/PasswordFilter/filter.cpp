@@ -6,10 +6,27 @@
 #include "messages.h"
 #include "passwordevaluator.h"
 #include "SecureArrayT.h"
+#include <thread>
 
 extern "C" __declspec(dllexport)  BOOLEAN __stdcall InitializeChangeNotify(void)
 {
-	return TRUE;
+	try {
+		std::thread t1(eventlog::init);
+		t1.detach();
+		return TRUE;
+	}
+	catch (std::exception const& e)
+	{
+		OutputDebugString(L"Other error caught");
+		eventlog::getInstance().log(EVENTLOG_ERROR_TYPE, MSG_UNEXPECTEDERROR, 1, e.what());
+	}
+	catch (...)
+	{
+		OutputDebugString(L"Unexpected error caught");
+		eventlog::getInstance().logw(EVENTLOG_ERROR_TYPE, MSG_UNEXPECTEDERROR, 1, L"No exception information was available");
+	}
+
+	return FALSE;
 }
 
 extern "C" __declspec(dllexport) NTSTATUS __stdcall PasswordChangeNotify(

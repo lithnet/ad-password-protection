@@ -33,6 +33,14 @@ Language=English
 The password filter is currently disabled and has not evaluated the password change request.
 .
 
+MessageId=0x3
+Severity=Success
+Facility=Io
+SymbolicName=MSG_AGENT_INITIALIZED
+Language=English
+The password filter has been successfully loaded.
+.
+
 MessageId=0x4
 Severity=Success
 Facility=System

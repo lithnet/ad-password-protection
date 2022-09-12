@@ -5,7 +5,6 @@
 #include <sstream>
 #include <iomanip>
 #include "utils.h"
-#include <atlconv.h>
 #include "SecureArrayT.h"
 #include "eventlog.h"
 #include "messages.h"
