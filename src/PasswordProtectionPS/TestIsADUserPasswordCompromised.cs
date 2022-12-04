@@ -1,9 +1,9 @@
 ﻿using System;
+using System.DirectoryServices.ActiveDirectory;
 using System.Management.Automation;
 using System.Security.Principal;
-using Lithnet.ActiveDirectory.PasswordProtection;
-using DSInternals.Replication;
 using DSInternals.Common.Data;
+using DSInternals.Replication;
 
 namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
 {
@@ -37,7 +37,22 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
         {
             Global.OpenExistingDefaultOrThrow();
             base.BeginProcessing();
-            this.client = new DirectoryReplicationClient(this.Server ?? Environment.GetEnvironmentVariable("UserDNSDomain"), RpcProtocol.TCP, this.Credential?.GetNetworkCredential());
+
+            string server = this.Server;
+
+            if (server == null)
+            {
+                if (NativeMethods.IsDc())
+                {
+                    server = Environment.MachineName;
+                }
+                else
+                {
+                    server = Domain.GetComputerDomain().FindDomainController(LocatorOptions.WriteableRequired).Name;
+                }
+            }
+
+            this.client = new DirectoryReplicationClient(server, RpcProtocol.TCP, this.Credential?.GetNetworkCredential());
         }
 
         protected override void ProcessRecord()
