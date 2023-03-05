@@ -36,7 +36,7 @@ stages:
       - task: VSBuild@1
         inputs:
           solution: 'src/PasswordFilter/PasswordFilter.vcxproj'
-          msbuildArgs: '/OUT $(Build.ArtifactStagingDirectory)\lithnetpwdf.dll'
+          msbuildArgs: '/p:OutDir=$(Build.ArtifactStagingDirectory)'
           platform: '$(buildPlatform)'
           configuration: '$(buildConfiguration)'
 
