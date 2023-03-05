@@ -1,0 +1,82 @@
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  - name: buildPlatform 
+    value: 'x64'
+  - name: buildConfiguration
+    value: 'Release'
+  - name: build.version.major
+    value: 1
+  - name: build.version.minor
+    value: 1
+  - name: build.version.revision
+    value: $[counter(format('{0}.{1}', variables['build.version.major'], variables['build.version.minor']), 0)]
+  - name: build.version.suffix
+    value: -beta1
+  - name: build.version
+    value: $(build.version.major).$(build.version.minor).$(build.version.revision)$(build.version.suffix)
+  - name: build.versionShort
+    value: $(build.version.major).$(build.version.minor).$(build.version.revision)
+  - name: build.date
+    value: $[format('{0:yyyy}-{0:MM}-{0:dd}T{0:HH}:{0:mm}:{0:ss}', pipeline.startTime)]
+  - group: Azure KeyVault Code Signing
+  
+name: $(build.version.major).$(build.version.minor).$(build.version.revision)$(build.version.suffix)
+trigger: none
+
+stages:
+- stage: build_lpp
+  displayName: Build LPP
+  dependsOn: []
+  jobs:
+    - job: "build_lpp_job"
+      steps:
+
+      - task: VSBuild@1
+        inputs:
+          solution: 'src/PasswordFilter/PasswordFilter.vcxproj'
+          msbuildArgs: '/OUT $(Build.ArtifactStagingDirectory)\lithnetpwdf.dll'
+          platform: '$(buildPlatform)'
+          configuration: '$(buildConfiguration)'
+
+      - task: DotNetCoreCLI@2
+        inputs:
+          command: 'custom'
+          custom: 'tool'
+          arguments: 'update --global azuresigntool'
+        displayName: Install AzureSignTool
+
+      - task: PowerShell@2
+        displayName: 'Sign files with AzureSignTool'
+        inputs:
+          targetType: 'inline'
+          script: |
+            $files = @()
+            $files += "$(Build.ArtifactStagingDirectory)\lithnetpwdf.dll"
+
+            write-host "Signing $($files.Length) files:"
+            write-output $files
+
+            $cmdargs = @(
+              "sign",
+              "-d", "Lithnet Password Protection for Active Directory",
+              "-kvu", "$(akv.url)",
+              "-kvi", "$(akv.applicationID)",
+              "-kvs", "$(akv.secret)",
+              "-kvt", "$(akv.tenantId)",
+              "-kvc", "$(akv.certificateName)",
+              "-tr", "http://timestamp.digicert.com",
+              "-td", "sha256"
+            )
+
+            $cmdargs += $files
+        
+            & AzureSignTool $cmdargs
+          failOnStderr: true
+          showWarnings: true
+      - task: CmdLine@2
+        displayName: Create CAB
+        inputs:
+          script: |
+            makecab $(Build.ArtifactStagingDirectory)\lithnetpwdf.dll $(Build.ArtifactStagingDirectory)\lithnetpwdf.cab
