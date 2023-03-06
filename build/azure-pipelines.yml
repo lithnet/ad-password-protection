@@ -106,11 +106,15 @@ stages:
           artifact: 'lpp_filter_for_signing'
           publishLocation: 'pipeline'
     - job: "get_lpp_signed_by_ms"
+      dependsOn: build_lpp_job
       displayName: Pause for LPP DLL signing by Microsoft
       pool: server
       steps:
-      - task: ManualIntervention@8
+      - task: ManualValidation@0
         inputs:
+          notifyUsers: |
+            [ad-password-protection]\Project Administrators
+            [ad-password-protection]\Build Administrators
           instructions: |
             Please download the LPP artifact and get it signed by Microsoft
             
@@ -121,4 +125,3 @@ stages:
             
             az login
             az pipelines runs artifact upload --artifact-name lpp_filter_ms_signed --path "lithnetpwdf.dll" --run-id $(Build.BuildId) --organization $(System.CollectionUri) --project "$(System.TeamProject)"
-          emailRecipients: 'ryan@lithnet.io'
