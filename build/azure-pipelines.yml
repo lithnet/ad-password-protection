@@ -45,7 +45,7 @@ stages:
               $myVersion1 = "$(build.versionShort)"
 
               $pattern2 = '(?<=\b(FILEVERSION|PRODUCTVERSION)\b )\d+(,\d+)+'
-              $myVersion2 = "$(build.majorversion),$(build.minorversion),$(build.revision),0"
+              $myVersion2 = "$(build.version.major),$(build.version.minor),$(build.version.revision),0"
 
               $content = $content -replace $pattern1, $myVersion1 -replace $pattern2, $myVersion2
 
