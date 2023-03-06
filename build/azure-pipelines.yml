@@ -123,5 +123,4 @@ stages:
             
             When it is signed, use the following command to upload the DLL file
             
-            az login
             az pipelines runs artifact upload --artifact-name lpp_filter_ms_signed --path "%cd%\lithnetpwdf.dll" --run-id $(Build.BuildId) --organization $(System.CollectionUri) --project "$(System.TeamProject)"
