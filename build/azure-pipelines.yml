@@ -119,7 +119,7 @@ stages:
             Please download the LPP artifact and get it signed by Microsoft
             
             az login
-            az pipelines runs artifact download --artifact-name lpp_filter_for_signing --path "lithnetpwdf.cab" --run-id $(Build.BuildId) --organization $(System.CollectionUri) --project "$(System.TeamProject)"
+            az pipelines runs artifact download --artifact-name lpp_filter_for_signing --path "." --run-id $(Build.BuildId) --organization $(System.CollectionUri) --project "$(System.TeamProject)"
             
             When it is signed, use the following command to upload the DLL file
             
