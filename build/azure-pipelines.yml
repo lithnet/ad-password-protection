@@ -42,7 +42,7 @@ stages:
               $content = Get-Content $file
 
               $pattern1 = '(?<=VALUE "(FileVersion|ProductVersion)", ")[^"]+'
-              $myVersion1 = "$(build.versionShort)"
+              $myVersion1 = "$(build.versionShort).0"
 
               $pattern2 = '(?<=\b(FILEVERSION|PRODUCTVERSION)\b )\d+(,\d+)+'
               $myVersion2 = "$(build.version.major),$(build.version.minor),$(build.version.revision),0"
@@ -103,5 +103,22 @@ stages:
       - task: PublishPipelineArtifact@1
         inputs:
           targetPath: '$(Build.ArtifactStagingDirectory)\lithnetpwdf.cab'
-          artifact: 'lpp_filter_dll'
+          artifact: 'lpp_filter_for_signing'
           publishLocation: 'pipeline'
+    - job: "get_lpp_signed_by_ms"
+      displayName: Pause for LPP DLL signing by Microsoft
+      pool: server
+      steps:
+      - task: ManualIntervention@8
+        inputs:
+          instructions: |
+            Please download the LPP artifact and get it signed by Microsoft
+            
+            az login
+            az pipelines runs artifact download --artifact-name lpp_filter_for_signing --path "lithnetpwdf.cab" --run-id $(Build.BuildId) --organization $(System.CollectionUri) --project "$(System.TeamProject)"
+            
+            When it is signed, use the following command to upload the DLL file
+            
+            az login
+            az pipelines runs artifact upload --artifact-name lpp_filter_ms_signed --path "lithnetpwdf.dll" --run-id $(Build.BuildId) --organization $(System.CollectionUri) --project "$(System.TeamProject)"
+          emailRecipients: 'ryan@lithnet.io'
