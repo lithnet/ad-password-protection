@@ -13,7 +13,7 @@ variables:
   - name: build.version.revision
     value: $[counter(format('{0}.{1}', variables['build.version.major'], variables['build.version.minor']), 0)]
   - name: build.version.suffix
-    value: -beta1
+    value:
   - name: build.version
     value: $(build.version.major).$(build.version.minor).$(build.version.revision)$(build.version.suffix)
   - name: build.versionShort
@@ -33,6 +33,26 @@ stages:
     - job: "build_lpp_job"
       steps:
 
+      - task: PowerShell@2
+        displayName: Set RC version
+        inputs:
+          targetType: 'inline'
+          script: |
+              $file = "src/PasswordFilter/passwordfilter.rc"
+              $content = Get-Content $file
+
+              $pattern1 = '(?<=VALUE "(FileVersion|ProductVersion)", ")[^"]+'
+              $myVersion1 = "$(build.versionShort)"
+
+              $pattern2 = '(?<=\b(FILEVERSION|PRODUCTVERSION)\b )\d+(,\d+)+'
+              $myVersion2 = "$(build.majorversion),$(build.minorversion),$(build.revision),0"
+
+              $content = $content -replace $pattern1, $myVersion1 -replace $pattern2, $myVersion2
+
+              $content | Set-Content $file
+              
+              Get-Content $file
+          failOnStderr: true
       - task: VSBuild@1
         inputs:
           solution: 'src/PasswordFilter/PasswordFilter.vcxproj'
@@ -80,3 +100,8 @@ stages:
         inputs:
           script: |
             makecab $(Build.ArtifactStagingDirectory)\lithnetpwdf.dll $(Build.ArtifactStagingDirectory)\lithnetpwdf.cab
+      - task: PublishPipelineArtifact@1
+        inputs:
+          targetPath: '$(Build.ArtifactStagingDirectory)\lithnetpwdf.cab'
+          artifact: 'lpp_filter_dll'
+          publishLocation: 'pipeline'
