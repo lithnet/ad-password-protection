@@ -187,6 +187,32 @@ stages:
           buildType: 'current'
           artifactName: 'lpp_filter_ms_signed'
           targetPath: 'D:\build\lpp\filter'
+      - task: PowerShell@2
+        displayName: Set AIP variables
+        inputs:
+          targetType: 'inline'
+          script: |
+              $file = "src/Lithnet Password Protection for Active Directory.aip"
+              $content = Get-Content $file
+
+              $pattern1 = 'akv_tenant_id'
+              $data1 = "$(akv.tenantid)"
+
+              $pattern2 = "akv_app_id"
+              $data2 = "$(akv.applicationid)"
+
+              $pattern3 = "akv_vault_name"
+              $data3 = "$(akv.url)"
+
+              $pattern4= "akv_certificate_name"
+              $data4 = "$(akv.certificatename)"
+
+              $content = $content -replace $pattern1, $data1 -replace $pattern2, $data2 -replace $pattern3, $data3 -replace $pattern4, $data4
+
+              $content | Set-Content $file
+              
+              Get-Content $file
+          failOnStderr: true
       - task: AdvancedInstaller@2
         displayName: Build Advanced Installer package
         inputs:
