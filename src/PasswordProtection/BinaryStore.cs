@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Security.Cryptography;
+using System.Threading;
 
 namespace Lithnet.ActiveDirectory.PasswordProtection
 {
@@ -14,6 +10,10 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
         public string StorePathPasswordStore { get; }
 
         public string StorePathWordStore { get; }
+
+        protected string StorePathBase { get; }
+
+        protected string MetadataPathBase { get; }
 
         private BinaryStoreInstance PasswordStoreInstance { get; }
 
@@ -27,6 +27,8 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
                 throw new DirectoryNotFoundException($"There was no store found at {storeBasePath}");
             }
 
+            this.StorePathBase = storeBasePath;
+
             this.StorePathPasswordStore = Path.Combine(storeBasePath, storeSubPathPasswords);
 
             this.PasswordStoreInstance = new BinaryStoreInstance(this.StorePathPasswordStore, hashLength, hashOffset);
@@ -34,6 +36,8 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             this.StorePathWordStore = Path.Combine(storeBasePath, storeSubPathWords);
 
             this.WordStoreInstance = new BinaryStoreInstance(this.StorePathWordStore, hashLength, hashOffset);
+
+            this.MetadataPathBase = Path.Combine(storeBasePath, "metadata");
         }
 
         public override void ClearStore(StoreType storeType)
@@ -73,7 +77,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
         public override void EndBatch(StoreType storeType, CancellationToken ct, OperationProgress progress)
         {
-            this.GetInstance(storeType).EndBatch(progress,ct);
+            this.GetInstance(storeType).EndBatch(progress, ct);
         }
 
         public override HashSet<byte[]> GetHashes(string range, StoreType storeType)
@@ -84,6 +88,38 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
         private BinaryStoreInstance GetInstance(StoreType storeType)
         {
             return storeType == StoreType.Password ? this.PasswordStoreInstance : this.WordStoreInstance;
+        }
+
+        public override string GetStoreMetadata(string metadataItemName)
+        {
+            var file = Path.Combine(this.MetadataPathBase, metadataItemName + ".dat");
+            if (File.Exists(file))
+            {
+                return File.ReadAllText(file);
+            }
+
+            return null;
+        }
+
+        public override void SetStoreMetadata(string metadataItemName, string data)
+        {
+            Directory.CreateDirectory(this.MetadataPathBase);
+            var file = Path.Combine(this.MetadataPathBase, metadataItemName + ".dat");
+            File.WriteAllText(file, data);
+        }
+
+        public override void DeleteStoreMetadata(string metadataItemName)
+        {
+            var file = Path.Combine(this.MetadataPathBase, metadataItemName + ".dat");
+            if (File.Exists(file))
+            {
+                File.Delete(file);
+            }
+        }
+
+        public override string GetPath()
+        {
+            return this.StorePathBase;
         }
     }
 }

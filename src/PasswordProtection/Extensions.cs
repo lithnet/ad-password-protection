@@ -1,15 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Lithnet.ActiveDirectory.PasswordProtection
 {
     public static class Extensions
     {
-       public static string ToHexString(this byte[] hash)
+        public static string ToHexPrefixString(this int i)
+        {
+            return i.ToString("X5");
+        }
+
+        public static string ToHexString(this byte[] hash)
         {
             if (hash == null)
             {

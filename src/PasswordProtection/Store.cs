@@ -288,26 +288,55 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             {
                 lineCount++;
 
-                if (line.Length < hashStringLength)
-                {
-                    throw new InvalidDataException($"Line #{lineCount} was not recognized as a hexadecimal hash. The line was not the expected length.\r\nThe following line was invalid:\r\n{line}");
-                }
-
-                if (line.Length == hashStringLength)
-                {
-                    yield return line.HexStringToBytes();
-                    continue;
-                }
-
-                char next = line[hashStringLength];
-
-                if (!(next == ':' || next == '\r' || next == '\n'))
-                {
-                    throw new InvalidDataException($"Line #{lineCount} was not recognized as a hexadecimal hash. Lines must end with a new line character or colon\r\nThe following line was invalid:\r\n{line}");
-                }
-
-                yield return line.Substring(0, hashStringLength).HexStringToBytes();
+                yield return Store.GetHexHashFromLine(line, null, hashStringLength, lineCount);
             }
+        }
+
+        internal static void ImportHexHashesFromString(Store store, string lines, string range, StoreType storeType,  OperationProgress progress)
+        {
+            var splitLines = lines.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+
+            var hash = GetHexHashesFromLines(splitLines, range, store.HashLength, progress);
+            HashSet<byte[]> hashes = new HashSet<byte[]>(hash, ByteArrayComparer.Comparer);
+
+            store.AddToStore(hashes, range, storeType, progress);
+        }
+
+        internal static IEnumerable<byte[]> GetHexHashesFromLines(IEnumerable<string> lines, string range, int hashBinaryLength, OperationProgress progress)
+        {
+            int hashStringLength = hashBinaryLength * 2;
+            int lineCount = 0;
+
+            foreach (string line in lines)
+            {
+                lineCount++;
+
+                yield return Store.GetHexHashFromLine(line, range, hashStringLength, lineCount);
+            }
+        }
+
+        internal static byte[] GetHexHashFromLine(string line, string range, int hashStringLength, int lineCount)
+        {
+            line = range + line;
+
+            if (line.Length < hashStringLength)
+            {
+                throw new InvalidDataException($"Line #{lineCount} was not recognized as a hexadecimal hash. The line was not the expected length.\r\nThe following line was invalid:\r\n{line}");
+            }
+
+            if (line.Length == hashStringLength)
+            {
+                return line.HexStringToBytes();
+            }
+
+            char next = line[hashStringLength];
+
+            if (!(next == ':' || next == '\r' || next == '\n'))
+            {
+                throw new InvalidDataException($"Line #{lineCount} was not recognized as a hexadecimal hash. Lines must end with a new line character or colon\r\nThe following line was invalid:\r\n{line}");
+            }
+
+            return line.Substring(0, hashStringLength).HexStringToBytes();
         }
 
         private static IEnumerable<string> GetLinesFromFile(string sourceFile, OperationProgress progress)
@@ -482,7 +511,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
         protected abstract void AddToStore(HashSet<byte[]> hashes, string range, StoreType storeType, OperationProgress progress);
 
         protected abstract void RemoveFromStore(HashSet<byte[]> hashes, string range, StoreType storeType, OperationProgress progress);
-       
+
         public abstract void StartBatch(StoreType storeType);
 
         public abstract byte[] ComputeHash(string text);
@@ -490,5 +519,13 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
         public abstract void EndBatch(StoreType storeType, CancellationToken ct, OperationProgress progress);
 
         public abstract HashSet<byte[]> GetHashes(string range, StoreType storeType);
+        
+        public abstract string GetStoreMetadata(string metadataItemName);
+        
+        public abstract void SetStoreMetadata(string metadataItemName, string data);
+
+        public abstract void DeleteStoreMetadata(string metadataItemName);
+
+        public abstract string GetPath();
     }
 }

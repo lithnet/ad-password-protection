@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Text;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Lithnet.ActiveDirectory.PasswordProtection;
 using System.Linq;
 using System.Threading;
+using Lithnet.ActiveDirectory.PasswordProtection;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ManagedUnitTests
 {

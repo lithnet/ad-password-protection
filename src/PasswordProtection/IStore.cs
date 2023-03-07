@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Lithnet.ActiveDirectory.PasswordProtection
 {
@@ -27,5 +22,13 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
         bool IsInStore(string password, StoreType storeType);
 
         bool IsInStore(byte[] hash, StoreType storeType);
+
+        string GetStoreMetadata(string metadataItemName);
+
+        void SetStoreMetadata(string metadataItemName, string data);
+
+        void DeleteStoreMetadata(string metadataItemName);
+
+        string GetPath();
     }
 }

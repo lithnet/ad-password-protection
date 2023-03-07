@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Threading;
 
 namespace Lithnet.ActiveDirectory.PasswordProtection
@@ -16,13 +12,21 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
         private int consolidateStorePosition;
         private int flushStorePosition;
 
+        private int hibpRangesUnchanged;
+        private int hibpRangesChanged;
+
         private string status;
+        private int hibpCurrentHash;
 
         public int HashesAdded => this.hashesAdded;
 
         public int HashesDiscarded => this.hashesDiscarded;
 
         public int LinesReadFromFile => this.linesReadFromFile;
+
+        public int HibpRangesChanged => this.hibpRangesChanged;
+
+        public int HibpRangesUnchanged => this.hibpRangesUnchanged;
 
         public long FileReadPosition { get; set; }
 
@@ -53,6 +57,54 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
                 return 0;
             }
         }
+
+        public DateTime HibpStartTime { get; set; }
+
+        public bool HibpReadInProgress { get; set; }
+
+        public int HibpHashTotal { get; set; }
+
+        public int HibpCurrentHash { get => this.hibpCurrentHash; }
+
+        public int HibpProgressPercent
+        {
+            get
+            {
+                if (this.HibpHashTotal <= 0)
+                {
+                    return 0;
+                }
+
+                return Convert.ToInt32(((double)this.HibpCurrentHash / this.HibpHashTotal) * 100);
+            }
+        }
+
+        public int HibpSecondsRemaining
+        {
+            get
+            {
+                double totalSeconds = (DateTime.Now - this.HibpStartTime).TotalSeconds;
+
+                if (totalSeconds > 0)
+                {
+                    double itemsPerSecond = this.HibpCurrentHash / totalSeconds;
+                    long remaining = this.HibpHashTotal - this.HibpCurrentHash;
+
+                    if (itemsPerSecond > 0)
+                    {
+                        double result = remaining / itemsPerSecond;
+
+                        if (result < Int32.MaxValue && result > 0)
+                        {
+                            return Convert.ToInt32(result);
+                        }
+                    }
+                }
+
+                return 0;
+            }
+        }
+
 
         public bool FileReadInProgress { get; set; }
 
@@ -126,7 +178,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
         public bool ConsolidateStoreInProgress { get; set; }
 
         public DateTime ConsolidateStoreStartTime { get; set; }
-        
+
         public int ConsolidateStoreSecondsRemaining
         {
             get
@@ -191,9 +243,19 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             Interlocked.Add(ref this.linesReadFromFile, count);
         }
 
-        public string GetProgressText()
+        internal void IncrementCurrentHash(int count = 1)
         {
-            return $"Found {this.linesReadFromFile:n0} objects. Committed {this.hashesAdded:n0} new records and discarded {this.hashesDiscarded:n0} duplicates";
+            Interlocked.Add(ref this.hibpCurrentHash, count);
+        }
+
+        internal void IncrementUnchangedRange(int count = 1)
+        {
+            Interlocked.Add(ref this.hibpRangesUnchanged, count);
+        }
+
+        internal void IncrementChangedRange(int count = 1)
+        {
+            Interlocked.Add(ref this.hibpRangesChanged, count);
         }
     }
 }
