@@ -48,8 +48,8 @@ user_policy policy::getpolicy(LPCWSTR account)
 	policy.GeneralPolicy.ValidatePasswordDoesntContainAccountName = reg.GetRegValue(REG_VALUE_PASSWORDDOESNTCONTAINACCOUNTNAME, 0) != 0;
 	policy.GeneralPolicy.ValidatePasswordDoesntContainFullName = reg.GetRegValue(REG_VALUE_PASSWORDDOESNTCONTAINFULLNAME, 0) != 0;
 		
-	policy.GeneralPolicy.RegexApprove = GetInteropString(reg.GetRegValue(REG_VALUE_REGEXAPPROVE, L"").c_str());
-	policy.GeneralPolicy.RegexReject = GetInteropString(reg.GetRegValue(REG_VALUE_REGEXREJECT, L"").c_str());
+	//policy.GeneralPolicy.RegexApprove = reg.GetRegValue(REG_VALUE_REGEXAPPROVE, L"").c_str();
+	//policy.GeneralPolicy.RegexReject = reg.GetRegValue(REG_VALUE_REGEXREJECT, L"").c_str();
 
 
 	return policy;

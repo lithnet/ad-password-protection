@@ -23,7 +23,7 @@ std::vector<std::wstring> SplitString(const std::wstring &text, const wchar_t se
 
 SecureArrayT<WCHAR> StringToWcharArray(const LPCWSTR str)
 {
-	const int charCount = wcslen(str);
+	const int charCount = (int)wcslen(str);
 	const int len = charCount + 1;
 
 	SecureArrayT<WCHAR> ar(len);
@@ -55,16 +55,4 @@ bool DirectoryExists(const std::wstring& dirName)
 	}
 
 	return (attributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
-}
-
-LPCWSTR GetInteropString(LPCWSTR value)
-{
-	size_t stSize = wcslen(value) + sizeof(wchar_t);
-
-	wchar_t* pszReturn = NULL;
-
-	pszReturn = (wchar_t*)::CoTaskMemAlloc(stSize);
-	wcscpy_s(pszReturn, stSize, value);
-
-	return pszReturn;
 }
