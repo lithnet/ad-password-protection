@@ -21,7 +21,8 @@ variables:
   - name: build.date
     value: $[format('{0:yyyy}-{0:MM}-{0:dd}T{0:HH}:{0:mm}:{0:ss}', pipeline.startTime)]
   - group: Azure KeyVault Code Signing
-  
+  - group: Advanced Installer License Keys
+
 name: $(build.version.major).$(build.version.minor).$(build.version.revision)$(build.version.suffix)
 trigger: none
 
@@ -31,6 +32,7 @@ stages:
   dependsOn: []
   jobs:
     - job: "build_lpp_job"
+      displayName: Build password filter DLL
       steps:
 
       - task: PowerShell@2
@@ -124,3 +126,79 @@ stages:
             When it is signed, use the following command to upload the DLL file
             
             az pipelines runs artifact upload --artifact-name lpp_filter_ms_signed --path "%cd%\lithnetpwdf.dll" --run-id $(Build.BuildId) --organization $(System.CollectionUri) --project "$(System.TeamProject)"
+    - job: main_build
+      dependsOn: get_lpp_signed_by_ms
+      displayName: Main build
+      pool:
+        vmImage: 'windows-latest'
+      steps:
+      - task: VSBuild@1
+        inputs:
+          solution: 'src/src/PasswordProtectionPS/Lithnet.ActiveDirectory.PasswordProtection.PowerShell.csproj'
+          msbuildArgs: '/p:Version=$(Build.Version)'
+          platform: '$(buildPlatform)'
+          configuration: '$(buildConfiguration)'
+      - task: PowerShell@2
+        displayName: Build folder structure
+        inputs:
+          targetType: 'inline'
+          script: |
+             New-Item "D:\build\lpp\filter" -ItemType Directory
+          failOnStderr: true
+      - task: DotNetCoreCLI@2
+        inputs:
+          command: 'custom'
+          custom: 'tool'
+          arguments: 'update --global azuresigntool'
+        displayName: Install AzureSignTool
+
+      - task: PowerShell@2
+        displayName: 'Sign files with AzureSignTool'
+        inputs:
+          targetType: 'inline'
+          script: |
+            $files = @()
+            $files += "D:\build\lpp\Lithnet*.dll"
+            $files += "D:\build\lpp\*.psd1"
+
+            write-host "Signing $($files.Length) files:"
+            write-output $files
+
+            $cmdargs = @(
+              "sign",
+              "-d", "Lithnet Password Protection for Active Directory",
+              "-kvu", "$(akv.url)",
+              "-kvi", "$(akv.applicationID)",
+              "-kvs", "$(akv.secret)",
+              "-kvt", "$(akv.tenantId)",
+              "-kvc", "$(akv.certificateName)",
+              "-tr", "http://timestamp.digicert.com",
+              "-td", "sha256"
+            )
+
+            $cmdargs += $files
+        
+            & AzureSignTool $cmdargs
+          failOnStderr: true
+          showWarnings: true
+
+      - task: DownloadPipelineArtifact@2
+        inputs:
+          buildType: 'current'
+          artifactName: 'lpp_filter_ms_signed'
+          targetPath: 'D:\build\lpp\filter'
+      - task: AdvancedInstaller@2
+        displayName: Build Advanced Installer package
+        inputs:
+          advinstVersion: '20.2.1'
+          advinstLicense: '$(advancedInstaller.licenseKey)'
+          aipPath: 'src/Lithnet Password Protection for Active Directory.aip'
+          aipBuild: 'DefaultBuild'
+          aipOutputFolder: '$(build.artifactstagingdirectory)'
+          aipExtraCommands: 'SetAzureKeyVaultSecret $(akv.secret)'
+          
+      - task: PublishPipelineArtifact@1
+        inputs:
+          targetPath: '$(Build.ArtifactStagingDirectory)'
+          artifact: 'installer'
+          publishLocation: 'pipeline'
