@@ -142,7 +142,7 @@ stages:
           command: 'publish'
           publishWebProjects: false
           projects: 'src/PasswordProtectionPS/Lithnet.ActiveDirectory.PasswordProtection.PowerShell.csproj'
-          arguments: '--configuration $(BuildConfiguration) --output "D:\build\lpp\ps" -p:Version=$(build.version)'
+          arguments: '--configuration $(BuildConfiguration) --output "D:\build\lpp\ps" -p:Version=$(build.version) --framework net472'
           zipAfterPublish: false
           modifyOutputPath: false
       - task: PowerShell@2
