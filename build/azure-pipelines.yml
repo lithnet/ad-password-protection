@@ -215,7 +215,7 @@ stages:
               $data2 = "$(akv.applicationid)"
 
               $pattern3 = "akv_vault_name"
-              $data3 = "$(akv.url)"
+              $data3 = "$(akv.name)"
 
               $pattern4= "akv_certificate_name"
               $data4 = "$(akv.certificatename)"
