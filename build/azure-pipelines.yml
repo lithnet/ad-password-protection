@@ -137,13 +137,14 @@ stages:
       - task: NuGetCommand@2
         inputs:
           restoreSolution: 'src/Lithnet.ActiveDirectory.PasswordProtection.sln'
-      
-      - task: VSBuild@1
+      - task: DotNetCoreCLI@2
         inputs:
-          solution: 'src/PasswordProtectionPS/Lithnet.ActiveDirectory.PasswordProtection.PowerShell.csproj'
-          msbuildArgs: '/p:Version=$(Build.Version) /p:OutDir=D:\build\lpp\ps'
-          platform: '$(buildPlatform)'
-          configuration: '$(buildConfiguration)'
+          command: 'publish'
+          publishWebProjects: false
+          projects: 'src/PasswordProtectionPS/Lithnet.ActiveDirectory.PasswordProtection.PowerShell.csproj'
+          arguments: '--configuration $(BuildConfiguration) --output "D:\build\lpp\ps" -p:Version=$(build.version)'
+          zipAfterPublish: false
+          modifyOutputPath: false
       - task: PowerShell@2
         displayName: Build folder structure
         inputs:
