@@ -141,7 +141,7 @@ stages:
       - task: VSBuild@1
         inputs:
           solution: 'src/PasswordProtectionPS/Lithnet.ActiveDirectory.PasswordProtection.PowerShell.csproj'
-          msbuildArgs: '/p:Version=$(Build.Version) /p:OutDir=:D:\build\lpp\ps'
+          msbuildArgs: '/p:Version=$(Build.Version) /p:OutDir=D:\build\lpp\ps'
           platform: '$(buildPlatform)'
           configuration: '$(buildConfiguration)'
       - task: PowerShell@2
