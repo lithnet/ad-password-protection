@@ -164,9 +164,15 @@ stages:
         inputs:
           targetType: 'inline'
           script: |
+            $myArray = @()
+            $myArray += "D:\build\lpp\ps\Lithnet*.dll"
+            $myArray += "D:\build\lpp\ps\*.psd1"
+
             $files = @()
-            $files += "D:\build\lpp\ps\Lithnet*.dll"
-            $files += "D:\build\lpp\ps\*.psd1"
+            foreach ($a in $myArray)
+            {
+              $files += (Get-ChildItem -Path "$a").FullName
+            }
 
             write-host "Signing $($files.Length) files:"
             write-output $files
