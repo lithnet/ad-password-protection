@@ -137,10 +137,11 @@ stages:
       - task: NuGetCommand@2
         inputs:
           restoreSolution: 'src/Lithnet.ActiveDirectory.PasswordProtection.sln'
+      
       - task: VSBuild@1
         inputs:
           solution: 'src/PasswordProtectionPS/Lithnet.ActiveDirectory.PasswordProtection.PowerShell.csproj'
-          msbuildArgs: '/p:Version=$(Build.Version)'
+          msbuildArgs: '/p:Version=$(Build.Version) /p:OutDir=:D:\build\lpp\ps'
           platform: '$(buildPlatform)'
           configuration: '$(buildConfiguration)'
       - task: PowerShell@2
@@ -163,8 +164,8 @@ stages:
           targetType: 'inline'
           script: |
             $files = @()
-            $files += "D:\build\lpp\Lithnet*.dll"
-            $files += "D:\build\lpp\*.psd1"
+            $files += "D:\build\lpp\ps\Lithnet*.dll"
+            $files += "D:\build\lpp\ps\*.psd1"
 
             write-host "Signing $($files.Length) files:"
             write-output $files
