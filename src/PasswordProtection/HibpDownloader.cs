@@ -27,12 +27,12 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
         private ConcurrentDictionary<string, string> hibpState;
         private int hashCounter = -1;
-        private int writeLock = 0;
+        private int writeLock;
 
         public HibpDownloader(Store store)
         {
             this.store = store;
-            this.httpClient = this.InitializeHttpClient();
+            this.httpClient = InitializeHttpClient();
             this.policy = HttpPolicyExtensions.HandleTransientHttpError().RetryAsync(10, OnRequestError);
         }
 
@@ -74,7 +74,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
                 foreach (var item in this.hibpState.ToArray())
                 {
-                    builder.Append(item.Key).Append(":").AppendLine(item.Value);
+                    builder.Append(item.Key).Append(':').AppendLine(item.Value);
                 }
 
                 this.store.SetStoreMetadata(MetadataItemName, builder.ToString());
@@ -85,7 +85,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             }
         }
 
-        private HttpClient InitializeHttpClient()
+        private static HttpClient InitializeHttpClient()
         {
             var handler = new HttpClientHandler();
 
@@ -163,7 +163,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
                     this.hibpState[range] = response.Headers.ETag.ToString();
                     var lines = await response.Content.ReadAsStringAsync();
 
-                    Store.ImportHexHashesFromString(this.store, lines, range, StoreType.Password, progress);
+                    Store.ImportHexHashesFromString(this.store, lines, range, StoreType.Password, progress, ct);
                 }
 
                 if (currentHash % 10000 == 0)

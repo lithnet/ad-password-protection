@@ -3,7 +3,7 @@
 namespace Lithnet.ActiveDirectory.PasswordProtection
 {
     [Flags]
-    public enum ServerTypes : uint
+    internal enum ServerTypes : uint
     {
         Workstation = 0x00000001,
         Server = 0x00000002,
@@ -17,7 +17,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
         PrintQueueServer = 0x00000200,
         DialinServer = 0x00000400,
         XenixServer = 0x00000800,
-        UnixServer = 0x00000800,
+        UnixServer = XenixServer,
         NT = 0x00001000,
         WindowsForWorkgroups = 0x00002000,
         MicrosoftFileAndPrintServer = 0x00004000,

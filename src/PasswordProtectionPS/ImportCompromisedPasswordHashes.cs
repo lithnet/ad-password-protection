@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Management.Automation;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Management.Automation;
-using Lithnet.ActiveDirectory.PasswordProtection;
 
 namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
 {
@@ -21,23 +17,12 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
         [Parameter(Mandatory = false, Position = 3)]
         public int BatchSize { get; set; } = -1;
 
-        private CancellationTokenSource token = new CancellationTokenSource();
-
         protected override void BeginProcessing()
         {
             Global.OpenExistingDefaultOrThrow();
             this.InitializeProgressUpdate($"Importing password hashes from {this.Filename}");
 
             base.BeginProcessing();
-        }
-        protected override void StopProcessing()
-        {
-            this.token.Cancel();
-        }
-
-        protected override void EndProcessing()
-        {
-            base.EndProcessing();
         }
 
         protected override void ProcessRecord()
@@ -46,15 +31,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
             {
                 try
                 {
-                    bool isSorted;
-                    if (this.Sorted.HasValue)
-                    {
-                        isSorted = this.Sorted.Value;
-                    }
-                    else
-                    {
-                        isSorted = Store.DoesHexHashFileAppearSorted(this.Filename, V3Store.BinaryHashLength);
-                    }
+                    bool isSorted = this.Sorted ?? Store.DoesHexHashFileAppearSorted(this.Filename, V3Store.BinaryHashLength);
 
                     if (isSorted)
                     {

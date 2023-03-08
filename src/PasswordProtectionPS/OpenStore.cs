@@ -1,34 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Management.Automation;
+﻿using System.Management.Automation;
 
 namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
 {
     [Cmdlet(VerbsCommon.Open, "Store")]
-    public class OpenStore : Cmdlet
+    public class OpenStore : PasswordProtectionCmdletBase
     {
         [Parameter(Mandatory = false, Position = 1, ValueFromPipeline = false)]
         public string Path { get; set; }
 
-        protected override void BeginProcessing()
-        {
-            base.BeginProcessing();
-        }
-
         protected override void EndProcessing()
-        {
-            base.EndProcessing();
-        }
-
-        protected override void StopProcessing()
-        {
-            base.StopProcessing();
-        }
-
-        protected override void ProcessRecord()
         {
             if (this.Path == null)
             {
@@ -38,6 +18,11 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
             {
                 Global.OpenStore(this.Path);
             }
+
+            var result = new PSObject();
+
+            result.Properties.Add(new PSNoteProperty("StorePath", Global.Store.GetPath()));
+            this.WriteObject(result);
         }
     }
 }

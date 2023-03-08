@@ -3,9 +3,9 @@
 namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
 {
     [Cmdlet(VerbsCommon.Get, "StorePath")]
-    public class GetStorePath : Cmdlet
+    public class GetStorePath : PasswordProtectionCmdletBase
     {
-        protected override void ProcessRecord()
+        protected override void EndProcessing()
         {
             if (Global.IsOpen)
             {

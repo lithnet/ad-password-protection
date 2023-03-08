@@ -3,15 +3,15 @@ using System.Management.Automation;
 
 namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
 {
-    public abstract class ImportPSCmdlet : PSCmdlet
+    public abstract class ImportPSCmdlet : PasswordProtectionCmdletBase
     {
-        protected internal OperationProgress Progress;
+        private protected OperationProgress Progress;
 
         private ProgressRecord overallRecord;
-        private ProgressRecord fileReadProgressRecord = null;
-        private ProgressRecord consolidateStoreProgressRecord = null;
-        private ProgressRecord flushStoreProgressRecord = null;
-        private ProgressRecord hibpImportProcessRecord = null;
+        private ProgressRecord fileReadProgressRecord;
+        private ProgressRecord consolidateStoreProgressRecord;
+        private ProgressRecord flushStoreProgressRecord;
+        private ProgressRecord hibpImportProcessRecord;
 
         protected void InitializeProgressUpdate(string header)
         {
@@ -21,7 +21,6 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
 
         protected void EndProgressUpdate()
         {
-
             if (this.fileReadProgressRecord != null)
             {
                 this.fileReadProgressRecord.RecordType = ProgressRecordType.Completed;
@@ -158,7 +157,6 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
                     this.consolidateStoreProgressRecord = null;
                 }
             }
-
         }
     }
 }

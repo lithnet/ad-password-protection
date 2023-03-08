@@ -21,22 +21,22 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
         protected int HashOffset { get; }
 
+        protected int HashRangeLength { get; }
+
         protected Store(HashAlgorithm encoder, int hashLength, int hashOffset)
         {
             this.StoredHashLength = hashLength - hashOffset;
             this.HashLength = hashLength;
             this.HashOffset = hashOffset;
             this.Encoder = encoder;
+            this.HashRangeLength = this.HashOffset * 2;
         }
 
         public static void ImportPasswordsFromFile(Store store, StoreType storeType, string sourceFile, CancellationToken ct, int batchSize = DefaultBatchSize, OperationProgress progress = null)
         {
             bool batched = false;
 
-            if (progress == null)
-            {
-                progress = new OperationProgress();
-            }
+            progress ??= new OperationProgress();
 
             if (batchSize < 0)
             {
@@ -53,7 +53,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             {
                 ct.ThrowIfCancellationRequested();
 
-                if (line.Length <= 0)
+                if (line.Length == 0)
                 {
                     continue;
                 }
@@ -97,7 +97,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
                     }
 
                     progress.Status = "Flushing batch to store";
-                    store.AddToStore(importData, storeType, ct, true, progress);
+                    store.AddToStore(importData, storeType, true, progress, ct);
                     currentCount = 0;
                 }
             }
@@ -105,13 +105,13 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             if (currentCount > 0)
             {
                 progress.Status = "Flushing batch to store";
-                store.AddToStore(importData, storeType, ct, true, progress);
+                store.AddToStore(importData, storeType, true, progress, ct);
             }
 
             if (batched)
             {
                 progress.Status = "Sorting hashes into store";
-                store.EndBatch(storeType, ct, progress);
+                store.EndBatch(storeType, progress, ct);
             }
 
             progress.Status = "Done";
@@ -122,10 +122,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             string lastRange = null;
             HashSet<byte[]> hashes = new HashSet<byte[]>(ByteArrayComparer.Comparer);
 
-            if (progress == null)
-            {
-                progress = new OperationProgress();
-            }
+            progress ??= new OperationProgress();
 
             progress.Status = $"Loading sorted hexadecimal hashes from {sourceFile}";
 
@@ -162,12 +159,9 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
             HashSet<byte[]> hashes = new HashSet<byte[]>(ByteArrayComparer.Comparer);
 
-            if (progress == null)
-            {
-                progress = new OperationProgress();
-            }
+            progress ??= new OperationProgress();
 
-            progress.Status = $"Merging hashes from source store";
+            progress.Status = "Merging hashes from source store";
 
             foreach (byte[] hash in sourceStore.GetHashes(sourceStoreType))
             {
@@ -200,10 +194,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
         {
             bool batched = false;
 
-            if (progress == null)
-            {
-                progress = new OperationProgress();
-            }
+            progress ??= new OperationProgress();
 
             if (batchSize < 0)
             {
@@ -229,20 +220,20 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
                         store.StartBatch(storeType);
                     }
 
-                    store.AddToStore(hashes, storeType, ct, progress);
+                    store.AddToStore(hashes, storeType, progress, ct);
                     hashes.Clear();
                 }
             }
 
             if (hashes.Count > 0)
             {
-                store.AddToStore(hashes, storeType, ct, progress);
+                store.AddToStore(hashes, storeType, progress, ct);
             }
 
             if (batched)
             {
-                progress.Status = $"Sorting hashes into store";
-                store.EndBatch(storeType, ct, progress);
+                progress.Status = "Sorting hashes into store";
+                store.EndBatch(storeType, progress, ct);
             }
 
             progress.Status = "Done";
@@ -281,6 +272,11 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
                 throw new FileNotFoundException("The source file was not found", sourceFile);
             }
 
+            if (hashBinaryLength <= 0)
+            {
+                throw new ArgumentException("Hash binary length must be greater than zero", nameof(hashBinaryLength));
+            }
+
             int hashStringLength = hashBinaryLength * 2;
             int lineCount = 0;
 
@@ -292,17 +288,17 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             }
         }
 
-        internal static void ImportHexHashesFromString(Store store, string lines, string range, StoreType storeType,  OperationProgress progress)
+        internal static void ImportHexHashesFromString(Store store, string lines, string range, StoreType storeType, OperationProgress progress, CancellationToken ct)
         {
             var splitLines = lines.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
 
-            var hash = GetHexHashesFromLines(splitLines, range, store.HashLength, progress);
+            var hash = GetHexHashesFromLines(splitLines, range, store.HashLength);
             HashSet<byte[]> hashes = new HashSet<byte[]>(hash, ByteArrayComparer.Comparer);
 
-            store.AddToStore(hashes, range, storeType, progress);
+            store.AddToStore(hashes, storeType, progress, ct);
         }
 
-        internal static IEnumerable<byte[]> GetHexHashesFromLines(IEnumerable<string> lines, string range, int hashBinaryLength, OperationProgress progress)
+        internal static IEnumerable<byte[]> GetHexHashesFromLines(IEnumerable<string> lines, string prefix, int hashBinaryLength)
         {
             int hashStringLength = hashBinaryLength * 2;
             int lineCount = 0;
@@ -311,13 +307,13 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             {
                 lineCount++;
 
-                yield return Store.GetHexHashFromLine(line, range, hashStringLength, lineCount);
+                yield return Store.GetHexHashFromLine(line, prefix, hashStringLength, lineCount);
             }
         }
 
-        internal static byte[] GetHexHashFromLine(string line, string range, int hashStringLength, int lineCount)
+        internal static byte[] GetHexHashFromLine(string line, string prefix, int hashStringLength, int lineCount)
         {
-            line = range + line;
+            line = prefix + line;
 
             if (line.Length < hashStringLength)
             {
@@ -357,7 +353,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
                     string line = reader.ReadLine();
                     progress.FileReadPosition = reader.BaseStream.Position;
 
-                    if (line == null || line.Length <= 0)
+                    if (string.IsNullOrEmpty(line))
                     {
                         continue;
                     }
@@ -371,9 +367,8 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
         public void RemoveFromStore(byte[] hash, StoreType storeType)
         {
-            HashSet<byte[]> hashset = new HashSet<byte[]>(ByteArrayComparer.Comparer);
-            hashset.Add(hash);
-            this.RemoveFromStore(hashset, storeType, new CancellationToken(), new OperationProgress());
+            var hashset = new HashSet<byte[]>(ByteArrayComparer.Comparer) { hash };
+            this.RemoveFromStore(hashset, storeType, new OperationProgress(), new CancellationToken());
         }
 
         public void RemoveFromStore(string password, StoreType storeType)
@@ -386,16 +381,16 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             this.RemoveFromStore(this.ComputeHash(password), storeType);
         }
 
-        public void RemoveFromStore(HashSet<byte[]> hashes, StoreType storeType, CancellationToken ct, OperationProgress progress)
+        public void RemoveFromStore(HashSet<byte[]> hashes, StoreType storeType, OperationProgress progress, CancellationToken ct)
         {
             this.RemoveFromStore(
                 hashes
                     .GroupBy(this.GetRangeFromHash, StringComparer.OrdinalIgnoreCase)
                     .ToDictionary(g => g.Key, g => new HashSet<byte[]>(g, ByteArrayComparer.Comparer)),
                 storeType,
-                ct,
                 false,
-                progress);
+                progress,
+                ct);
         }
 
         public void AddToStore(string password, StoreType storeType)
@@ -410,24 +405,23 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
         public void AddToStore(byte[] hash, StoreType storeType)
         {
-            HashSet<byte[]> hashset = new HashSet<byte[]>(ByteArrayComparer.Comparer);
-            hashset.Add(hash);
-            this.AddToStore(hashset, storeType, new CancellationToken(), new OperationProgress());
+            var hashset = new HashSet<byte[]>(ByteArrayComparer.Comparer) { hash };
+            this.AddToStore(hashset, storeType, new OperationProgress(), new CancellationToken());
         }
 
-        public void AddToStore(HashSet<byte[]> hashes, StoreType storeType, CancellationToken ct, OperationProgress progress)
+        public void AddToStore(HashSet<byte[]> hashes, StoreType storeType, OperationProgress progress, CancellationToken ct)
         {
             this.AddToStore(
                 hashes
                     .GroupBy(this.GetRangeFromHash, StringComparer.OrdinalIgnoreCase)
                     .ToDictionary(g => g.Key, g => new HashSet<byte[]>(g, ByteArrayComparer.Comparer)),
                 storeType,
-                ct,
                 false,
-                progress);
+                progress,
+                ct);
         }
 
-        private void AddToStore(Dictionary<string, HashSet<byte[]>> hashes, StoreType storeType, CancellationToken ct, bool emptyAfterCommit, OperationProgress progress)
+        private void AddToStore(Dictionary<string, HashSet<byte[]>> hashes, StoreType storeType, bool emptyAfterCommit, OperationProgress progress, CancellationToken ct)
         {
             try
             {
@@ -456,7 +450,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             }
         }
 
-        private void RemoveFromStore(Dictionary<string, HashSet<byte[]>> hashes, StoreType storeType, CancellationToken ct, bool emptyAfterCommit, OperationProgress progress)
+        private void RemoveFromStore(Dictionary<string, HashSet<byte[]>> hashes, StoreType storeType, bool emptyAfterCommit, OperationProgress progress, CancellationToken ct)
         {
             try
             {
@@ -484,7 +478,6 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
                 progress.FlushStoreInProgress = false;
             }
         }
-
 
         public bool IsInStore(string password, StoreType storeType)
         {
@@ -516,12 +509,12 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
         public abstract byte[] ComputeHash(string text);
 
-        public abstract void EndBatch(StoreType storeType, CancellationToken ct, OperationProgress progress);
+        public abstract void EndBatch(StoreType storeType, OperationProgress progress, CancellationToken ct);
 
         public abstract HashSet<byte[]> GetHashes(string range, StoreType storeType);
-        
+
         public abstract string GetStoreMetadata(string metadataItemName);
-        
+
         public abstract void SetStoreMetadata(string metadataItemName, string data);
 
         public abstract void DeleteStoreMetadata(string metadataItemName);

@@ -1,16 +1,14 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Lithnet.ActiveDirectory.PasswordProtection;
+﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using Lithnet.ActiveDirectory.PasswordProtection;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ManagedUnitTests
 {
     public class StoreTestBase
     {
-        private Store store;
+        private readonly Store store;
 
         public StoreTestBase(Store store)
         {
@@ -19,15 +17,15 @@ namespace ManagedUnitTests
 
         public void TestAddPasswordToStore()
         {
-            string password = "password";
+            const string password = "password";
             Assert.IsFalse(this.store.IsInStore(password, StoreType.Password));
-            this.store.AddToStore(password,  StoreType.Password);
+            this.store.AddToStore(password, StoreType.Password);
             Assert.IsTrue(this.store.IsInStore(password, StoreType.Password));
         }
 
         public void TestAddHashToStore()
         {
-            string hash = "000000005AD76BD555C1D6D771DE417A4B87E4B4";
+            const string hash = "000000005AD76BD555C1D6D771DE417A4B87E4B4";
             byte[] hashBytes = hash.HexStringToBytes();
             Assert.IsFalse(this.store.IsInStore(hashBytes, StoreType.Password));
             this.store.AddToStore(hashBytes, StoreType.Password);
@@ -51,9 +49,9 @@ namespace ManagedUnitTests
             };
 
             List<byte[]> hashBytes = hashes.Select(t => t.HexStringToBytes()).ToList();
-            
+
             this.store.AddToStore(
-                new HashSet<byte[]>(hashBytes, new ByteArrayComparer()), StoreType.Password, new System.Threading.CancellationToken(), new OperationProgress());
+                new HashSet<byte[]>(hashBytes, new ByteArrayComparer()), StoreType.Password, new OperationProgress(), CancellationToken.None);
 
             foreach (string hash in hashes)
             {

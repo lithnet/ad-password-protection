@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -8,7 +9,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
     {
         public static string ToHexPrefixString(this int i)
         {
-            return i.ToString("X5");
+            return i.ToString("X5", CultureInfo.InvariantCulture);
         }
 
         public static string ToHexString(this byte[] hash)
@@ -42,7 +43,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
             for (int i = offset; i < count; i++)
             {
-                sb.Append(hash[i].ToString("X2"));
+                sb.Append(hash[i].ToString("X2", CultureInfo.InvariantCulture));
             }
 
             return sb.ToString();
@@ -57,7 +58,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
             if (hexHash.Length % 2 != 0)
             {
-                throw new ArgumentException($"The value supplied must be a hexadecimal representation of the hash");
+                throw new ArgumentException("The value supplied must be a hexadecimal representation of the hash");
             }
 
             int binaryLength = hexHash.Length / 2;
@@ -66,7 +67,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
             for (int i = 0; i < binaryLength; i++)
             {
-                hash[i] = Convert.ToByte(hexHash.Substring((i * 2), 2), 16);
+                hash[i] = Convert.ToByte(hexHash.Substring(i * 2, 2), 16);
             }
 
             return hash;

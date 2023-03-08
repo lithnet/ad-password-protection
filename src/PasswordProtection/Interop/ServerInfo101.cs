@@ -3,7 +3,7 @@
 namespace Lithnet.ActiveDirectory.PasswordProtection
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct ServerInfo101
+    internal struct ServerInfo101
     {
         public ServerPlatform PlatformId;
 

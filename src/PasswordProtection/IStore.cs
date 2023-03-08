@@ -11,13 +11,13 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
         void RemoveFromStore(byte[] hash, StoreType storeType);
 
-        void RemoveFromStore(HashSet<byte[]> hashes, StoreType storeType, CancellationToken ct, OperationProgress progress);
+        void RemoveFromStore(HashSet<byte[]> hashes, StoreType storeType, OperationProgress progress, CancellationToken ct);
 
         void AddToStore(string password, StoreType storeType);
 
         void AddToStore(byte[] hash, StoreType storeType);
 
-        void AddToStore(HashSet<byte[]> hashes, StoreType storeType, CancellationToken ct, OperationProgress progress);
+        void AddToStore(HashSet<byte[]> hashes, StoreType storeType, OperationProgress progress, CancellationToken ct);
 
         bool IsInStore(string password, StoreType storeType);
 

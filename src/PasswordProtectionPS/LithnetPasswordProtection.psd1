@@ -9,7 +9,7 @@
 @{
 
 # Version number of this module.
-ModuleVersion = '$version$'
+ModuleVersion = '1.0.0.0'
 
 # ID used to uniquely identify this module
 GUID = 'e6a12c2f-7a92-44af-9ec8-6473d479cf27'
@@ -36,7 +36,7 @@ PowerShellHostName = ''
 PowerShellHostVersion = ''
 
 # Minimum version of the .NET Framework required by this module
-DotNetFrameworkVersion = '4.5'
+DotNetFrameworkVersion = '4.7'
 
 # Minimum version of the common language runtime (CLR) required by this module
 CLRVersion = ''

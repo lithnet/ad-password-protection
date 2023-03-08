@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Management.Automation;
+﻿using System.Management.Automation;
 using System.Security;
-using Lithnet.ActiveDirectory.PasswordProtection;
 
 namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
 {
     [Cmdlet(VerbsDiagnostic.Test, "IsBannedWord", DefaultParameterSetName = "String")]
-    public class TestIsBannedWord: PSCmdlet
+    public class TestIsBannedWord : PasswordProtectionCmdletBase
     {
         [Parameter(Mandatory = true, Position = 1, ValueFromPipeline = true, ParameterSetName = "String"), ValidateNotNullOrEmpty]
         public string Value { get; set; }
@@ -25,11 +19,6 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
         {
             Global.OpenExistingDefaultOrThrow();
             base.BeginProcessing();
-        }
-
-        protected override void EndProcessing()
-        {
-            base.EndProcessing();
         }
 
         protected override void ProcessRecord()

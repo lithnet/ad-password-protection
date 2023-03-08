@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Management.Automation;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Management.Automation;
 
 namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
 {
@@ -17,23 +14,11 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
         [Parameter(Mandatory = false, Position = 2)]
         public int BatchSize { get; set; } = -1;
 
-        private CancellationTokenSource token = new CancellationTokenSource();
-
         protected override void BeginProcessing()
         {
             Global.OpenExistingDefaultOrThrow();
             this.InitializeProgressUpdate($"Importing plain-text passwords from {this.Filename}");
             base.BeginProcessing();
-        }
-
-        protected override void StopProcessing()
-        {
-            this.token.Cancel();
-        }
-
-        protected override void EndProcessing()
-        {
-            base.EndProcessing();
         }
 
         protected override void ProcessRecord()
@@ -42,7 +27,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
             {
                 try
                 {
-                    PasswordProtection.Store.ImportPasswordsFromFile(Global.Store, PasswordProtection.StoreType.Password, this.Filename, this.token.Token, this.BatchSize, this.Progress);
+                    Store.ImportPasswordsFromFile(Global.Store, StoreType.Password, this.Filename, this.token.Token, this.BatchSize, this.Progress);
                 }
                 catch (OperationCanceledException)
                 {

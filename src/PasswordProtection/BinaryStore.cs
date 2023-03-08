@@ -52,7 +52,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
         protected override void RemoveFromStore(HashSet<byte[]> hashes, string range, StoreType storeType, OperationProgress progress)
         {
-            this.GetInstance(storeType).RemoveHashRangeFromStore(hashes, range, progress);
+            this.GetInstance(storeType).RemoveHashRangeFromStore(hashes, range);
         }
 
         public override bool IsInStore(byte[] hash, StoreType storeType)
@@ -75,7 +75,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             return this.GetInstance(storeType).GetHashCount(range);
         }
 
-        public override void EndBatch(StoreType storeType, CancellationToken ct, OperationProgress progress)
+        public override void EndBatch(StoreType storeType, OperationProgress progress, CancellationToken ct)
         {
             this.GetInstance(storeType).EndBatch(progress, ct);
         }

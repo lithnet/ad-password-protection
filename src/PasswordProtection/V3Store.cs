@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Security.Cryptography;
+﻿using System.Text;
 using Microsoft.Protocols.TestTools.StackSdk.Security.Cryptographic;
-using System.Text;
 
 namespace Lithnet.ActiveDirectory.PasswordProtection
 {
@@ -24,7 +18,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
         {
             return this.Encoder.ComputeHash(Encoding.Unicode.GetBytes(text));
         }
-        
+
         protected override string GetRangeFromHash(string hash)
         {
             return hash.Substring(0, V3Store.BinaryHashOffset * 2);

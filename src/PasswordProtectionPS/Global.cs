@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security;
-using System.Text;
 using System.Threading.Tasks;
-using Lithnet.ActiveDirectory.PasswordProtection;
 using Microsoft.Win32;
 
 namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
@@ -16,7 +12,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
 
         public static void OpenStore(string path)
         {
-            Global.Store = new V3Store(path);
+            Store = new V3Store(path);
         }
 
         public static void OpenStore()
@@ -41,15 +37,15 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
 
         public static void OpenExistingDefaultOrThrow()
         {
-            if (Global.IsOpen)
+            if (IsOpen)
             {
                 return;
             }
 
-            Global.OpenStore();
+            OpenStore();
         }
 
-        public static bool IsOpen => Global.Store != null;
+        public static bool IsOpen => Store != null;
 
         public static string SecureStringToString(this SecureString value)
         {

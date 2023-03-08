@@ -56,7 +56,7 @@ namespace Microsoft.Protocols.TestTools.StackSdk.Security.Cryptographic
         {
             this.Setup();
         }
-        
+
         private void Setup()
         {
             bool status = NativeMethods.CryptCreateHash(this.providerHandle, AlgId.CALG_MD4, IntPtr.Zero, 0, ref this.hashHandle);

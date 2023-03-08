@@ -5,21 +5,20 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Security.Cryptography;
 
 namespace Lithnet.ActiveDirectory.PasswordProtection
 {
-    internal class BinaryStoreInstance
+    internal sealed class BinaryStoreInstance
     {
         public bool IsInBatch { get; private set; }
 
         public string StorePath { get; }
 
-        protected int StoredHashLength { get; }
+        private int StoredHashLength { get; }
 
-        protected int HashLength { get; }
+        private int HashLength { get; }
 
-        protected int HashOffset { get; }
+        private int HashOffset { get; }
 
         internal BinaryStoreInstance(string path, int hashLength, int hashOffset)
         {
@@ -59,7 +58,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             HashSet<byte[]> items = new HashSet<byte[]>(ByteArrayComparer.Comparer);
             string file = Path.Combine(this.StorePath, $"{range}.db");
 
-            this.LoadHashesFromStoreFile(file, items, new OperationProgress());
+            this.LoadHashesFromStoreFile(file, items);
 
             return items;
         }
@@ -86,7 +85,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             {
                 throw new ArgumentNullException(nameof(range));
             }
-            
+
             if (this.IsInBatch)
             {
                 this.AddHashRangeToTempStore(incomingHashes, range);
@@ -95,14 +94,14 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
             string file = Path.Combine(this.StorePath, $"{range}.db");
 
-            bool hasChanges = false;
+            bool hasChanges;
             HashSet<byte[]> hashesToProcess;
 
             if (File.Exists(file))
             {
                 HashSet<byte[]> originalHashes = new HashSet<byte[]>(ByteArrayComparer.Comparer);
-                this.LoadHashesFromStoreFile(file, originalHashes, progress);
-                hasChanges = this.MergeHashSets(originalHashes, incomingHashes, progress);
+                this.LoadHashesFromStoreFile(file, originalHashes);
+                hasChanges = MergeHashSets(originalHashes, incomingHashes, progress);
                 hashesToProcess = originalHashes;
             }
             else
@@ -118,7 +117,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             }
         }
 
-        public void RemoveHashRangeFromStore(HashSet<byte[]> hashesToRemove, string range, OperationProgress progress)
+        public void RemoveHashRangeFromStore(HashSet<byte[]> hashesToRemove, string range)
         {
             if (hashesToRemove == null)
             {
@@ -137,7 +136,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
             if (File.Exists(file))
             {
-                this.LoadHashesFromStoreFile(file, storedHashes, progress);
+                this.LoadHashesFromStoreFile(file, storedHashes);
                 foreach (byte[] hashToRemove in hashesToRemove)
                 {
                     hasChanges |= storedHashes.Remove(hashToRemove);
@@ -193,7 +192,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             string file = Path.Combine(this.StorePath, $"{range}.db");
             FileInfo fileInfo = new FileInfo(file);
 
-            if (!fileInfo.Exists || file.Length <= 0)
+            if (!fileInfo.Exists || file.Length == 0)
             {
                 return 0;
             }
@@ -223,10 +222,10 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
                     string realFile = tempFile.Substring(0, tempFile.Length - 4);
                     Trace.WriteLine($"Consolidating {realFile}");
 
-                    this.LoadHashesFromStoreFile(realFile, existingHashes, progress);
-                    this.LoadHashesFromStoreFile(tempFile, newHashes, progress);
+                    this.LoadHashesFromStoreFile(realFile, existingHashes);
+                    this.LoadHashesFromStoreFile(tempFile, newHashes);
 
-                    bool hasChanges = this.MergeHashSets(existingHashes, newHashes, progress);
+                    bool hasChanges = MergeHashSets(existingHashes, newHashes, progress);
 
                     if (hasChanges)
                     {
@@ -240,7 +239,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             progress.ConsolidateStoreInProgress = false;
         }
 
-        private bool MergeHashSets(HashSet<byte[]> existingHashes, HashSet<byte[]> newHashes, OperationProgress progress)
+        private static bool MergeHashSets(HashSet<byte[]> existingHashes, HashSet<byte[]> newHashes, OperationProgress progress)
         {
             bool write = false;
 
@@ -260,7 +259,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             return write;
         }
 
-        private void LoadHashesFromStoreFile(string file, HashSet<byte[]> hashes, OperationProgress progress)
+        private void LoadHashesFromStoreFile(string file, HashSet<byte[]> hashes)
         {
             foreach (byte[] hash in this.LoadHashesFromStoreFile(file))
             {
@@ -293,26 +292,25 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
                 for (int i = 0; i < 2; i++)
                 {
-                    rangeBytes[i] = Convert.ToByte(range.Substring((i * 2), 2), 16);
+                    rangeBytes[i] = Convert.ToByte(range.Substring(i * 2, 2), 16);
                 }
             }
 
-            using (BinaryReader reader = new BinaryReader(File.Open(file, FileMode.Open)))
+            using BinaryReader reader = new BinaryReader(File.Open(file, FileMode.Open));
+
+            while (reader.BaseStream.Position < reader.BaseStream.Length)
             {
-                while (reader.BaseStream.Position < reader.BaseStream.Length)
+                byte[] raw = reader.ReadBytes(this.StoredHashLength);
+
+                if (rangeBytes != null)
                 {
-                    byte[] raw = reader.ReadBytes(this.StoredHashLength);
-
-                    if (rangeBytes != null)
-                    {
-                        byte[] hash = new byte[this.HashLength];
-                        Buffer.BlockCopy(rangeBytes, 0, hash, 0, this.HashOffset);
-                        Buffer.BlockCopy(raw, 0, hash, this.HashOffset, raw.Length);
-                        raw = hash;
-                    }
-
-                    yield return raw;
+                    byte[] hash = new byte[this.HashLength];
+                    Buffer.BlockCopy(rangeBytes, 0, hash, 0, this.HashOffset);
+                    Buffer.BlockCopy(raw, 0, hash, this.HashOffset, raw.Length);
+                    raw = hash;
                 }
+
+                yield return raw;
             }
         }
 
@@ -373,7 +371,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
                 }
             }
 
-            Debug.WriteLine($"Hash not found");
+            Debug.WriteLine("Hash not found");
 
             return false;
         }

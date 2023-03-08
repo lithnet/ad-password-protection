@@ -18,12 +18,12 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             return info.Type.HasFlag(ServerTypes.DomainCtrl) || info.Type.HasFlag(ServerTypes.BackupDomainCtrl);
         }
 
-        public static ServerInfo101 GetServerInfo()
+        internal static ServerInfo101 GetServerInfo()
         {
             return GetServerInfo(null);
         }
 
-        public static ServerInfo101 GetServerInfo(string server)
+        internal static ServerInfo101 GetServerInfo(string server)
         {
             IntPtr pServerInfo = IntPtr.Zero;
 
@@ -44,10 +44,9 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             {
                 if (pServerInfo != IntPtr.Zero)
                 {
-                    NetApiBufferFree(pServerInfo);
+                    _ = NetApiBufferFree(pServerInfo);
                 }
             }
         }
-
     }
 }

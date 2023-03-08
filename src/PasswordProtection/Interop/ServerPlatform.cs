@@ -1,6 +1,6 @@
 ﻿namespace Lithnet.ActiveDirectory.PasswordProtection
 {
-    public enum ServerPlatform
+    internal enum ServerPlatform
     {
         Dos = 300,
         Os2 = 400,

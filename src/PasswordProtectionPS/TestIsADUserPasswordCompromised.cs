@@ -8,7 +8,7 @@ using DSInternals.Replication;
 namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
 {
     [Cmdlet(VerbsDiagnostic.Test, "IsADUserPasswordCompromised", DefaultParameterSetName = "AccountName")]
-    public class TestIsADUserPasswordCompromised : PSCmdlet
+    public class TestIsADUserPasswordCompromised : PasswordProtectionCmdletBase
     {
         [Parameter(Mandatory = true, Position = 1, ValueFromPipeline = false, ParameterSetName = "AccountName"), ValidateNotNullOrEmpty]
         public string AccountName { get; set; }
@@ -32,6 +32,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
         public SwitchParameter OutputCompromisedHashOnMatch { get; set; }
 
         private DirectoryReplicationClient client;
+        private bool disposedValue;
 
         protected override void BeginProcessing()
         {
@@ -62,10 +63,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
             switch (this.ParameterSetName)
             {
                 case "AccountName":
-                    if (this.DomainName == null)
-                    {
-                        this.DomainName = Environment.GetEnvironmentVariable("UserDomain");
-                    }
+                    this.DomainName ??= Environment.GetEnvironmentVariable("UserDomain");
 
                     account = this.client.GetAccount(new NTAccount(this.DomainName, this.AccountName));
                     break;
@@ -106,6 +104,21 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
             {
                 this.WriteObject(result);
             }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (!this.disposedValue)
+            {
+                if (disposing)
+                {
+                    this.client.Dispose();
+                }
+
+                this.disposedValue = true;
+            }
+
+            base.Dispose(disposing);
         }
     }
 }

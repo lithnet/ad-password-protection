@@ -105,11 +105,9 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             }
         }
 
-
         public bool FileReadInProgress { get; set; }
 
         public DateTime FileReadStartTime { get; set; }
-
 
         public int FileProgressPercent
         {
@@ -163,7 +161,6 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
                 return 0;
             }
         }
-
 
         public int ConsolidateStoreTotal { get; set; }
 

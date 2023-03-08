@@ -8,8 +8,6 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
     [Cmdlet(VerbsData.Sync, "HashesFromHibp")]
     public class SyncHashesFromHibp : ImportPSCmdlet
     {
-        private readonly CancellationTokenSource token = new CancellationTokenSource();
-
         [Parameter(Mandatory = false, Position = 0)]
         public int Threads { get; set; } = -1;
 
@@ -19,14 +17,9 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
         protected override void BeginProcessing()
         {
             Global.OpenExistingDefaultOrThrow();
-            this.InitializeProgressUpdate($"Synchronizing password hashes from api.haveibeenpwned.com");
+            this.InitializeProgressUpdate("Synchronizing password hashes from api.haveibeenpwned.com");
 
             base.BeginProcessing();
-        }
-
-        protected override void StopProcessing()
-        {
-            this.token.Cancel();
         }
 
         protected override void EndProcessing()

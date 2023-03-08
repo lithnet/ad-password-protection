@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Management.Automation;
+﻿using System.Management.Automation;
 using System.Security;
-using Lithnet.ActiveDirectory.PasswordProtection;
 
 namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
 {
     [Cmdlet(VerbsDiagnostic.Test, "IsCompromisedPassword", DefaultParameterSetName = "String")]
-    public class TestIsCompromisedPassword : PSCmdlet
+    public class TestIsCompromisedPassword : PasswordProtectionCmdletBase
     {
         [Parameter(Mandatory = true, Position = 1, ValueFromPipeline = true, ParameterSetName = "String"), ValidateNotNullOrEmpty]
         public string Value { get; set; }
@@ -31,11 +25,6 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
             base.BeginProcessing();
         }
 
-        protected override void EndProcessing()
-        {
-            base.EndProcessing();
-        }
-
         protected override void ProcessRecord()
         {
             if (this.ParameterSetName == "String")
@@ -43,7 +32,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
                 string password = this.Normalize.IsPresent ? StringNormalizer.Normalize(this.Value) : this.Value;
                 this.WriteObject(Global.Store.IsInStore(password, StoreType.Password));
             }
-            else if (this.ParameterSetName =="SecureString")
+            else if (this.ParameterSetName == "SecureString")
             {
                 string password = this.SecureString.SecureStringToString();
                 password = this.Normalize.IsPresent ? StringNormalizer.Normalize(password) : password;
