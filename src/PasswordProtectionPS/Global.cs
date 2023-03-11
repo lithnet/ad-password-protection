@@ -17,15 +17,9 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
 
         public static void OpenStore()
         {
-            RegistryKey hklm = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64);
-            RegistryKey appKey = hklm.OpenSubKey("Software\\Policies\\Lithnet\\PasswordFilter");
-            string storePath = (string)appKey?.GetValue("Store", null);
+            Settings settings = new Settings();
 
-            if (storePath == null)
-            {
-                appKey = hklm.OpenSubKey("Software\\Lithnet\\PasswordFilter");
-                storePath = (string)appKey?.GetValue("Store", null);
-            }
+            var storePath = settings.StorePath ?? GetLastOpenStorePath();
 
             if (storePath == null)
             {
@@ -33,6 +27,20 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
             }
 
             OpenStore(storePath);
+
+            SetLastOpenStorePath(storePath);
+        }
+
+        private static string GetLastOpenStorePath()
+        {
+            RegistryKey baseKey = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry64);
+            return baseKey.OpenSubKey("Software\\Lithnet\\PasswordFilter", false)?.GetValue("LastOpenStore", null) as string;
+        }
+
+        private static void SetLastOpenStorePath(string path)
+        {
+            RegistryKey baseKey = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry64);
+            baseKey.CreateSubKey("Software\\Lithnet\\PasswordFilter", true).SetValue("LastOpenStore", path);
         }
 
         public static void OpenExistingDefaultOrThrow()
