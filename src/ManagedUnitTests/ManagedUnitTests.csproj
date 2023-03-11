@@ -63,12 +63,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\PasswordProtection\Lithnet.ActiveDirectory.PasswordProtection.csproj">
-      <Project>{61df881d-34fe-462b-aaa8-a56cd4dff287}</Project>
-      <Name>Lithnet.ActiveDirectory.PasswordProtection</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="TestData\english.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -81,6 +75,12 @@
     <Content Include="TestData\test-hash-too-long.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PasswordProtection\Lithnet.ActiveDirectory.PasswordProtection.csproj">
+      <Project>{61df881d-34fe-462b-aaa8-a56cd4dff287}</Project>
+      <Name>Lithnet.ActiveDirectory.PasswordProtection</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

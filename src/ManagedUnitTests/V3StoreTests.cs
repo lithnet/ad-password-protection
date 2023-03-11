@@ -20,6 +20,15 @@ namespace ManagedUnitTests
             this.StoredHashSize = 14;
         }
 
+        [TestMethod]
+        public void TestHibp()
+        {
+            HibpDownloader downloader = new HibpDownloader(this.Store);
+            var progress = new OperationProgress();
+
+            downloader.Execute(progress, 1, CancellationToken.None);
+        }
+        
         protected override string GetFileNameFromHash(string hash)
         {
             return $"{hash.Substring(0, 4)}.db";

@@ -10,6 +10,15 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace NativeUnitTests
 {
+	/// <summary>
+	/// Add the following words and passwords to complete these unit tests
+	/// 
+	/// Add-CompromisedPassword "password"
+	/// Add-CompromisedPassword "abacus"
+	/// Add-BannedWord "abacus"
+	/// Add-BannedWord "password"
+	/// </summary>
+
 	TEST_CLASS(Storev3Tests)
 	{
 	public:

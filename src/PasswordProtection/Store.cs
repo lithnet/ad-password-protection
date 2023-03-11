@@ -21,7 +21,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
         protected int HashOffset { get; }
 
-        protected int HashRangeLength { get; }
+        protected int RangeStringLength { get; }
 
         protected Store(HashAlgorithm encoder, int hashLength, int hashOffset)
         {
@@ -29,7 +29,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             this.HashLength = hashLength;
             this.HashOffset = hashOffset;
             this.Encoder = encoder;
-            this.HashRangeLength = this.HashOffset * 2;
+            this.RangeStringLength = this.HashOffset * 2;
         }
 
         public static void ImportPasswordsFromFile(Store store, StoreType storeType, string sourceFile, CancellationToken ct, int batchSize = DefaultBatchSize, OperationProgress progress = null)
@@ -284,37 +284,12 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             {
                 lineCount++;
 
-                yield return Store.GetHexHashFromLine(line, null, hashStringLength, lineCount);
+                yield return Store.GetBinaryHashFromLine(line, hashStringLength, lineCount);
             }
         }
 
-        internal static void ImportHexHashesFromString(Store store, string lines, string range, StoreType storeType, OperationProgress progress, CancellationToken ct)
+        internal static byte[] GetBinaryHashFromLine(string line, int hashStringLength, int lineCount)
         {
-            var splitLines = lines.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
-
-            var hash = GetHexHashesFromLines(splitLines, range, store.HashLength);
-            HashSet<byte[]> hashes = new HashSet<byte[]>(hash, ByteArrayComparer.Comparer);
-
-            store.AddToStore(hashes, storeType, progress, ct);
-        }
-
-        internal static IEnumerable<byte[]> GetHexHashesFromLines(IEnumerable<string> lines, string prefix, int hashBinaryLength)
-        {
-            int hashStringLength = hashBinaryLength * 2;
-            int lineCount = 0;
-
-            foreach (string line in lines)
-            {
-                lineCount++;
-
-                yield return Store.GetHexHashFromLine(line, prefix, hashStringLength, lineCount);
-            }
-        }
-
-        internal static byte[] GetHexHashFromLine(string line, string prefix, int hashStringLength, int lineCount)
-        {
-            line = prefix + line;
-
             if (line.Length < hashStringLength)
             {
                 throw new InvalidDataException($"Line #{lineCount} was not recognized as a hexadecimal hash. The line was not the expected length.\r\nThe following line was invalid:\r\n{line}");
@@ -407,6 +382,16 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
         {
             var hashset = new HashSet<byte[]>(ByteArrayComparer.Comparer) { hash };
             this.AddToStore(hashset, storeType, new OperationProgress(), new CancellationToken());
+        }
+
+        internal void AddSingleRangeToStore(HashSet<byte[]> hashes, string range, StoreType storeType, OperationProgress progress)
+        {
+            if (range.Length != this.RangeStringLength)
+            {
+                throw new InvalidOperationException("The range string length did not match the expected length");
+            }
+
+            this.AddToStore(hashes, range, storeType, progress);
         }
 
         public void AddToStore(HashSet<byte[]> hashes, StoreType storeType, OperationProgress progress, CancellationToken ct)

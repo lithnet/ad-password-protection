@@ -7,7 +7,12 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 {
     public static class Extensions
     {
-        public static string ToHexPrefixString(this int i)
+        public static string ToHexLppPrefixString(this int i)
+        {
+            return i.ToString("X4", CultureInfo.InvariantCulture);
+        }
+
+        public static string ToHexHibpPrefixString(this int i)
         {
             return i.ToString("X5", CultureInfo.InvariantCulture);
         }
