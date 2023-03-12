@@ -260,7 +260,7 @@ stages:
         inputs:
           targetType: 'inline'
           script: |
-              $file = "src/Lithnet Password Protection for Active Directory.aip"
+              $file = "src/Installer/Lithnet Password Protection for Active Directory.aip"
               $content = Get-Content $file
 
               $pattern1 = 'akv_tenant_id'
@@ -286,7 +286,7 @@ stages:
         inputs:
           advinstVersion: '20.4.1'
           advinstLicense: '$(advancedInstaller.licenseKey)'
-          aipPath: 'src/Lithnet Password Protection for Active Directory.aip'
+          aipPath: 'src/Installer/Lithnet Password Protection for Active Directory.aip'
           aipBuild: 'DefaultBuild'
           aipOutputFolder: '$(build.artifactstagingdirectory)'
           aipExtraCommands: 'SetAzureKeyVaultSecret $(akv.secret)'
