@@ -81,6 +81,7 @@ stages:
           script: |
             $files = @()
             $files += "$(Build.ArtifactStagingDirectory)\lithnetpwdf.dll"
+            $files += "$(Build.ArtifactStagingDirectory)\messages.dll"
 
             write-host "Signing $($files.Length) files:"
             write-output $files
@@ -136,9 +137,16 @@ stages:
           failOnStderr: true
           showWarnings: true
       - task: PublishPipelineArtifact@1
+        displayName: Publish CAB artifact
         inputs:
           targetPath: '$(Build.ArtifactStagingDirectory)\lithnetpwdf.cab'
           artifact: 'lpp_filter_for_signing'
+          publishLocation: 'pipeline'
+      - task: PublishPipelineArtifact@1
+        displayName: Publish message DLL artifact
+        inputs:
+          targetPath: '$(Build.ArtifactStagingDirectory)\messages.dll'
+          artifact: 'eventlog_messages_dll'
           publishLocation: 'pipeline'
     - job: "get_lpp_signed_by_ms"
       dependsOn: build_lpp_job
@@ -251,9 +259,16 @@ stages:
           showWarnings: true
 
       - task: DownloadPipelineArtifact@2
+        displayName: Download signed filter DLL
         inputs:
           buildType: 'current'
           artifactName: 'lpp_filter_ms_signed'
+          targetPath: 'D:\build\lpp\filter'
+      - task: DownloadPipelineArtifact@2
+        displayName: Download messages DLL
+        inputs:
+          buildType: 'current'
+          artifactName: 'eventlog_messages_dll'
           targetPath: 'D:\build\lpp\filter'
       - task: PowerShell@2
         displayName: Set AIP variables
