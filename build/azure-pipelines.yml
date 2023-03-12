@@ -75,7 +75,7 @@ stages:
         displayName: Install AzureSignTool
 
       - task: PowerShell@2
-        displayName: 'Sign files with AzureSignTool'
+        displayName: 'Sign filter DLL with AzureSignTool'
         inputs:
           targetType: 'inline'
           script: |
@@ -107,6 +107,34 @@ stages:
         inputs:
           script: |
             makecab $(Build.ArtifactStagingDirectory)\lithnetpwdf.dll $(Build.ArtifactStagingDirectory)\lithnetpwdf.cab
+      - task: PowerShell@2
+        displayName: 'Sign submission CAB with AzureSignTool'
+        inputs:
+          targetType: 'inline'
+          script: |
+            $files = @()
+            $files += "$(Build.ArtifactStagingDirectory)\lithnetpwdf.cab"
+
+            write-host "Signing $($files.Length) files:"
+            write-output $files
+
+            $cmdargs = @(
+              "sign",
+              "-d", "Lithnet Password Protection for Active Directory",
+              "-kvu", "$(akv.url)",
+              "-kvi", "$(akv.applicationID)",
+              "-kvs", "$(akv.secret)",
+              "-kvt", "$(akv.tenantId)",
+              "-kvc", "$(akv.certificateName)",
+              "-tr", "http://timestamp.digicert.com",
+              "-td", "sha256"
+            )
+
+            $cmdargs += $files
+        
+            & AzureSignTool $cmdargs
+          failOnStderr: true
+          showWarnings: true
       - task: PublishPipelineArtifact@1
         inputs:
           targetPath: '$(Build.ArtifactStagingDirectory)\lithnetpwdf.cab'
@@ -123,12 +151,16 @@ stages:
             [ad-password-protection]\Project Administrators
             [ad-password-protection]\Build Administrators
           instructions: |
-            Please download the LPP artifact and get it signed by Microsoft
+            Please download the LPP artifact 
             
             az login
             az pipelines runs artifact download --artifact-name lpp_filter_for_signing --path "." --run-id $(Build.BuildId) --organization $(System.CollectionUri) --project "$(System.TeamProject)"
             
-            When it is signed, use the following command to upload the DLL file
+            Submit the CAB to Microsoft for signing at 
+            
+            https://partner.microsoft.com/en-us/dashboard/hardware/FileSign/NewLSA
+
+            When it is signed, use the following command to upload the resulting DLL file
             
             az pipelines runs artifact upload --artifact-name lpp_filter_ms_signed --path "%cd%\lithnetpwdf.dll" --run-id $(Build.BuildId) --organization $(System.CollectionUri) --project "$(System.TeamProject)"
     - job: main_build
@@ -155,6 +187,7 @@ stages:
         inputs:
           SearchPattern: 'D:\build\lpp\ps\*.pdb'
           SymbolServerType: 'TeamServices'
+          IndexSources: false
       - task: PowerShell@2
         displayName: Update PS module manifest version
         inputs:
