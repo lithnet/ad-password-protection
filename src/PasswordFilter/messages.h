@@ -105,8 +105,9 @@
 //
 // MessageText:
 //
-// There was a problem opening the store file. Check that the store folder exists and is accessible
+// There was a problem opening the store file. Check that the store folder exists and is accessible.\n
 // Error code: %1
+// Path: %2
 //
 #define MSG_STOREERROR                   ((DWORD)0xC0020009L)
 
