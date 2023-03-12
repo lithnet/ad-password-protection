@@ -229,7 +229,7 @@ stages:
       - task: AdvancedInstaller@2
         displayName: Build Advanced Installer package
         inputs:
-          advinstVersion: '20.2.1'
+          advinstVersion: '20.4.1'
           advinstLicense: '$(advancedInstaller.licenseKey)'
           aipPath: 'src/Lithnet Password Protection for Active Directory.aip'
           aipBuild: 'DefaultBuild'
