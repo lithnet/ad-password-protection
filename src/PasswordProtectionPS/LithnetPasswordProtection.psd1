@@ -48,7 +48,7 @@ ProcessorArchitecture = 'Amd64'
 RequiredModules = @()
 
 # Assemblies that must be loaded prior to importing this module
-RequiredAssemblies = @('DSInternals.Common.dll', 'DSInternals.Replication.Model.dll', 'DSInternals.Replication.Interop.dll', 'NDceRpc.Microsoft.dll', 'DSInternals.Replication.dll', 'Lithnet.ActiveDirectory.PasswordProtection.dll')
+# RequiredAssemblies = @('DSInternals.Common.dll', 'DSInternals.Replication.Model.dll', 'DSInternals.Replication.Interop.dll', 'NDceRpc.Microsoft.dll', 'DSInternals.Replication.dll', 'Lithnet.ActiveDirectory.PasswordProtection.dll')
 
 # Script files (.ps1) that are run in the caller's environment prior to importing this module
 # ScriptsToProcess = @()
