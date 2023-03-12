@@ -61,7 +61,11 @@ stages:
           msbuildArgs: '/p:OutDir=$(Build.ArtifactStagingDirectory)\'
           platform: '$(buildPlatform)'
           configuration: '$(buildConfiguration)'
-
+      - task: PublishSymbols@2
+        displayName: Publish Password Filter symbols 
+        inputs:
+          SearchPattern: '$(Build.ArtifactStagingDirectory)/*.pdb'
+          SymbolServerType: 'TeamServices'
       - task: DotNetCoreCLI@2
         inputs:
           command: 'custom'
@@ -145,6 +149,11 @@ stages:
           arguments: '--configuration $(BuildConfiguration) --output "D:\build\lpp\ps" -p:Version=$(build.version) --framework net472'
           zipAfterPublish: false
           modifyOutputPath: false
+      - task: PublishSymbols@2
+        displayName: Publish PS Module symbols 
+        inputs:
+          SearchPattern: 'D:\build\lpp\ps\*.pdb'
+          SymbolServerType: 'TeamServices'
       - task: PowerShell@2
         displayName: Update PS module manifest version
         inputs:
