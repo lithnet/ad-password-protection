@@ -146,12 +146,24 @@ stages:
           zipAfterPublish: false
           modifyOutputPath: false
       - task: PowerShell@2
+        displayName: Update PS module manifest version
+        inputs:
+          targetType: 'inline'
+          script: |
+              $file = "D:\build\lpp\ps\LithnetPasswordProtection.psd1"
+              
+              Update-ModuleManifest -Path $file -ModuleVersion "$(build.versionShort).0"
+              
+              Get-Content $file
+          failOnStderr: true
+      - task: PowerShell@2
         displayName: Build folder structure
         inputs:
           targetType: 'inline'
           script: |
              New-Item "D:\build\lpp\filter" -ItemType Directory
           failOnStderr: true
+          
       - task: DotNetCoreCLI@2
         inputs:
           command: 'custom'
