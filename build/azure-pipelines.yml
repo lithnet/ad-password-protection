@@ -61,7 +61,11 @@ stages:
           msbuildArgs: '/p:OutDir=$(Build.ArtifactStagingDirectory)\'
           platform: '$(buildPlatform)'
           configuration: '$(buildConfiguration)'
-
+      - task: PublishSymbols@2
+        displayName: Publish Password Filter symbols 
+        inputs:
+          SearchPattern: '$(Build.ArtifactStagingDirectory)/*.pdb'
+          SymbolServerType: 'TeamServices'
       - task: DotNetCoreCLI@2
         inputs:
           command: 'custom'
@@ -145,6 +149,22 @@ stages:
           arguments: '--configuration $(BuildConfiguration) --output "D:\build\lpp\ps" -p:Version=$(build.version) --framework net472'
           zipAfterPublish: false
           modifyOutputPath: false
+      - task: PublishSymbols@2
+        displayName: Publish PS Module symbols 
+        inputs:
+          SearchPattern: 'D:\build\lpp\ps\*.pdb'
+          SymbolServerType: 'TeamServices'
+      - task: PowerShell@2
+        displayName: Update PS module manifest version
+        inputs:
+          targetType: 'inline'
+          script: |
+              $file = "D:\build\lpp\ps\LithnetPasswordProtection.psd1"
+              
+              Update-ModuleManifest -Path $file -ModuleVersion "$(build.versionShort).0"
+              
+              Get-Content $file
+          failOnStderr: true
       - task: PowerShell@2
         displayName: Build folder structure
         inputs:
@@ -152,6 +172,7 @@ stages:
           script: |
              New-Item "D:\build\lpp\filter" -ItemType Directory
           failOnStderr: true
+          
       - task: DotNetCoreCLI@2
         inputs:
           command: 'custom'
@@ -229,7 +250,7 @@ stages:
       - task: AdvancedInstaller@2
         displayName: Build Advanced Installer package
         inputs:
-          advinstVersion: '20.2.1'
+          advinstVersion: '20.4.1'
           advinstLicense: '$(advancedInstaller.licenseKey)'
           aipPath: 'src/Lithnet Password Protection for Active Directory.aip'
           aipBuild: 'DefaultBuild'
