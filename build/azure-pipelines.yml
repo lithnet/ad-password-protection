@@ -303,6 +303,7 @@ stages:
           advinstLicense: '$(advancedInstaller.licenseKey)'
           aipPath: 'src/Installer/Lithnet Password Protection for Active Directory.aip'
           aipBuild: 'DefaultBuild'
+          aipPackageName: 'LithnetPasswordProtection-$(build.version).exe'
           aipOutputFolder: '$(build.artifactstagingdirectory)'
           aipExtraCommands: 'SetAzureKeyVaultSecret $(akv.secret)'
           
