@@ -79,7 +79,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
             if (result == null)
             {
-                result = settingsKey.GetValue(name);
+                result = settingsKey?.GetValue(name);
             }
 
             if (result == null)
