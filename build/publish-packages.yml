@@ -1,0 +1,132 @@
+parameters:
+- name: deploymentType
+  type: string
+  default: dev
+  values:
+  - dev
+  - preview
+  - prod
+
+stages:
+- stage: publish_${{ parameters.deploymentType }}
+  ${{ if eq(parameters.deploymentType, 'dev') }}:
+    displayName: Publish packages to dev
+    dependsOn: ['main_build_stage']
+  ${{ if eq(parameters.deploymentType, 'preview') }}:
+    displayName: Publish packages to preview
+    dependsOn: ['publish_dev']
+  ${{ if eq(parameters.deploymentType, 'prod') }}:
+    displayName: Publish packages to prod
+    dependsOn: ['publish_preview', 'publish_dev']
+  variables:
+    - group: Packaging variables
+    - ${{ if eq(parameters.deploymentType, 'dev') }}:
+      - group: Dev package repo variables
+      - name: releaseType
+        value: latest
+      - name: releaseClass
+        value: preview
+    - ${{ if eq(parameters.deploymentType, 'preview') }}:
+      - group: Preview package repo variables
+      - name: releaseType
+        value: latest
+      - name: releaseClass
+        value: preview
+    - ${{ if eq(parameters.deploymentType, 'prod') }}:
+      - group: Prod package repo variables
+      - name: releaseType
+        value: stable
+      - name: releaseClass
+        value: prod
+  jobs:
+
+## Publish to blob storage
+  - deployment: 'PublishPackages'
+    ${{ if eq(parameters.deploymentType, 'dev') }}:
+      environment: 'development'
+      displayName: Publish packages to dev/latest
+    ${{ if eq(parameters.deploymentType, 'preview') }}:
+      environment: 'preview'
+      displayName: Publish packages to prod/latest
+    ${{ if eq(parameters.deploymentType, 'prod') }}:
+      environment: 'production'
+      displayName: Publish packages to prod/stable
+    variables:
+      ${{ if eq(parameters.deploymentType, 'dev') }}:
+        retentionLeaseDays: 45 
+      ${{ if eq(parameters.deploymentType, 'preview') }}:
+        retentionLeaseDays: 180
+        leaseId: $[ stageDependencies.publish_dev.PublishPackages.outputs['PublishPackages.CreateRetentionLease.newLeaseId']]
+      ${{ if eq(parameters.deploymentType, 'prod') }}:
+        retentionLeaseDays: 1825
+        leaseId: $[ stageDependencies.publish_dev.PublishPackages.outputs['PublishPackages.CreateRetentionLease.newLeaseId']]
+
+    pool:
+      vmImage: windows-2022 
+    strategy:
+      runOnce:
+        deploy:            
+          steps:
+          - checkout: self
+           - task: CmdLine@2
+            displayName: 'Set variables'
+            name: artifactsList
+            inputs:
+              script: |
+                set
+                SET artifactLocation=$(Pipeline.Workspace)
+                dir %artifactLocation%
+                SET artifactsPresent=,
+                if exist "%artifactLocation%\installer\"        SET artifactsPresent=installer,
+                
+                echo ##vso[task.setvariable variable=artifactsPresent;isOutput=true;]%artifactsPresent%
+                echo Found artifacts %artifactsPresent%
+          - task: AzureCLI@2
+            name: PublishToBlobStorage
+            displayName: 'Upload artifacts to blob storage' 
+            inputs:
+              azureSubscription: 'LithnetPAYGSubscription'
+              scriptType: 'pscore'
+              scriptLocation: 'scriptPath'
+              scriptPath: '$(Build.SourcesDirectory)\build\scripts\PushArtifactsToStorage.ps1'
+              addSpnToEnvironment: true
+          - ${{ if eq(parameters.deploymentType, 'dev') }}:    
+            - task: PowerShell@2
+              condition: and(succeeded(), not(canceled()))
+              name: CreateRetentionLease
+              displayName: Set retention lease to $(retentionLeaseDays) days
+              inputs:
+                failOnStderr: true
+                targetType: 'inline'
+                script: |
+                  $VerbosePreference="Continue"
+                  $contentType = "application/json";
+                  $headers = @{ Authorization = 'Bearer $(System.AccessToken)' };
+                  $rawRequest = @{ daysValid = $(retentionLeaseDays); definitionId = $(System.DefinitionId); ownerId = 'User:$(Build.RequestedForId)'; protectPipeline = $false; runId = $(Build.BuildId) };
+                  $request = ConvertTo-Json @($rawRequest);
+                  $uri = "$(System.CollectionUri)$(System.TeamProject)/_apis/build/retention/leases?api-version=7.1-preview.2";
+                  $newLease = Invoke-RestMethod -uri $uri -method POST -Headers $headers -ContentType $contentType -Body $request;
+                  Write-Verbose (ConvertTo-Json $newLease)
+                  $newLeaseId = $newLease.Value[0].LeaseId
+                  Write-Host "##vso[task.setvariable variable=newLeaseId;isOutput=true;]$newLeaseId"
+                  Write-Verbose "Set leaseId to $newLeaseId"
+          - ${{ if or(eq(parameters.deploymentType, 'preview'),eq(parameters.deploymentType, 'prod'))  }}:    
+            - task: PowerShell@2
+              condition: and(succeeded(), not(canceled()))
+              name: UpdateRetentionLease_${{ parameters.deploymentType }}
+              displayName: Set retention lease $(leaseId) to $(retentionLeaseDays) days
+              inputs:
+                failOnStderr: true
+                targetType: 'inline'
+                script: |
+                  $VerbosePreference="Continue"
+                  $contentType = "application/json";
+                  $headers = @{ Authorization = 'Bearer $(System.AccessToken)' };
+                  $rawRequest = @{ daysValid = $(retentionLeaseDays); };
+                  $request = ConvertTo-Json $rawRequest;
+                  $uri = "$(System.CollectionUri)$(System.TeamProject)/_apis/build/retention/leases/$(leaseId)?api-version=7.1-preview.2";
+                  write-Verbose $uri
+                  write-verbose $request
+                  Invoke-RestMethod -uri $uri -method PATCH -Headers $headers -ContentType $contentType -Body $request;
+                  write-host "Updates retention lease to $(retentionLeaseDays) days"
+ 

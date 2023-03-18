@@ -22,6 +22,7 @@ variables:
     value: $[format('{0:yyyy}-{0:MM}-{0:dd}T{0:HH}:{0:mm}:{0:ss}', pipeline.startTime)]
   - group: Azure KeyVault Code Signing
   - group: Advanced Installer License Keys
+  - group: Packaging variables
 
 name: $(build.version.major).$(build.version.minor).$(build.version.revision)$(build.version.suffix)
 trigger: none
@@ -148,8 +149,10 @@ stages:
           targetPath: '$(Build.ArtifactStagingDirectory)\messages.dll'
           artifact: 'eventlog_messages_dll'
           publishLocation: 'pipeline'
+- stage: ms_sign_stage
+  dependsOn: build_lpp
+  jobs:
     - job: "get_lpp_signed_by_ms"
-      dependsOn: build_lpp_job
       displayName: Pause for LPP DLL signing by Microsoft
       pool: server
       steps:
@@ -171,6 +174,9 @@ stages:
             When it is signed, use the following command to upload the resulting DLL file
             
             az pipelines runs artifact upload --artifact-name lpp_filter_ms_signed --path "%cd%\lithnetpwdf.dll" --run-id $(Build.BuildId) --organization $(System.CollectionUri) --project "$(System.TeamProject)"
+- stage: main_build_stage
+  dependsOn: ms_sign_stage
+  jobs:
     - job: main_build
       dependsOn: get_lpp_signed_by_ms
       displayName: Main build
@@ -303,7 +309,7 @@ stages:
           advinstLicense: '$(advancedInstaller.licenseKey)'
           aipPath: 'src/Installer/Lithnet Password Protection for Active Directory.aip'
           aipBuild: 'DefaultBuild'
-          aipPackageName: 'LithnetPasswordProtection-$(build.version).exe'
+          aipPackageName: '$(package.name)'
           aipOutputFolder: '$(build.artifactstagingdirectory)'
           aipExtraCommands: 'SetAzureKeyVaultSecret $(akv.secret)'
           
@@ -312,3 +318,9 @@ stages:
           targetPath: '$(Build.ArtifactStagingDirectory)'
           artifact: 'installer'
           publishLocation: 'pipeline'
+- stage:
+  dependsOn: main_build_stage
+  jobs:
+    - deployment: publish_dev
+      environment: 'development'
+      displayName: Publish packages to dev/latest 
