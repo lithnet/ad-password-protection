@@ -57,4 +57,4 @@ function UploadFiles([string]$artifact, [string]$destinationPath, [string]$fileN
     Write-Host "Uploaded artifact $artifact" -ForegroundColor White
 }
 
-UploadFiles -artifact "installer" -destinationPath "$($env:package.path)" -fileName $($env:package.name) -arch "x64"
+UploadFiles -artifact "installer" -destinationPath "$($env:package_path)" -fileName "$($env:package_name)" -arch "x64"
