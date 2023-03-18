@@ -318,6 +318,7 @@ stages:
           targetPath: '$(Build.ArtifactStagingDirectory)'
           artifact: 'installer'
           publishLocation: 'pipeline'
+
 - template: publish-packages.yml
   parameters:
     deploymentType: dev
@@ -326,41 +327,6 @@ stages:
   parameters:
     deploymentType: preview
 
-- stage: 
-  jobs:
-  - job:
-    steps:
-    - task: GitHubRelease@1
-      inputs:
-        gitHubConnection: 'github.com'
-        repositoryName: 'lithnet/ad-password-protection'
-        action: 'create'
-        target: '$(Build.SourceVersion)'
-        tag: 'v$(build.version)'
-        title: 'v$(build.version)'
-        releaseNotesSource: 'inline'
-        assets: '$(Build.ArtifactStagingDirectory)/installer/*'
-        isPreRelease: true
-        addChangeLog: false
-
 - template: publish-packages.yml
   parameters:
     deploymentType: prod
-
-- stage: 
-  jobs:
-  - job:
-    steps:
-    - task: GitHubRelease@1
-      inputs:
-        gitHubConnection: 'github.com'
-        repositoryName: 'lithnet/ad-password-protection'
-        action: 'edit'
-        target: '$(Build.SourceVersion)'
-        tag: 'v$(build.version)'
-        title: 'v$(build.version)'
-        releaseNotesSource: 'inline'
-        isPreRelease: false
-        assets: '$(Build.ArtifactStagingDirectory)/installer/*'
-        assetUploadMode: 'replace'
-        addChangeLog: false
