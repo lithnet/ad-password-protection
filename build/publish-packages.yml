@@ -68,7 +68,7 @@ stages:
         deploy:            
           steps:
           - checkout: self
-           - task: CmdLine@2
+          - task: CmdLine@2
             displayName: 'Set variables'
             name: artifactsList
             inputs:
