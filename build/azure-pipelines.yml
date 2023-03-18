@@ -318,14 +318,14 @@ stages:
           targetPath: '$(Build.ArtifactStagingDirectory)'
           artifact: 'installer'
           publishLocation: 'pipeline'
-- template: publish-packages.yaml
+- template: ./publish-packages.yaml
   parameters:
     deploymentType: dev
 
-- template: publish-packages.yaml
+- template: ./publish-packages.yaml
   parameters:
     deploymentType: preview
 
-- template: publish-packages.yaml
+- template: ./publish-packages.yaml
   parameters:
     deploymentType: prod
