@@ -9,9 +9,9 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Http;
 using Polly;
 using Polly.Extensions.Http;
-using Polly.Retry;
 
 namespace Lithnet.ActiveDirectory.PasswordProtection
 {
@@ -25,7 +25,6 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
         private readonly Store store;
         private readonly HttpClient httpClient;
-        private readonly AsyncRetryPolicy<HttpResponseMessage> policy;
 
         private ConcurrentDictionary<string, string> hibpState;
         private int writeLock;
@@ -34,13 +33,6 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
         {
             this.store = store;
             this.httpClient = InitializeHttpClient();
-            this.policy = HttpPolicyExtensions.HandleTransientHttpError()
-                .WaitAndRetryAsync(
-                    maxApiRetries,
-                    (retryAttempt) =>
-                        TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
-                    (response, delay, retryCount, _) =>
-                        Trace.WriteLine($"Retry {retryCount}/{maxApiRetries}: {delay}: {response?.Result?.StatusCode}."));
         }
 
         public void DeleteSavedState()
@@ -50,7 +42,17 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
         private static HttpClient InitializeHttpClient()
         {
+            var policy = HttpPolicyExtensions.HandleTransientHttpError()
+                .WaitAndRetryAsync(
+                    maxApiRetries,
+                    (retryAttempt) =>
+                        TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+                    (response, delay, retryCount, _) =>
+                        Trace.WriteLine($"Retry {retryCount}/{maxApiRetries}: {delay}: {response?.Result?.StatusCode}."));
+
+            var pollyHandler = new PolicyHttpMessageHandler(policy);
             var handler = new HttpClientHandler();
+            pollyHandler.InnerHandler = handler;
 
             if (handler.SupportsAutomaticDecompression)
             {
@@ -60,7 +62,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             handler.SslProtocols = System.Security.Authentication.SslProtocols.Tls12;
             handler.MaxConnectionsPerServer = 256;
 
-            HttpClient client = new HttpClient(handler);
+            HttpClient client = new HttpClient(pollyHandler);
             client.BaseAddress = new Uri("https://api.pwnedpasswords.com/range/");
             client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("LithnetPasswordProtection", AssemblyVersion.ToString()));
             client.Timeout = TimeSpan.FromMinutes(15);
@@ -220,25 +222,22 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
         {
             string requestUri = range + "?mode=ntlm";
 
-            return await this.policy.ExecuteAsync(async () =>
+            var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+
+            if (etag != null)
             {
-                var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+                request.Headers.Add("If-None-Match", etag);
+            }
 
-                if (etag != null)
-                {
-                    request.Headers.Add("If-None-Match", etag);
-                }
-
-                try
-                {
-                    return await this.httpClient.SendAsync(request, ct);
-                }
-                catch (Exception ex)
-                {
-                    Trace.WriteLine(ex.ToString());
-                    throw;
-                }
-            }).ConfigureAwait(false);
+            try
+            {
+                return await this.httpClient.SendAsync(request, ct);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex.ToString());
+                throw;
+            }
         }
     }
 }
