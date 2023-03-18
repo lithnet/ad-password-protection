@@ -29,7 +29,7 @@ trigger: none
 
 stages:
 - stage: build_lpp_stage
-  displayName: Build LPP
+  displayName: Build filter DLL
   jobs:
     - job: "build_lpp_job"
       displayName: Build password filter DLL
@@ -149,6 +149,7 @@ stages:
           artifact: 'eventlog_messages_dll'
           publishLocation: 'pipeline'
 - stage: ms_sign_stage
+  displayName: Pause for Microsoft LSA Signing
   dependsOn: build_lpp_stage
   jobs:
     - job: "get_lpp_signed_by_ms"
@@ -174,6 +175,7 @@ stages:
             
             az pipelines runs artifact upload --artifact-name lpp_filter_ms_signed --path "%cd%\lithnetpwdf.dll" --run-id $(Build.BuildId) --organization $(System.CollectionUri) --project "$(System.TeamProject)"
 - stage: main_build_stage
+  displayName: Perform main build
   dependsOn: ms_sign_stage
   jobs:
     - job: main_build
