@@ -28,9 +28,8 @@ name: $(build.version.major).$(build.version.minor).$(build.version.revision)$(b
 trigger: none
 
 stages:
-- stage: build_lpp
+- stage: build_lpp_stage
   displayName: Build LPP
-  dependsOn: []
   jobs:
     - job: "build_lpp_job"
       displayName: Build password filter DLL
@@ -150,7 +149,7 @@ stages:
           artifact: 'eventlog_messages_dll'
           publishLocation: 'pipeline'
 - stage: ms_sign_stage
-  dependsOn: build_lpp
+  dependsOn: build_lpp_stage
   jobs:
     - job: "get_lpp_signed_by_ms"
       displayName: Pause for LPP DLL signing by Microsoft
@@ -178,7 +177,6 @@ stages:
   dependsOn: ms_sign_stage
   jobs:
     - job: main_build
-      dependsOn: get_lpp_signed_by_ms
       displayName: Main build
       pool:
         vmImage: 'windows-latest'
