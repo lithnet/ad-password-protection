@@ -318,9 +318,14 @@ stages:
           targetPath: '$(Build.ArtifactStagingDirectory)'
           artifact: 'installer'
           publishLocation: 'pipeline'
-- stage:
-  dependsOn: main_build_stage
-  jobs:
-    - deployment: publish_dev
-      environment: 'development'
-      displayName: Publish packages to dev/latest 
+- template: publish-packages.yaml
+  parameters:
+    deploymentType: dev
+
+- template: publish-packages.yaml
+  parameters:
+    deploymentType: preview
+
+- template: publish-packages.yaml
+  parameters:
+    deploymentType: prod
