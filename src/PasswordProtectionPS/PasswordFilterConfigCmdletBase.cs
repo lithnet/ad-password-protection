@@ -10,8 +10,8 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
 
             var result = new PSObject();
             result.Properties.Add(new PSNoteProperty("StorePath", settings.StorePath));
-            result.Properties.Add(new PSNoteProperty("Enabled", settings.Enabled));
             result.Properties.Add(new PSNoteProperty("IsFilterRegistered", settings.IsFilterRegistered));
+            result.Properties.Add(new PSNoteProperty("IsFilterEnabled", settings.IsFilterRegistered && settings.Enabled));
 
             this.WriteObject(result);
         }
