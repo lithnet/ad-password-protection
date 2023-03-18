@@ -24,21 +24,18 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
 
         protected override void EndProcessing()
         {
+            HibpDownloader downloader = new HibpDownloader(Global.Store);
+
+            if (this.MyInvocation.BoundParameters.ContainsKey(nameof(this.Reset)) && this.Reset)
+            {
+                this.WriteVerbose("Removing saved state");
+                downloader.DeleteSavedState();
+            }
+
             var task = Task.Run(() =>
             {
                 try
                 {
-                    HibpDownloader downloader = new HibpDownloader(Global.Store);
-
-                    if (this.MyInvocation.BoundParameters.ContainsKey(nameof(this.Reset)))
-                    {
-                        if (this.Reset)
-                        {
-                            this.WriteVerbose("Removing saved state");
-                            downloader.DeleteSavedState();
-                        }
-                    }
-
                     downloader.Execute(this.Progress, this.Threads, this.token.Token);
                 }
                 catch (OperationCanceledException)
