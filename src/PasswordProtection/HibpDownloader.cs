@@ -40,7 +40,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
                     (retryAttempt) =>
                         TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
                     (response, delay, retryCount, _) =>
-                        Trace.WriteLine($"Retry {retryCount}/{maxApiRetries}: {delay}: {response.Result.StatusCode}."));
+                        Trace.WriteLine($"Retry {retryCount}/{maxApiRetries}: {delay}: {response?.Result?.StatusCode}."));
         }
 
         public void DeleteSavedState()
