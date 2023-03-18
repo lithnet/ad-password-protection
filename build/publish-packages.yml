@@ -85,7 +85,7 @@ stages:
             name: PublishToBlobStorage
             displayName: 'Upload artifacts to blob storage' 
             inputs:
-              azureSubscription: 'LithnetPAYGSubscription'
+              azureSubscription: 'ProductionServicesSubscription'
               scriptType: 'pscore'
               scriptLocation: 'scriptPath'
               scriptPath: '$(Build.SourcesDirectory)\build\scripts\PushArtifactsToStorage.ps1'
