@@ -33,11 +33,11 @@ LPP is only supported on x64 editions of Windows
 
 #### Password Filter
 * Windows Server 2012 R2 or higher
-* (Microsoft Visual C++ Redistributable package 2015-2022)[https://aka.ms/vs/17/release/vc_redist.x64.exe]
+* [Microsoft Visual C++ Redistributable package 2015-2022](https://aka.ms/vs/17/release/vc_redist.x64.exe)
 #### PowerShell module
 * .NET Framework 4.7.2
 * Windows PowerShell 5
-* (Microsoft Visual C++ Redistributable package 2015-2022)[https://aka.ms/vs/17/release/vc_redist.x64.exe]
+* [Microsoft Visual C++ Redistributable package 2015-2022](https://aka.ms/vs/17/release/vc_redist.x64.exe)
 
 ## Getting started
 Download the installer from the [releases page](https://github.com/lithnet/ad-password-protection/releases)
