@@ -1,7 +1,5 @@
 ![](https://lithnet.github.io/images/lppad.png)
 
-*Read the getting started [blog post series](https://blog.lithnet.io/2019/01/lppad-1.html?m=1)*
-
 Lithnet Password Protection for Active Directory (LPP) enhances the options available to an organization wanting to ensure that all their Active Directory accounts have strong passwords.
 
 LPP is a module that you install on your Active Directory servers that uses a [password filter](https://docs.microsoft.com/en-us/windows/desktop/secmgmt/password-filters) to inspect passwords as users attempt to change them. Using group policy, you customize the types of checks you want to perform on those passwords and they are either rejected, or approved, and committed to the directory.
@@ -18,7 +16,8 @@ It also includes the ability to audit your users' existing passwords against the
 
 ## Additional features
 * Full PowerShell support which is used to;
-  * Manage the compromised password and banned word stores. Add your own banned words and compromised passwords, as well as use popular databases such as the haveibeenpwned.com downloadable password list
+  * Synchronize compromise password lists from the haveibeenpwned.com API
+  * Add your own banned words and compromised passwords, as well as use popular 3rd party word and password lists
   * Test passwords and existing hashes against the compromised store
   * Check to see if your user's current passwords in AD are found in the compromised password store
 * Passwords never leave the domain controller
@@ -33,26 +32,27 @@ It also includes the ability to audit your users' existing passwords against the
 LPP is only supported on x64 editions of Windows
 
 #### Password Filter
-* Windows Server 2008 R2 or higher
-* Microsoft Visual C++ Runtime 14 (2017)
+* Windows Server 2012 R2 or higher
+* (Microsoft Visual C++ Redistributable package 2015-2022)[https://aka.ms/vs/17/release/vc_redist.x64.exe]
 #### PowerShell module
-* .NET Framework 4.6
-* PowerShell 5
-* Microsoft Visual C++ Runtime 14 (2017)
+* .NET Framework 4.7.2
+* Windows PowerShell 5
+* (Microsoft Visual C++ Redistributable package 2015-2022)[https://aka.ms/vs/17/release/vc_redist.x64.exe]
 
 ## Getting started
 Download the installer from the [releases page](https://github.com/lithnet/ad-password-protection/releases)
 
-Read the [getting started guide](https://blog.lithnet.io/2019/01/lppad-1.html) or visit the [wiki](https://github.com/lithnet/ad-password-protection/wiki) for the full set of documentation.
+Read the [getting started guide](https://docs.lithnet.io/password-protection/installation/setup-guide) on our documentation site.
 
 ## How can I contribute to the project?
 * Found an issue and want us to fix it? [Log it](https://github.com/lithnet/ad-password-protection/issues)
 * Want to fix an issue yourself or add functionality? Clone the project and submit a pull request
 
 ## Enteprise support
-Lithnet offer enterprise support plans for our open-source products. Deploy our tools with confidence that you have the backing of the dedicated Lithnet support team if you run into any issues, have questions, or need advice. Reach out to support@lithnet.io, let us know the number of users you are protecting with LPP, and we'll put together a quote.
+Lithnet offer enterprise support plans for our products. Deploy our tools with confidence that you have the backing of the dedicated Lithnet support team if you run into any issues, have questions, or need advice. Reach out to us via our [contact form](https://lithnet.io/products/password-protection#requestaquote) for a quote and more information on this offering.
 
 ## Keep up to date
+* [Product documentation](http://docs.lithnet.io/password-protection)
 * [Visit our blog](http://blog.lithnet.io)
 * [Follow us on twitter](https://twitter.com/lithnet_io)![](http://twitter.com/favicon.ico)
 
