@@ -19,7 +19,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
                     throw new DirectoryNotFoundException($"The path {value} was not found");
                 }
 
-                var settingsKey = this.hklm.OpenSubKey("Software\\Lithnet\\PasswordFilter", true);
+                var settingsKey = this.hklm.CreateSubKey("Software\\Lithnet\\PasswordFilter", true);
                 settingsKey.SetValue("Store", value);
             }
         }
@@ -29,7 +29,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             get => this.GetPolicyOrSetting<int>("Disabled", 0) == 0;
             set
             {
-                var settingsKey = this.hklm.OpenSubKey("Software\\Lithnet\\PasswordFilter", true);
+                var settingsKey = this.hklm.CreateSubKey("Software\\Lithnet\\PasswordFilter", true);
                 if (value)
                 {
                     settingsKey.DeleteValue("Disabled", false);
@@ -49,7 +49,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
                 var values = key?.GetValue("Notification Packages") as string[];
 
-                return values.Contains("lithnetpwdf", StringComparer.OrdinalIgnoreCase);
+                return values?.Contains("lithnetpwdf", StringComparer.OrdinalIgnoreCase) ?? false;
             }
         }
 
@@ -67,7 +67,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
         {
             var policyKey = this.hklm.OpenSubKey("Software\\Policies\\Lithnet\\PasswordFilter", false);
 
-            return policyKey.GetValue(setting, null) != null;
+            return policyKey?.GetValue(setting, null) != null;
         }
 
         private T GetPolicyOrSetting<T>(string name, T defaultValue)
