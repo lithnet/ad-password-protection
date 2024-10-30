@@ -61,7 +61,7 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 			return FALSE;
 		}
 
-		simulate = reg.GetRegValue(REG_VALUE_SIMULATE, 0) != 0;
+		simulate = reg.GetRegValue(REG_VALUE_AUDITONLY, 0) != 0;
 
 		std::wstring accountName(AccountName->Buffer, AccountName->Length / sizeof(WCHAR));
 		std::wstring fullName(FullName->Buffer, FullName->Length / sizeof(WCHAR));

@@ -6,7 +6,7 @@ static LPCWSTR REG_BASE_POLICY_KEY = L"SOFTWARE\\Policies\\Lithnet\\PasswordFilt
 
 static LPCWSTR REG_VALUE_STOREPATH = L"Store";
 static LPCWSTR REG_VALUE_DISABLED = L"Disabled";
-static LPCWSTR REG_VALUE_SIMULATE = L"Disabled";
+static LPCWSTR REG_VALUE_AUDITONLY = L"AuditOnly";
 
 static LPCWSTR REG_VALUE_MINIMUMLENGTH = L"MinimumLength";
 
