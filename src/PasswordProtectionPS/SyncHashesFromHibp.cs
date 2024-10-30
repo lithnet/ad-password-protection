@@ -14,6 +14,9 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
         [Parameter]
         public SwitchParameter Reset { get; set; }
 
+        [Parameter]
+        public string ProxyAddress { get; set; }
+
         protected override void BeginProcessing()
         {
             Global.OpenExistingDefaultOrThrow();
@@ -24,7 +27,18 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
 
         protected override void EndProcessing()
         {
-            HibpDownloader downloader = new HibpDownloader(Global.Store);
+            Uri proxyUri = null;
+            if (!string.IsNullOrWhiteSpace(this.ProxyAddress))
+            {
+                if (!Uri.TryCreate(this.ProxyAddress, UriKind.Absolute, out proxyUri))
+                {
+                    throw new ArgumentException("The proxy address is not a valid URI");
+                }
+
+                this.WriteVerbose($"Using proxy server {this.ProxyAddress}");
+            }
+
+            HibpDownloader downloader = new HibpDownloader(Global.Store, proxyUri);
 
             if (this.MyInvocation.BoundParameters.ContainsKey(nameof(this.Reset)) && this.Reset)
             {

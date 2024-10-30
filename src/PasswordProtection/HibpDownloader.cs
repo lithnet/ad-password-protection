@@ -30,9 +30,14 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
         private int writeLock;
 
         public HibpDownloader(Store store)
+            : this(store, null)
+        {
+        }
+
+        public HibpDownloader(Store store, Uri proxy)
         {
             this.store = store;
-            this.httpClient = InitializeHttpClient();
+            this.httpClient = InitializeHttpClient(proxy);
         }
 
         public void DeleteSavedState()
@@ -40,7 +45,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             this.store.DeleteStoreMetadata(MetadataItemName);
         }
 
-        private static HttpClient InitializeHttpClient()
+        private static HttpClient InitializeHttpClient(Uri proxy)
         {
             var policy = HttpPolicyExtensions.HandleTransientHttpError()
                 .WaitAndRetryAsync(
@@ -52,6 +57,12 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
             var pollyHandler = new PolicyHttpMessageHandler(policy);
             var handler = new HttpClientHandler();
+
+            if (proxy != null)
+            {
+                handler.Proxy = new WebProxy(proxy);
+            }
+
             pollyHandler.InnerHandler = handler;
 
             if (handler.SupportsAutomaticDecompression)
