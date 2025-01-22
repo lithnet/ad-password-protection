@@ -67,7 +67,6 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 
 		if (!IsUserInScope(accountName))
 		{
-			eventlog::getInstance().logw(EVENTLOG_INFORMATION_TYPE, MSG_USEREXCLUDED, 1, accountName.c_str());
 			return TRUE;
 		}
 
@@ -156,8 +155,7 @@ extern "C" __declspec(dllexport) int __stdcall PasswordFilterEx(
 
 		if (!IsUserInScope(accountName))
 		{
-			eventlog::getInstance().logw(EVENTLOG_INFORMATION_TYPE, MSG_USEREXCLUDED, 1, accountName.c_str());
-			return TRUE;
+			return PASSWORD_APPROVED;
 		}
 
 		std::wstring fullName = FullName;
