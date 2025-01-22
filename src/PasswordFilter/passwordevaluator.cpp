@@ -9,8 +9,50 @@
 #include "utils.h"
 #include "complexityevaluator.h"
 #include "v3store.h"
+#include <string.h>
 
-int ProcessPassword(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation)
+BOOLEAN IsUserInScope(const std::wstring& accountName)
+{
+	if (_wcsicmp(accountName.c_str(), L"krbtgt") == 0)
+	{
+		eventlog::getInstance().logw(EVENTLOG_INFORMATION_TYPE, MSG_USEREXCLUDED, 1, accountName.c_str());
+		return FALSE;
+	}
+
+	registry reg;
+
+	for (const auto& excludedAccount : reg.GetRegValue(REG_VALUE_EXCLUDEDACCOUNTS, REG_DEFAULT_MAX_ITEMS, std::vector<std::wstring>()))
+	{
+		if (_wcsicmp(accountName.c_str(), excludedAccount.c_str()) == 0)
+		{
+			eventlog::getInstance().logw(EVENTLOG_INFORMATION_TYPE, MSG_USEREXCLUDED, 1, accountName.c_str());
+			return FALSE;
+		}
+	}
+
+	// See if we have an INCLUDEDACCOUNTS value. If it is present, then only allow those accounts to be processed. If it is blank, allow all accounts.
+
+	std::vector<std::wstring> includedAccounts = reg.GetRegValue(REG_VALUE_INCLUDEDACCOUNTS, REG_DEFAULT_MAX_ITEMS, std::vector<std::wstring>());
+
+	if (!includedAccounts.empty())
+	{
+		for (const auto& includedAccount : includedAccounts)
+		{
+			if (_wcsicmp(accountName.c_str(), includedAccount.c_str()) == 0)
+			{
+				return TRUE;
+			}
+		}
+
+		eventlog::getInstance().logw(EVENTLOG_INFORMATION_TYPE, MSG_USERNOTINCLUDED, 1, accountName.c_str());
+
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+int ProcessPassword(const SecureArrayT<WCHAR>& password, const std::wstring& accountName, const std::wstring& fullName, const BOOLEAN& setOperation)
 {
 	eventlog::getInstance().logw(EVENTLOG_INFORMATION_TYPE, MSG_PROCESSING_REQUEST, 3, setOperation ? L"set" : L"change", accountName.c_str(), fullName.c_str());
 
@@ -73,9 +115,9 @@ int ProcessPassword(const SecureArrayT<WCHAR> &password, const std::wstring &acc
 	return PASSWORD_APPROVED;
 }
 
-BOOLEAN ProcessPasswordRaw(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
+BOOLEAN ProcessPasswordRaw(const SecureArrayT<WCHAR>& password, const std::wstring& accountName, const std::wstring& fullName, const BOOLEAN& setOperation, const registry& reg)
 {
-	if ((setOperation && reg.GetRegValue(REG_VALUE_CHECKBANNEDPASSWORDONSET, 0) != 0) || 
+	if ((setOperation && reg.GetRegValue(REG_VALUE_CHECKBANNEDPASSWORDONSET, 0) != 0) ||
 		(!setOperation && reg.GetRegValue(REG_VALUE_CHECKBANNEDPASSWORDONCHANGE, 0) != 0))
 	{
 		OutputDebugString(L"Checking raw password");
@@ -93,10 +135,10 @@ BOOLEAN ProcessPasswordRaw(const SecureArrayT<WCHAR> &password, const std::wstri
 	return TRUE;
 }
 
-BOOLEAN ProcessPasswordNormalizedPasswordStore(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
+BOOLEAN ProcessPasswordNormalizedPasswordStore(const SecureArrayT<WCHAR>& password, const std::wstring& accountName, const std::wstring& fullName, const BOOLEAN& setOperation, const registry& reg)
 {
 	if (setOperation && reg.GetRegValue(REG_VALUE_CHECKNORMALIZEDBANNEDPASSWORDONSET, 0) != 0 ||
-		!setOperation && reg.GetRegValue(REG_VALUE_CHECKNORMALIZEDBANNEDPASSWORDONCHANGE, 0) != 0 )
+		!setOperation && reg.GetRegValue(REG_VALUE_CHECKNORMALIZEDBANNEDPASSWORDONCHANGE, 0) != 0)
 	{
 		bool result = TRUE;
 
@@ -121,7 +163,7 @@ BOOLEAN ProcessPasswordNormalizedPasswordStore(const SecureArrayT<WCHAR> &passwo
 }
 
 
-BOOLEAN ProcessPasswordNormalizedWordStore(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
+BOOLEAN ProcessPasswordNormalizedWordStore(const SecureArrayT<WCHAR>& password, const std::wstring& accountName, const std::wstring& fullName, const BOOLEAN& setOperation, const registry& reg)
 {
 	if (setOperation && reg.GetRegValue(REG_VALUE_CHECKNORMALIZEDBANNEDWORDONSET, 0) != 0 ||
 		!setOperation && reg.GetRegValue(REG_VALUE_CHECKNORMALIZEDBANNEDWORDONCHANGE, 0) != 0)
@@ -149,7 +191,7 @@ BOOLEAN ProcessPasswordNormalizedWordStore(const SecureArrayT<WCHAR> &password, 
 }
 
 
-BOOLEAN ProcessPasswordLength(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
+BOOLEAN ProcessPasswordLength(const SecureArrayT<WCHAR>& password, const std::wstring& accountName, const std::wstring& fullName, const BOOLEAN& setOperation, const registry& reg)
 {
 	const int minLength = reg.GetRegValue(REG_VALUE_MINIMUMLENGTH, 0);
 
@@ -170,7 +212,7 @@ BOOLEAN ProcessPasswordLength(const SecureArrayT<WCHAR> &password, const std::ws
 	return TRUE;
 }
 
-BOOLEAN ProcessPasswordDoesntContainAccountName(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
+BOOLEAN ProcessPasswordDoesntContainAccountName(const SecureArrayT<WCHAR>& password, const std::wstring& accountName, const std::wstring& fullName, const BOOLEAN& setOperation, const registry& reg)
 {
 	int flag = reg.GetRegValue(REG_VALUE_PASSWORDDOESNTCONTAINACCOUNTNAME, 0);
 
@@ -178,7 +220,7 @@ BOOLEAN ProcessPasswordDoesntContainAccountName(const SecureArrayT<WCHAR> &passw
 	{
 		OutputDebugString(L"Checking to see if password contains account name");
 
-		for each (std::wstring substring in SplitString(accountName, L' '))
+		for each(std::wstring substring in SplitString(accountName, L' '))
 		{
 			if (substring.length() > 3)
 			{
@@ -197,7 +239,7 @@ BOOLEAN ProcessPasswordDoesntContainAccountName(const SecureArrayT<WCHAR> &passw
 	return TRUE;
 }
 
-BOOLEAN ProcessPasswordDoesntContainFullName(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
+BOOLEAN ProcessPasswordDoesntContainFullName(const SecureArrayT<WCHAR>& password, const std::wstring& accountName, const std::wstring& fullName, const BOOLEAN& setOperation, const registry& reg)
 {
 	int flag = reg.GetRegValue(REG_VALUE_PASSWORDDOESNTCONTAINFULLNAME, 0);
 
@@ -205,7 +247,7 @@ BOOLEAN ProcessPasswordDoesntContainFullName(const SecureArrayT<WCHAR> &password
 	{
 		OutputDebugString(L"Checking to see if password contains full name");
 
-		for each (std::wstring substring in SplitString(fullName, L' '))
+		for each(std::wstring substring in SplitString(fullName, L' '))
 		{
 			if (substring.length() > 3)
 			{
@@ -224,7 +266,7 @@ BOOLEAN ProcessPasswordDoesntContainFullName(const SecureArrayT<WCHAR> &password
 	return TRUE;
 }
 
-BOOLEAN ProcessPasswordRegexApprove(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
+BOOLEAN ProcessPasswordRegexApprove(const SecureArrayT<WCHAR>& password, const std::wstring& accountName, const std::wstring& fullName, const BOOLEAN& setOperation, const registry& reg)
 {
 	std::wstring regex = reg.GetRegValue(REG_VALUE_REGEXAPPROVE, L"");
 
@@ -247,7 +289,7 @@ BOOLEAN ProcessPasswordRegexApprove(const SecureArrayT<WCHAR> &password, const s
 	return TRUE;
 }
 
-BOOLEAN ProcessPasswordRegexReject(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg)
+BOOLEAN ProcessPasswordRegexReject(const SecureArrayT<WCHAR>& password, const std::wstring& accountName, const std::wstring& fullName, const BOOLEAN& setOperation, const registry& reg)
 {
 	std::wstring regex = reg.GetRegValue(REG_VALUE_REGEXREJECT, L"");
 
