@@ -20,7 +20,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
         protected override void BeginProcessing()
         {
             Global.OpenExistingDefaultOrThrow();
-            this.InitializeProgressUpdate("Synchronizing password hashes from api.haveibeenpwned.com");
+            this.InitializeProgressUpdate("Synchronizing password hashes from api.pwnedpasswords.com");
 
             base.BeginProcessing();
         }
