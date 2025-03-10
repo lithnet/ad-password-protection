@@ -34,14 +34,12 @@ Add-BannedWord -Value "password"
 
 This example adds a single banned word to the store
 
-
 ### Example 1
 ```powershell
 Add-BannedWord -SecureString (Read-Host -Prompt "Enter the banned word to add to the store" -AsSecureString)
 ```
 
 This example prompts for a word to be added to the store
-
 
 ## PARAMETERS
 
@@ -89,4 +87,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## NOTES
 
 ## RELATED LINKS
+
 [Normalization rules](https://docs.lithnet.io/password-protection/help-and-support/normalization-rules)

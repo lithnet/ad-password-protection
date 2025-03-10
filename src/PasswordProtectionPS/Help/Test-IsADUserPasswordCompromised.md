@@ -87,7 +87,6 @@ PS C:\> Test-IsADUserPasswordCompromised -AccountName bob -Domain lithnet -Outpu
 
 This example checks to see if the password for the user ryan in the lithnet domain is present in the compromised password store. If the password is compromised, the cmdlet will output the raw NTLM hash of the password. If the password is not compromised, the cmdlet will output nothing.
 
-
 ## PARAMETERS
 
 ### -AccountName

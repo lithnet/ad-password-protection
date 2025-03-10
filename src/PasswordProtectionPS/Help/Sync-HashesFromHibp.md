@@ -13,7 +13,7 @@ Synchronizes the hashes from the Have I Been Pwned API into the compromised pass
 ## SYNTAX
 
 ```
-Sync-HashesFromHibp [[-Threads] <Int32>] [-Reset] [<CommonParameters>]
+Sync-HashesFromHibp [[-Threads] <Int32>] [-Reset] [-ProxyAddress <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -56,6 +56,21 @@ Aliases:
 Required: False
 Position: 0
 Default value: 8 x the number of CPU cores
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProxyAddress
+Specifies the address of the HTTP proxy server to use (optional)
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

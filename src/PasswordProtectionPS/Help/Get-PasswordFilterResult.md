@@ -42,7 +42,6 @@ ContainsFullName
 
 These examples show two password filter operations that are rejected for different reasons.
 
-
 ### Example 2
 ```powershell
 PS C:\> Get-PasswordFilterResult -SecurePassword (Read-Host -Prompt "Enter the password" -AsSecureString) -Username (Read-Host -Prompt "Enter the user's username") -Fullname (Read-Host -Prompt "Enter the user's full name")
@@ -157,8 +156,8 @@ The cmdlet will return one of the following values
 | PasswordWasBlank              | The password was an empty string                                                                     |
 | FilterError                   | An exception occurred in the filter engine and the password could not be processed                   |
 
-
 ## NOTES
 
 ## RELATED LINKS
+
 [Normalization rules](https://docs.lithnet.io/password-protection/help-and-support/normalization-rules)

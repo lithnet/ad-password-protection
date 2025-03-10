@@ -112,4 +112,5 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## NOTES
 
 ## RELATED LINKS
+
 [Normalization rules](https://docs.lithnet.io/password-protection/help-and-support/normalization-rules)

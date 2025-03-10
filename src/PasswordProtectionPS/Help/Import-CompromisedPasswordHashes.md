@@ -23,6 +23,7 @@ The Import-CompromisedPasswordHashes cmdlet will import a file containing newlin
 The NTLM password files from haveibeenpwned.com can be imported directly without modification using this cmdlet. Ensure you download the "sorted-by-hash" version of the file for the best import performance.
 
 Note: Use the Sync-HashesFromHibp cmdlet to import the latest compromised password hashes directly from the haveibeenpwned.com API
+
 ## EXAMPLES
 
 ### Example 1

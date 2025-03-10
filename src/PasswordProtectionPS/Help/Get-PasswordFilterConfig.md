@@ -28,7 +28,6 @@ PS C:\>  Get-PasswordFilterConfig
 StorePath       IsFilterRegistered IsFilterEnabled
 ---------       ------------------ ---------------
 d:\lppstore                   True            True
-
 ```
 
 Shows the output of the cmdlet
