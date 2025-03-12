@@ -77,6 +77,34 @@ Error code: %1
 Path: %2
 .
 
+MessageId=0xA
+Severity=Informational
+Facility=Runtime
+SymbolicName=MSG_USEREXCLUDED
+Language=English
+The user %1 was in the exclusion list and was not evaluated by the password filter.
+.
+
+MessageId=0xB
+Severity=Informational
+Facility=Runtime
+SymbolicName=MSG_USERNOTINCLUDED
+Language=English
+The user %1 was not in the inclusion list and was not evaluated by the password filter.
+.
+
+MessageId=0xC
+Severity=Error
+Facility=Runtime
+SymbolicName=MSG_REG_READ_ERROR
+Language=English
+A registry read error occurred.
+Error code: %1
+Key: %2
+Value: %3
+Type: %4
+.
+
 MessageId=0x2001
 Severity=Warning
 Facility=System

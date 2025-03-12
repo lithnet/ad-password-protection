@@ -105,11 +105,42 @@
 //
 // MessageText:
 //
-// There was a problem opening the store file. Check that the store folder exists and is accessible.\n
+// There was a problem opening the store file. Check that the store folder exists and is accessible.
 // Error code: %1
 // Path: %2
 //
 #define MSG_STOREERROR                   ((DWORD)0xC0020009L)
+
+//
+// MessageId: MSG_USEREXCLUDED
+//
+// MessageText:
+//
+// The user %1 was in the exclusion list and was not evaluated by the password filter.
+//
+#define MSG_USEREXCLUDED                 ((DWORD)0x4002000AL)
+
+//
+// MessageId: MSG_USERNOTINCLUDED
+//
+// MessageText:
+//
+// The user %1 was not in the inclusion list and was not evaluated by the password filter.
+//
+#define MSG_USERNOTINCLUDED              ((DWORD)0x4002000BL)
+
+//
+// MessageId: MSG_REG_READ_ERROR
+//
+// MessageText:
+//
+// A registry read error occurred.
+// Error code: %1
+// Key: %2
+// Value: %3
+// Type: %4
+//
+#define MSG_REG_READ_ERROR               ((DWORD)0xC002000CL)
 
 //
 // MessageId: MSG_PASSWORD_REJECTED_ON_ERROR

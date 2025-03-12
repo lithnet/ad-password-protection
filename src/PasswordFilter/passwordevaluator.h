@@ -16,6 +16,8 @@ static const int PASSWORD_REJECTED_BANNED_NORMALIZED_WORD = 10;
 static const int PASSWORD_REJECTED_BLANK = 11;
 static const int FILTER_ERROR = 100;
 
+BOOLEAN IsUserInScope(const std::wstring& accountName);
+
 int ProcessPassword(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation);
 
 BOOLEAN ProcessPasswordRaw(const SecureArrayT<WCHAR> &password, const std::wstring &accountName, const std::wstring &fullName, const BOOLEAN &setOperation, const registry &reg);
