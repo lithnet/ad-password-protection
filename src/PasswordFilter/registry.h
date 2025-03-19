@@ -1,12 +1,16 @@
 #pragma once
 #include "stdafx.h"
+#include <vector>
 
+static DWORD REG_DEFAULT_MAX_ITEMS = 32;
 static LPCWSTR REG_BASE_SETTINGS_KEY = L"SOFTWARE\\Lithnet\\PasswordFilter";
 static LPCWSTR REG_BASE_POLICY_KEY = L"SOFTWARE\\Policies\\Lithnet\\PasswordFilter";
 
 static LPCWSTR REG_VALUE_STOREPATH = L"Store";
 static LPCWSTR REG_VALUE_DISABLED = L"Disabled";
 static LPCWSTR REG_VALUE_AUDITONLY = L"AuditOnly";
+static LPCWSTR REG_VALUE_EXCLUDEDACCOUNTS = L"ExcludedAccounts";
+static LPCWSTR REG_VALUE_INCLUDEDACCOUNTS = L"IncludedAccounts";
 
 static LPCWSTR REG_VALUE_MINIMUMLENGTH = L"MinimumLength";
 
@@ -76,15 +80,18 @@ public:
 	registry();
 	registry(std::wstring policyGroup);
 	~registry();
-	std::wstring GetRegValue(const std::wstring & valueName, const std::wstring & defaultValue) const;
-	DWORD GetRegValue(const std::wstring & valueName, DWORD defaultValue) const;
-	static registry GetRegistryForUser(const std::wstring & user);
+	std::wstring GetRegValue(const std::wstring& valueName, const std::wstring& defaultValue) const;
+	DWORD GetRegValue(const std::wstring& valueName, DWORD defaultValue) const;
+	std::vector<std::wstring> registry::GetRegValue(const std::wstring& valueName, DWORD maxItems, const std::vector<std::wstring>& defaultValue) const;
+	static registry GetRegistryForUser(const std::wstring& user);
 
 private:
-	DWORD GetPolicyOrSettingsValue(const std::wstring & valueName, DWORD defaultValue) const;
 	const std::wstring GetKeyName(LPCWSTR& key) const;
-	const std::wstring GetPolicyOrSettingsValue(const std::wstring & valueName, const std::wstring & defaultValue) const;
-	const std::wstring GetValueString(DWORD & dwBufferSize, const std::wstring & keyName, const std::wstring & valueName, const std::wstring & defaultValue) const;
+	DWORD GetPolicyOrSettingsValue(const std::wstring& valueName, DWORD defaultValue) const;
+	const std::vector<std::wstring> GetPolicyOrSettingsValue(DWORD maxItems, const std::wstring& valueName, const std::vector< std::wstring>& defaultValue) const;
+	const std::wstring GetPolicyOrSettingsValue(const std::wstring& valueName, const std::wstring& defaultValue) const;
+	const std::wstring GetValueString(DWORD& dwBufferSize, const std::wstring& keyName, const std::wstring& valueName, const std::wstring& defaultValue) const;
+	const std::vector<std::wstring> GetValueMultiString(DWORD& dwBufferSize, DWORD maxItems, const std::wstring& keyName, const std::wstring& valueName, const std::vector<std::wstring>& defaultValue) const;
 };
 
 

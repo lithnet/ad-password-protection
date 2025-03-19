@@ -64,6 +64,12 @@ extern "C" __declspec(dllexport) BOOLEAN __stdcall PasswordFilter(
 		simulate = reg.GetRegValue(REG_VALUE_AUDITONLY, 0) != 0;
 
 		std::wstring accountName(AccountName->Buffer, AccountName->Length / sizeof(WCHAR));
+
+		if (!IsUserInScope(accountName))
+		{
+			return TRUE;
+		}
+
 		std::wstring fullName(FullName->Buffer, FullName->Length / sizeof(WCHAR));
 
 		SecureArrayT<WCHAR> password = UnicodeStringToWcharArray(*Password);
@@ -146,6 +152,12 @@ extern "C" __declspec(dllexport) int __stdcall PasswordFilterEx(
 		}
 
 		std::wstring accountName = AccountName;
+
+		if (!IsUserInScope(accountName))
+		{
+			return PASSWORD_APPROVED;
+		}
+
 		std::wstring fullName = FullName;
 		SecureArrayT<WCHAR> password = StringToWcharArray(Password);
 
