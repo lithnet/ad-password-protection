@@ -46,11 +46,11 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
                 downloader.DeleteSavedState();
             }
 
-            var task = Task.Run(() =>
+            var task = Task.Run(async () =>
             {
                 try
                 {
-                    downloader.Execute(this.Progress, this.Threads, this.token.Token);
+                    await downloader.ExecuteAsync(this.Progress, this.Threads, this.token.Token).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException)
                 {

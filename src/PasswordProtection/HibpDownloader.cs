@@ -18,17 +18,19 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
     public class HibpDownloader
     {
         private static readonly Version AssemblyVersion = Assembly.GetExecutingAssembly().GetName().Version;
+        private static readonly string[] separator = new string[] { "\r\n", "\r", "\n" };
+        private static readonly string[] separatorArray = new string[] { ":" };
 
         private const string MetadataItemName = "hibp-state";
         private const int totalHashes = 0xFFFFF;
-        private const int maxApiRetries = 10;
+        private const int maxApiRetries = 5;
 
         private readonly Store store;
         private readonly HttpClient httpClient;
 
         private ConcurrentDictionary<string, string> hibpState;
         private int writeLock;
-
+        
         public HibpDownloader(Store store)
             : this(store, null)
         {
@@ -81,7 +83,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             return client;
         }
 
-        public void Execute(OperationProgress progress, int threads, CancellationToken ct)
+        public async Task ExecuteAsync(OperationProgress progress, int threads, CancellationToken ct)
         {
             if (threads <= 0)
             {
@@ -92,7 +94,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
             try
             {
-                this.ProcessRanges(progress, threads, ct);
+                await this.ProcessRangesAsync(progress, threads, ct).ConfigureAwait(false);
             }
             finally
             {
@@ -107,11 +109,11 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             var indexMetadata = this.store.GetStoreMetadata(MetadataItemName);
             if (indexMetadata != null)
             {
-                var splitLines = indexMetadata.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+                var splitLines = indexMetadata.Split(separator, StringSplitOptions.None);
 
                 foreach (var line in splitLines)
                 {
-                    var items = line.Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries);
+                    var items = line.Split(separatorArray, StringSplitOptions.RemoveEmptyEntries);
                     if (items.Length == 2)
                     {
                         this.hibpState.TryAdd(items[0], items[1]);
@@ -144,7 +146,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             }
         }
 
-        private void ProcessRanges(OperationProgress progress, int threads, CancellationToken ct)
+        private async Task ProcessRangesAsync(OperationProgress progress, int threads, CancellationToken ct)
         {
             progress.HibpReadInProgress = true;
             progress.HibpHashTotal = totalHashes + 1;
@@ -156,10 +158,12 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
                 MaxDegreeOfParallelism = threads
             };
 
-            var result = Parallel.For(0, 0xFFFF + 1, op, i => this.DownloadRange(progress, i, ct).ConfigureAwait(false).GetAwaiter().GetResult());
+            await this.DownloadRangeAsync(progress, 0, ct).ConfigureAwait(false);
+
+            var result = Parallel.For(1, 0xFFFF + 1, op, i => this.DownloadRangeAsync(progress, i, ct).ConfigureAwait(false).GetAwaiter().GetResult());
         }
 
-        private async Task DownloadRange(OperationProgress progress, int range, CancellationToken ct)
+        private async Task DownloadRangeAsync(OperationProgress progress, int range, CancellationToken ct)
         {
             try
             {
@@ -177,7 +181,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
                     this.hibpState.TryGetValue(hibpRange, out string etag);
 
-                    var response = await this.GetRangeFromApi(hibpRange, ct, etag).ConfigureAwait(false);
+                    var response = await this.GetRangeFromApiAsync(hibpRange, ct, etag).ConfigureAwait(false);
 
                     if (response.StatusCode == HttpStatusCode.NotModified)
                     {
@@ -216,7 +220,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
         private static void ExtractHashesFromResponse(HashSet<byte[]> items, string hibpRange, string lines)
         {
-            var incompleteLines = lines.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+            var incompleteLines = lines.Split(separator, StringSplitOptions.RemoveEmptyEntries);
 
             int lineCount = 0;
 
@@ -229,7 +233,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             }
         }
 
-        private async Task<HttpResponseMessage> GetRangeFromApi(string range, CancellationToken ct, string etag = null)
+        private async Task<HttpResponseMessage> GetRangeFromApiAsync(string range, CancellationToken ct, string etag = null)
         {
             string requestUri = range + "?mode=ntlm";
 

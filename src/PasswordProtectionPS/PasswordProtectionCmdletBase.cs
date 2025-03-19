@@ -20,8 +20,8 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
             {
                 if (disposing)
                 {
-                    this.token.Dispose();
                 }
+
                 this.disposedValue = true;
             }
         }
