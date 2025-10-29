@@ -105,7 +105,7 @@
 //
 // MessageText:
 //
-// There was a problem opening the store file. Check that the store folder exists and is accessible.\n
+// There was a problem opening the store file. Check that the store folder exists and is accessible.
 // Error code: %1
 // Path: %2
 //
