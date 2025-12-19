@@ -6,9 +6,9 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 {
     public class OperationProgress
     {
-        private int hashesAdded;
-        private int hashesDiscarded;
-        private int linesReadFromFile;
+        private long hashesAdded;
+        private long hashesDiscarded;
+        private long linesReadFromFile;
         private int consolidateStorePosition;
         private int flushStorePosition;
 
@@ -18,11 +18,11 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
         private string status;
         private int hibpCurrentHash;
 
-        public int HashesAdded => this.hashesAdded;
+        public long HashesAdded => this.hashesAdded;
 
-        public int HashesDiscarded => this.hashesDiscarded;
+        public long HashesDiscarded => this.hashesDiscarded;
 
-        public int LinesReadFromFile => this.linesReadFromFile;
+        public long LinesReadFromFile => this.linesReadFromFile;
 
         public int HibpRangesChanged => this.hibpRangesChanged;
 
