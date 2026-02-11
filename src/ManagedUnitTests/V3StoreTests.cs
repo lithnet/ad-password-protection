@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Lithnet.ActiveDirectory.PasswordProtection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -21,14 +22,14 @@ namespace ManagedUnitTests
         }
 
         [TestMethod]
-        public void TestHibp()
+        public async Task TestHibp()
         {
             HibpDownloader downloader = new HibpDownloader(this.Store);
             var progress = new OperationProgress();
 
-            downloader.Execute(progress, 1, CancellationToken.None);
+            await downloader.ExecuteAsync(progress, 1, CancellationToken.None);
         }
-        
+
         protected override string GetFileNameFromHash(string hash)
         {
             return $"{hash.Substring(0, 4)}.db";
