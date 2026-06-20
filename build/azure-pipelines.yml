@@ -1,8 +1,15 @@
+resources:
+  repositories:
+  - repository: release_tools
+    type: git
+    name: release-tools/release-tools
+    ref: refs/heads/master
+
 pool:
   vmImage: 'windows-latest'
 
 variables:
-  - name: buildPlatform 
+  - name: buildPlatform
     value: 'x64'
   - name: buildConfiguration
     value: 'Release'
@@ -12,321 +19,267 @@ variables:
     value: 1
   - name: build.version.revision
     value: $[counter(format('{0}.{1}', variables['build.version.major'], variables['build.version.minor']), 0)]
-  - name: build.version.suffix
-    value:
   - name: build.version
-    value: $(build.version.major).$(build.version.minor).$(build.version.revision)$(build.version.suffix)
-  - name: build.versionShort
     value: $(build.version.major).$(build.version.minor).$(build.version.revision)
   - name: build.date
     value: $[format('{0:yyyy}-{0:MM}-{0:dd}T{0:HH}:{0:mm}:{0:ss}', pipeline.startTime)]
-  - group: Azure KeyVault Code Signing
-  - group: Advanced Installer License Keys
-  - group: Packaging variables
+  - name: installer.fileName
+    value: 'LithnetPasswordProtection.exe'
 
-name: $(build.version.major).$(build.version.minor).$(build.version.revision)$(build.version.suffix)
+name: $(build.version.major).$(build.version.minor).$(build.version.revision)
 trigger: none
 
 stages:
+# ── Validate product metadata ───────────────────────────────────────────
+- template: templates/validate-release-metadata-stage.yaml@release_tools
+
+# ── Build filter DLL ────────────────────────────────────────────────────
 - stage: build_lpp_stage
   displayName: Build filter DLL
+  dependsOn: [validate_metadata]
   jobs:
-    - job: "build_lpp_job"
-      displayName: Build password filter DLL
-      steps:
+  - job: build_lpp_job
+    displayName: Build password filter DLL
+    steps:
+    - template: templates/checkout.yaml@release_tools
 
-      - task: PowerShell@2
-        displayName: Set RC version
-        inputs:
-          targetType: 'inline'
-          script: |
-              $file = "src/PasswordFilter/passwordfilter.rc"
-              $content = Get-Content $file
+    - task: PowerShell@2
+      displayName: Set RC version
+      inputs:
+        targetType: 'inline'
+        script: |
+          $file = "$(Build.SourcesDirectory)/src/PasswordFilter/passwordfilter.rc"
+          $content = Get-Content $file
 
-              $pattern1 = '(?<=VALUE "(FileVersion|ProductVersion)", ")[^"]+'
-              $myVersion1 = "$(build.versionShort).0"
+          $pattern1 = '(?<=VALUE "(FileVersion|ProductVersion)", ")[^"]+'
+          $myVersion1 = "$(build.version).0"
 
-              $pattern2 = '(?<=\b(FILEVERSION|PRODUCTVERSION)\b )\d+(,\d+)+'
-              $myVersion2 = "$(build.version.major),$(build.version.minor),$(build.version.revision),0"
+          $pattern2 = '(?<=\b(FILEVERSION|PRODUCTVERSION)\b )\d+(,\d+)+'
+          $myVersion2 = "$(build.version.major),$(build.version.minor),$(build.version.revision),0"
 
-              $content = $content -replace $pattern1, $myVersion1 -replace $pattern2, $myVersion2
+          $content = $content -replace $pattern1, $myVersion1 -replace $pattern2, $myVersion2
+          $content | Set-Content $file
+          Get-Content $file
+        failOnStderr: true
 
-              $content | Set-Content $file
-              
-              Get-Content $file
-          failOnStderr: true
-      - task: VSBuild@1
-        inputs:
-          solution: 'src/PasswordFilter/PasswordFilter.vcxproj'
-          msbuildArgs: '/p:OutDir=$(Build.ArtifactStagingDirectory)\'
-          platform: '$(buildPlatform)'
-          configuration: '$(buildConfiguration)'
-      - task: PublishSymbols@2
-        displayName: Publish Password Filter symbols 
-        inputs:
-          SearchPattern: '$(Build.ArtifactStagingDirectory)/*.pdb'
-          IndexSources: false
-          SymbolServerType: 'TeamServices'
-      - task: DotNetCoreCLI@2
-        inputs:
-          command: 'custom'
-          custom: 'tool'
-          arguments: 'update --global azuresigntool'
-        displayName: Install AzureSignTool
+    - task: VSBuild@1
+      inputs:
+        solution: 'src/PasswordFilter/PasswordFilter.vcxproj'
+        msbuildArgs: '/p:OutDir=$(Build.ArtifactStagingDirectory)\'
+        platform: '$(buildPlatform)'
+        configuration: '$(buildConfiguration)'
 
-      - task: PowerShell@2
-        displayName: 'Sign filter DLL with AzureSignTool'
-        inputs:
-          targetType: 'inline'
-          script: |
-            $files = @()
-            $files += "$(Build.ArtifactStagingDirectory)\lithnetpwdf.dll"
-            $files += "$(Build.ArtifactStagingDirectory)\messages.dll"
+    - task: PublishSymbols@2
+      displayName: Publish Password Filter symbols
+      inputs:
+        SearchPattern: '$(Build.ArtifactStagingDirectory)/*.pdb'
+        IndexSources: false
+        SymbolServerType: 'TeamServices'
 
-            write-host "Signing $($files.Length) files:"
-            write-output $files
+    - template: templates/codesign.yaml@release_tools
+      parameters:
+        path:
+          - $(Build.ArtifactStagingDirectory)\lithnetpwdf.dll
+          - $(Build.ArtifactStagingDirectory)\messages.dll
+        environment: 'dev'
+        azureSubscription: 'ProductionServicesSubscription'
+        description: 'Lithnet Password Protection for Active Directory'
 
-            $cmdargs = @(
-              "sign",
-              "-d", "Lithnet Password Protection for Active Directory",
-              "-kvu", "$(akv.url)",
-              "-kvi", "$(akv.applicationID)",
-              "-kvs", "$(akv.secret)",
-              "-kvt", "$(akv.tenantId)",
-              "-kvc", "$(akv.certificateName)",
-              "-tr", "http://timestamp.digicert.com",
-              "-td", "sha256"
-            )
+    - task: CmdLine@2
+      displayName: Create CAB
+      inputs:
+        script: |
+          makecab $(Build.ArtifactStagingDirectory)\lithnetpwdf.dll $(Build.ArtifactStagingDirectory)\lithnetpwdf.cab
 
-            $cmdargs += $files
-        
-            & AzureSignTool $cmdargs
-          failOnStderr: true
-          showWarnings: true
-      - task: CmdLine@2
-        displayName: Create CAB
-        inputs:
-          script: |
-            makecab $(Build.ArtifactStagingDirectory)\lithnetpwdf.dll $(Build.ArtifactStagingDirectory)\lithnetpwdf.cab
-      - task: PowerShell@2
-        displayName: 'Sign submission CAB with AzureSignTool'
-        inputs:
-          targetType: 'inline'
-          script: |
-            $files = @()
-            $files += "$(Build.ArtifactStagingDirectory)\lithnetpwdf.cab"
+    - template: templates/codesign.yaml@release_tools
+      parameters:
+        path:
+          - $(Build.ArtifactStagingDirectory)\lithnetpwdf.cab
+        environment: 'dev'
+        azureSubscription: 'ProductionServicesSubscription'
+        description: 'Lithnet Password Protection for Active Directory'
 
-            write-host "Signing $($files.Length) files:"
-            write-output $files
+    - task: PublishPipelineArtifact@1
+      displayName: Publish CAB artifact
+      inputs:
+        targetPath: '$(Build.ArtifactStagingDirectory)\lithnetpwdf.cab'
+        artifact: 'lpp_filter_for_signing'
+        publishLocation: 'pipeline'
 
-            $cmdargs = @(
-              "sign",
-              "-d", "Lithnet Password Protection for Active Directory",
-              "-kvu", "$(akv.url)",
-              "-kvi", "$(akv.applicationID)",
-              "-kvs", "$(akv.secret)",
-              "-kvt", "$(akv.tenantId)",
-              "-kvc", "$(akv.certificateName)",
-              "-tr", "http://timestamp.digicert.com",
-              "-td", "sha256"
-            )
+    - task: PublishPipelineArtifact@1
+      displayName: Publish message DLL artifact
+      inputs:
+        targetPath: '$(Build.ArtifactStagingDirectory)\messages.dll'
+        artifact: 'eventlog_messages_dll'
+        publishLocation: 'pipeline'
 
-            $cmdargs += $files
-        
-            & AzureSignTool $cmdargs
-          failOnStderr: true
-          showWarnings: true
-      - task: PublishPipelineArtifact@1
-        displayName: Publish CAB artifact
-        inputs:
-          targetPath: '$(Build.ArtifactStagingDirectory)\lithnetpwdf.cab'
-          artifact: 'lpp_filter_for_signing'
-          publishLocation: 'pipeline'
-      - task: PublishPipelineArtifact@1
-        displayName: Publish message DLL artifact
-        inputs:
-          targetPath: '$(Build.ArtifactStagingDirectory)\messages.dll'
-          artifact: 'eventlog_messages_dll'
-          publishLocation: 'pipeline'
+# ── Pause for Microsoft LSA signing ─────────────────────────────────────
 - stage: ms_sign_stage
   displayName: Pause for Microsoft LSA Signing
   dependsOn: build_lpp_stage
   jobs:
-    - job: "get_lpp_signed_by_ms"
-      displayName: Pause for LPP DLL signing by Microsoft
-      pool: server
-      steps:
-      - task: ManualValidation@0
-        inputs:
-          notifyUsers: |
-            [ad-password-protection]\Project Administrators
-            [ad-password-protection]\Build Administrators
-          instructions: |
-            Please download the LPP artifact 
-            
-            az login
-            az pipelines runs artifact download --artifact-name lpp_filter_for_signing --path "." --run-id $(Build.BuildId) --organization $(System.CollectionUri) --project "$(System.TeamProject)"
-            
-            Submit the CAB to Microsoft for signing at 
-            
-            https://partner.microsoft.com/en-us/dashboard/hardware/FileSign/NewLSA
+  - job: get_lpp_signed_by_ms
+    displayName: Pause for LPP DLL signing by Microsoft
+    pool: server
+    steps:
+    - task: ManualValidation@0
+      inputs:
+        notifyUsers: |
+          [ad-password-protection]\Project Administrators
+          [ad-password-protection]\Build Administrators
+        instructions: |
+          Please download the LPP artifact
 
-            When it is signed, use the following command to upload the resulting DLL file
-            
-            az pipelines runs artifact upload --artifact-name lpp_filter_ms_signed --path "%cd%\lithnetpwdf.dll" --run-id $(Build.BuildId) --organization $(System.CollectionUri) --project "$(System.TeamProject)"
+          az login
+          az pipelines runs artifact download --artifact-name lpp_filter_for_signing --path "." --run-id $(Build.BuildId) --organization $(System.CollectionUri) --project "$(System.TeamProject)"
+
+          Submit the CAB to Microsoft for signing at
+
+          https://partner.microsoft.com/en-us/dashboard/hardware/FileSign/NewLSA
+
+          When it is signed, use the following command to upload the resulting DLL file
+
+          az pipelines runs artifact upload --artifact-name lpp_filter_ms_signed --path "%cd%\lithnetpwdf.dll" --run-id $(Build.BuildId) --organization $(System.CollectionUri) --project "$(System.TeamProject)"
+
+# ── Main build ──────────────────────────────────────────────────────────
 - stage: main_build_stage
   displayName: Perform main build
   dependsOn: ms_sign_stage
   jobs:
-    - job: main_build
-      displayName: Main build
-      pool:
-        vmImage: 'windows-latest'
-      steps:
-      - task: NuGetToolInstaller@1
+  - job: main_build
+    displayName: Main build
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+    - template: templates/checkout.yaml@release_tools
 
-      - task: NuGetCommand@2
-        inputs:
-          restoreSolution: 'src/Lithnet.ActiveDirectory.PasswordProtection.sln'
-      - task: DotNetCoreCLI@2
-        inputs:
-          command: 'publish'
-          publishWebProjects: false
-          projects: 'src/PasswordProtectionPS/Lithnet.ActiveDirectory.PasswordProtection.PowerShell.csproj'
-          arguments: '--configuration $(BuildConfiguration) --output "D:\build\lpp\ps" -p:Version=$(build.version) --framework net472'
-          zipAfterPublish: false
-          modifyOutputPath: false
-      - task: PublishSymbols@2
-        displayName: Publish PS Module symbols 
-        inputs:
-          SearchPattern: 'D:\build\lpp\ps\*.pdb'
-          SymbolServerType: 'TeamServices'
-          IndexSources: false
-      - task: PowerShell@2
-        displayName: Update PS module manifest version
-        inputs:
-          targetType: 'inline'
-          script: |
-              $file = "D:\build\lpp\ps\LithnetPasswordProtection.psd1"
-              
-              Update-ModuleManifest -Path $file -ModuleVersion "$(build.versionShort).0"
-              
-              Get-Content $file
-          failOnStderr: true
-      - task: PowerShell@2
-        displayName: Build folder structure
-        inputs:
-          targetType: 'inline'
-          script: |
-             New-Item "D:\build\lpp\filter" -ItemType Directory
-          failOnStderr: true
-          
-      - task: DotNetCoreCLI@2
-        inputs:
-          command: 'custom'
-          custom: 'tool'
-          arguments: 'update --global azuresigntool'
-        displayName: Install AzureSignTool
+    - task: NuGetToolInstaller@1
 
-      - task: PowerShell@2
-        displayName: 'Sign files with AzureSignTool'
-        inputs:
-          targetType: 'inline'
-          script: |
-            $myArray = @()
-            $myArray += "D:\build\lpp\ps\Lithnet*.dll"
-            $myArray += "D:\build\lpp\ps\*.psd1"
+    - task: NuGetCommand@2
+      inputs:
+        restoreSolution: 'src/Lithnet.ActiveDirectory.PasswordProtection.sln'
 
-            $files = @()
-            foreach ($a in $myArray)
-            {
-              $files += (Get-ChildItem -Path "$a").FullName
-            }
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: 'publish'
+        publishWebProjects: false
+        projects: 'src/PasswordProtectionPS/Lithnet.ActiveDirectory.PasswordProtection.PowerShell.csproj'
+        arguments: '--configuration $(BuildConfiguration) --output "D:\build\lpp\ps" -p:Version=$(build.version) --framework net472'
+        zipAfterPublish: false
+        modifyOutputPath: false
 
-            write-host "Signing $($files.Length) files:"
-            write-output $files
+    - task: PublishSymbols@2
+      displayName: Publish PS Module symbols
+      inputs:
+        SearchPattern: 'D:\build\lpp\ps\*.pdb'
+        SymbolServerType: 'TeamServices'
+        IndexSources: false
 
-            $cmdargs = @(
-              "sign",
-              "-d", "Lithnet Password Protection for Active Directory",
-              "-kvu", "$(akv.url)",
-              "-kvi", "$(akv.applicationID)",
-              "-kvs", "$(akv.secret)",
-              "-kvt", "$(akv.tenantId)",
-              "-kvc", "$(akv.certificateName)",
-              "-tr", "http://timestamp.digicert.com",
-              "-td", "sha256"
-            )
+    - task: PowerShell@2
+      displayName: Update PS module manifest version
+      inputs:
+        targetType: 'inline'
+        script: |
+          $file = "D:\build\lpp\ps\LithnetPasswordProtection.psd1"
+          Update-ModuleManifest -Path $file -ModuleVersion "$(build.version).0"
+          Get-Content $file
+        failOnStderr: true
 
-            $cmdargs += $files
-        
-            & AzureSignTool $cmdargs
-          failOnStderr: true
-          showWarnings: true
+    - task: PowerShell@2
+      displayName: Build folder structure
+      inputs:
+        targetType: 'inline'
+        script: |
+          New-Item "D:\build\lpp\filter" -ItemType Directory
+        failOnStderr: true
 
-      - task: DownloadPipelineArtifact@2
-        displayName: Download signed filter DLL
-        inputs:
-          buildType: 'current'
-          artifactName: 'lpp_filter_ms_signed'
-          targetPath: 'D:\build\lpp\filter'
-      - task: DownloadPipelineArtifact@2
-        displayName: Download messages DLL
-        inputs:
-          buildType: 'current'
-          artifactName: 'eventlog_messages_dll'
-          targetPath: 'D:\build\lpp\filter'
-      - task: PowerShell@2
-        displayName: Set AIP variables
-        inputs:
-          targetType: 'inline'
-          script: |
-              $file = "src/Installer/Lithnet Password Protection for Active Directory.aip"
-              $content = Get-Content $file
+    - template: templates/codesign.yaml@release_tools
+      parameters:
+        path:
+          - D:\build\lpp\ps\Lithnet*.dll
+          - D:\build\lpp\ps\*.psd1
+        environment: 'dev'
+        azureSubscription: 'ProductionServicesSubscription'
+        description: 'Lithnet Password Protection for Active Directory'
 
-              $pattern1 = 'akv_tenant_id'
-              $data1 = "$(akv.tenantid)"
+    - task: DownloadPipelineArtifact@2
+      displayName: Download signed filter DLL
+      inputs:
+        buildType: 'current'
+        artifactName: 'lpp_filter_ms_signed'
+        targetPath: 'D:\build\lpp\filter'
 
-              $pattern2 = "akv_app_id"
-              $data2 = "$(akv.applicationid)"
+    - task: DownloadPipelineArtifact@2
+      displayName: Download messages DLL
+      inputs:
+        buildType: 'current'
+        artifactName: 'eventlog_messages_dll'
+        targetPath: 'D:\build\lpp\filter'
 
-              $pattern3 = "akv_vault_name"
-              $data3 = "$(akv.name)"
+    - template: templates/build-advanced-installer-package.yaml@release_tools
+      parameters:
+        aipPath: '$(Build.SourcesDirectory)\src\Installer\Lithnet Password Protection for Active Directory.aip'
+        azureSubscription: 'ProductionServicesSubscription'
+        environment: 'dev'
+        aipBuild: 'DefaultBuild'
+        aipPackageName: '$(installer.fileName)'
+        sign: true
 
-              $pattern4= "akv_certificate_name"
-              $data4 = "$(akv.certificatename)"
+    - template: templates/generate-manifest.yaml@release_tools
+      parameters:
+        artifactName: 'installer-win-x64'
+        packages:
+          - fileName: '$(installer.fileName)'
+            description: 'EXE installer'
+        packageArchitecture: 'x64'
+        packageFormat: 'exe'
+        productMetadataDir: '$(Build.SourcesDirectory)/_productMetadata'
+        environment: 'dev'
+        azureSubscription: 'ProductionServicesSubscription'
+        supportedPlatforms:
+          - win/server-2016
+          - win/server-2019
+          - win/server-2022
+          - win/server-2025
+        description: 'Password Protection for Active Directory (x64)'
 
-              $content = $content -replace $pattern1, $data1 -replace $pattern2, $data2 -replace $pattern3, $data3 -replace $pattern4, $data4
+    - task: PublishPipelineArtifact@1
+      displayName: Publish installer artifact
+      inputs:
+        targetPath: '$(Build.ArtifactStagingDirectory)'
+        artifact: 'installer-win-x64'
+        publishLocation: 'pipeline'
 
-              $content | Set-Content $file
-              
-              Get-Content $file
-          failOnStderr: true
-      - task: AdvancedInstaller@2
-        displayName: Build Advanced Installer package
-        inputs:
-          advinstVersion: '21.4'
-          advinstLicense: '$(advancedInstaller.licenseKey)'
-          aipPath: 'src/Installer/Lithnet Password Protection for Active Directory.aip'
-          aipBuild: 'DefaultBuild'
-          aipPackageName: '$(package.name)'
-          aipOutputFolder: '$(build.artifactstagingdirectory)'
-          aipExtraCommands: 'SetAzureKeyVaultSecret $(akv.secret)'
-          
-      - task: PublishPipelineArtifact@1
-        inputs:
-          targetPath: '$(Build.ArtifactStagingDirectory)'
-          artifact: 'installer'
-          publishLocation: 'pipeline'
-
+# ── Publish: dev → preview → prod ──────────────────────────────────────
 - template: publish-packages.yml
   parameters:
     deploymentType: dev
+    dependsOn: [main_build_stage]
+
+- template: templates/release-management.yaml@release_tools
+  parameters:
+    deploymentType: dev
+    releaseLine: 'v$(build.version.major).$(build.version.minor)'
+    dependsOn: [cdn_purge_dev]
 
 - template: publish-packages.yml
   parameters:
     deploymentType: preview
+    dependsOn: [release_management_dev]
+
+- template: templates/release-management.yaml@release_tools
+  parameters:
+    deploymentType: preview
+    releaseLine: 'v$(build.version.major).$(build.version.minor)'
+    dependsOn: [cdn_purge_preview]
 
 - template: publish-packages.yml
   parameters:
     deploymentType: prod
+    dependsOn: [release_management_preview]
+
+- template: templates/release-management.yaml@release_tools
+  parameters:
+    deploymentType: prod
+    releaseLine: 'v$(build.version.major).$(build.version.minor)'
+    dependsOn: [cdn_purge_prod]
