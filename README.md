@@ -31,6 +31,14 @@ It also includes the ability to audit your users' existing passwords against the
 ## System Requirements
 LPP is only supported on x64 editions of Windows
 
+#### Password Filter
+* Windows Server 2012 R2 or higher
+* [Microsoft Visual C++ Redistributable package 2015-2022](https://aka.ms/vs/17/release/vc_redist.x64.exe)
+#### PowerShell module
+* .NET Framework 4.7.2
+* Windows PowerShell 5
+* [Microsoft Visual C++ Redistributable package 2015-2022](https://aka.ms/vs/17/release/vc_redist.x64.exe)
+
 ## Enterprise support
 Lithnet Password Protection is free and open source, but we understand that deploying third-party code on your domain controllers is a decision that benefits from a safety net.
 
@@ -39,14 +47,6 @@ Enterprise support agreements give your organization direct access to the Lithne
 [Request a support quote →](https://lithnet.io/products/password-protection)
 
 Community support is available via [GitHub Issues](https://github.com/lithnet/ad-password-protection/issues).
-
-#### Password Filter
-* Windows Server 2012 R2 or higher
-* [Microsoft Visual C++ Redistributable package 2015-2022](https://aka.ms/vs/17/release/vc_redist.x64.exe)
-#### PowerShell module
-* .NET Framework 4.7.2
-* Windows PowerShell 5
-* [Microsoft Visual C++ Redistributable package 2015-2022](https://aka.ms/vs/17/release/vc_redist.x64.exe)
 
 ## Getting started
 Download the installer from the [releases page](https://github.com/lithnet/ad-password-protection/releases)
