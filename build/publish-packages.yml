@@ -23,7 +23,8 @@ stages:
 
 - stage: upload_${{ parameters.deploymentType }}
   displayName: Upload artifacts (${{ parameters.deploymentType }})
-  dependsOn: [generate_release_data_${{ parameters.deploymentType }}]
+  dependsOn:
+  - generate_release_data_${{ parameters.deploymentType }}
   jobs:
   - deployment: upload
     ${{ if eq(parameters.deploymentType, 'dev') }}:
@@ -49,7 +50,8 @@ stages:
 
 - stage: promote_${{ parameters.deploymentType }}
   displayName: Promote artifacts (${{ parameters.deploymentType }})
-  dependsOn: [upload_${{ parameters.deploymentType }}]
+  dependsOn:
+  - upload_${{ parameters.deploymentType }}
   jobs:
   - job: promote
     displayName: Promote (${{ parameters.deploymentType }})
@@ -64,7 +66,8 @@ stages:
 
 - stage: cdn_purge_${{ parameters.deploymentType }}
   displayName: CDN purge (${{ parameters.deploymentType }})
-  dependsOn: [promote_${{ parameters.deploymentType }}]
+  dependsOn:
+  - promote_${{ parameters.deploymentType }}
   jobs:
   - job: cdn_purge
     displayName: CDN purge (${{ parameters.deploymentType }})
