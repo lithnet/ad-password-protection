@@ -266,3 +266,5 @@ __pycache__/
 /*/*-cache
 *back.aip
 /**/*-cache
+/.*/
+/docs/
