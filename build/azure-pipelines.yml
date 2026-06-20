@@ -28,7 +28,7 @@ variables:
   - name: build.date
     value: $[format('{0:yyyy}-{0:MM}-{0:dd}T{0:HH}:{0:mm}:{0:ss}', pipeline.startTime)]
   - name: installer.fileName
-    value: 'LithnetPasswordProtection.exe'
+    value: 'LithnetPasswordProtection-$(build.version).exe'
 
 name: $(build.version.major).$(build.version.minor).$(build.version.revision)
 trigger: none
