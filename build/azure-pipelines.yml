@@ -1,3 +1,9 @@
+parameters:
+- name: devMode
+  type: boolean
+  displayName: 'Dev mode (skip MS signing, dev deployment only)'
+  default: false
+
 resources:
   repositories:
   - repository: release_tools
@@ -117,38 +123,51 @@ stages:
         artifact: 'eventlog_messages_dll'
         publishLocation: 'pipeline'
 
+    # In dev mode, publish the unsigned DLL as the "MS signed" artifact
+    - ${{ if eq(parameters.devMode, true) }}:
+      - task: PublishPipelineArtifact@1
+        displayName: Publish unsigned filter DLL as MS signed (dev mode)
+        inputs:
+          targetPath: '$(Build.ArtifactStagingDirectory)\lithnetpwdf.dll'
+          artifact: 'lpp_filter_ms_signed'
+          publishLocation: 'pipeline'
+
 # ── Pause for Microsoft LSA signing ─────────────────────────────────────
-- stage: ms_sign_stage
-  displayName: Pause for Microsoft LSA Signing
-  dependsOn: build_lpp_stage
-  jobs:
-  - job: get_lpp_signed_by_ms
-    displayName: Pause for LPP DLL signing by Microsoft
-    pool: server
-    steps:
-    - task: ManualValidation@0
-      inputs:
-        notifyUsers: |
-          [ad-password-protection]\Project Administrators
-          [ad-password-protection]\Build Administrators
-        instructions: |
-          Please download the LPP artifact
+- ${{ if eq(parameters.devMode, false) }}:
+  - stage: ms_sign_stage
+    displayName: Pause for Microsoft LSA Signing
+    dependsOn: build_lpp_stage
+    jobs:
+    - job: get_lpp_signed_by_ms
+      displayName: Pause for LPP DLL signing by Microsoft
+      pool: server
+      steps:
+      - task: ManualValidation@0
+        inputs:
+          notifyUsers: |
+            [ad-password-protection]\Project Administrators
+            [ad-password-protection]\Build Administrators
+          instructions: |
+            Please download the LPP artifact
 
-          az login
-          az pipelines runs artifact download --artifact-name lpp_filter_for_signing --path "." --run-id $(Build.BuildId) --organization $(System.CollectionUri) --project "$(System.TeamProject)"
+            az login
+            az pipelines runs artifact download --artifact-name lpp_filter_for_signing --path "." --run-id $(Build.BuildId) --organization $(System.CollectionUri) --project "$(System.TeamProject)"
 
-          Submit the CAB to Microsoft for signing at
+            Submit the CAB to Microsoft for signing at
 
-          https://partner.microsoft.com/en-us/dashboard/hardware/FileSign/NewLSA
+            https://partner.microsoft.com/en-us/dashboard/hardware/FileSign/NewLSA
 
-          When it is signed, use the following command to upload the resulting DLL file
+            When it is signed, use the following command to upload the resulting DLL file
 
-          az pipelines runs artifact upload --artifact-name lpp_filter_ms_signed --path "%cd%\lithnetpwdf.dll" --run-id $(Build.BuildId) --organization $(System.CollectionUri) --project "$(System.TeamProject)"
+            az pipelines runs artifact upload --artifact-name lpp_filter_ms_signed --path "%cd%\lithnetpwdf.dll" --run-id $(Build.BuildId) --organization $(System.CollectionUri) --project "$(System.TeamProject)"
 
 # ── Main build ──────────────────────────────────────────────────────────
 - stage: main_build_stage
   displayName: Perform main build
-  dependsOn: ms_sign_stage
+  ${{ if eq(parameters.devMode, true) }}:
+    dependsOn: build_lpp_stage
+  ${{ else }}:
+    dependsOn: ms_sign_stage
   jobs:
   - job: main_build
     displayName: Main build
@@ -266,7 +285,7 @@ stages:
       environment: 'prod'
       productMetadataDir: '$(Build.SourcesDirectory)/_productMetadata'
 
-# ── Publish: dev → preview → prod ──────────────────────────────────────
+# ── Publish: dev ────────────────────────────────────────────────────────
 - template: publish-packages.yml
   parameters:
     deploymentType: dev
@@ -278,41 +297,43 @@ stages:
     releaseLine: 'v$(build.version.major).$(build.version.minor)'
     dependsOn: [cdn_purge_dev]
 
-- template: publish-packages.yml
-  parameters:
-    deploymentType: preview
-    dependsOn: [release_management_dev]
+# ── Publish: preview → prod (excluded in dev mode) ─────────────────────
+- ${{ if eq(parameters.devMode, false) }}:
+  - template: publish-packages.yml
+    parameters:
+      deploymentType: preview
+      dependsOn: [release_management_dev]
 
-- template: templates/release-management.yaml@release_tools
-  parameters:
-    deploymentType: preview
-    releaseLine: 'v$(build.version.major).$(build.version.minor)'
-    dependsOn: [cdn_purge_preview]
+  - template: templates/release-management.yaml@release_tools
+    parameters:
+      deploymentType: preview
+      releaseLine: 'v$(build.version.major).$(build.version.minor)'
+      dependsOn: [cdn_purge_preview]
 
-- template: publish-packages.yml
-  parameters:
-    deploymentType: prod
-    dependsOn: [release_management_preview]
+  - template: publish-packages.yml
+    parameters:
+      deploymentType: prod
+      dependsOn: [release_management_preview]
 
-- template: templates/release-management.yaml@release_tools
-  parameters:
-    deploymentType: prod
-    releaseLine: 'v$(build.version.major).$(build.version.minor)'
-    dependsOn: [cdn_purge_prod]
+  - template: templates/release-management.yaml@release_tools
+    parameters:
+      deploymentType: prod
+      releaseLine: 'v$(build.version.major).$(build.version.minor)'
+      dependsOn: [cdn_purge_prod]
 
-# ── Publish changelog to docs repo ─────────────────────────────────────
-- stage: publish_changelog
-  displayName: Publish changelog
-  dependsOn: [release_management_prod]
-  jobs:
-  - job: publish
-    displayName: Publish changelog to docs repo
-    pool:
-      vmImage: 'ubuntu-22.04'
-    steps:
-    - template: templates/checkout.yaml@release_tools
-      parameters:
-        checkoutSelf: false
-    - template: templates/publish-changelog.yaml@release_tools
-      parameters:
-        docsRepo: 'docs'
+  # ── Publish changelog to docs repo ───────────────────────────────────
+  - stage: publish_changelog
+    displayName: Publish changelog
+    dependsOn: [release_management_prod]
+    jobs:
+    - job: publish
+      displayName: Publish changelog to docs repo
+      pool:
+        vmImage: 'ubuntu-22.04'
+      steps:
+      - template: templates/checkout.yaml@release_tools
+        parameters:
+          checkoutSelf: false
+      - template: templates/publish-changelog.yaml@release_tools
+        parameters:
+          docsRepo: 'docs'
