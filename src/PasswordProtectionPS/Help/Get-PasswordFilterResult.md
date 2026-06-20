@@ -160,4 +160,4 @@ The cmdlet will return one of the following values
 
 ## RELATED LINKS
 
-[Normalization rules](https://docs.lithnet.io/password-protection/help-and-support/normalization-rules)
+[Normalization rules](https://docs.lithnet.io/password-protection/help-and-support/normalization-rules?utm_source=github&utm_medium=readme&utm_campaign=lpp-help)

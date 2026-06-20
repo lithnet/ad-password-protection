@@ -44,21 +44,21 @@ Lithnet Password Protection is free and open source, but we understand that depl
 
 Enterprise support agreements give your organization direct access to the Lithnet engineering team for troubleshooting, configuration guidance, and priority issue resolution.
 
-[Request a support quote →](https://lithnet.io/products/password-protection)
+[Request a support quote →](https://lithnet.io/products/password-protection?utm_source=github&utm_medium=readme&utm_campaign=lpp-ups)
 
 Community support is available via [GitHub Issues](https://github.com/lithnet/ad-password-protection/issues).
 
 ## Getting started
 Download the installer from the [releases page](https://github.com/lithnet/ad-password-protection/releases)
 
-Read the [getting started guide](https://docs.lithnet.io/password-protection/installation/setup-guide) on our documentation site.
+Read the [getting started guide](https://docs.lithnet.io/password-protection/installation/setup-guide?utm_source=github&utm_medium=readme&utm_campaign=lpp-help) on our documentation site.
 
 ## How can I contribute to the project?
 * Found an issue and want us to fix it? [Log it](https://github.com/lithnet/ad-password-protection/issues)
 * Want to fix an issue yourself or add functionality? Clone the project and submit a pull request
 
 ## Keep up to date
-* [Product documentation](http://docs.lithnet.io/password-protection)
+* [Product documentation](https://docs.lithnet.io/password-protection?utm_source=github&utm_medium=readme&utm_campaign=lpp-help)
 * [Visit our blog](http://blog.lithnet.io)
 * [Follow us on twitter](https://twitter.com/lithnet_io)![](http://twitter.com/favicon.ico)
 
