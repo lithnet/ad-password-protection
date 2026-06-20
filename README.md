@@ -31,6 +31,15 @@ It also includes the ability to audit your users' existing passwords against the
 ## System Requirements
 LPP is only supported on x64 editions of Windows
 
+## Enterprise support
+Lithnet Password Protection is free and open source, but we understand that deploying third-party code on your domain controllers is a decision that benefits from a safety net.
+
+Enterprise support agreements give your organization direct access to the Lithnet engineering team for troubleshooting, configuration guidance, and priority issue resolution.
+
+[Request a support quote →](https://lithnet.io/products/password-protection)
+
+Community support is available via [GitHub Issues](https://github.com/lithnet/ad-password-protection/issues).
+
 #### Password Filter
 * Windows Server 2012 R2 or higher
 * [Microsoft Visual C++ Redistributable package 2015-2022](https://aka.ms/vs/17/release/vc_redist.x64.exe)
@@ -47,9 +56,6 @@ Read the [getting started guide](https://docs.lithnet.io/password-protection/ins
 ## How can I contribute to the project?
 * Found an issue and want us to fix it? [Log it](https://github.com/lithnet/ad-password-protection/issues)
 * Want to fix an issue yourself or add functionality? Clone the project and submit a pull request
-
-## Enteprise support
-Lithnet offer enterprise support plans for our products. Deploy our tools with confidence that you have the backing of the dedicated Lithnet support team if you run into any issues, have questions, or need advice. Reach out to us via our [contact form](https://lithnet.io/products/password-protection#requestaquote) for a quote and more information on this offering.
 
 ## Keep up to date
 * [Product documentation](http://docs.lithnet.io/password-protection)
