@@ -1,0 +1,4 @@
+summary: "Adds support services info to the installer"
+type: enhancement
+priority: normal
+breaking: false

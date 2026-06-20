@@ -11,42 +11,44 @@ parameters:
   default: []
 
 stages:
-- stage: generate_release_data_${{ parameters.deploymentType }}
-  displayName: Generate release data (${{ parameters.deploymentType }})
-  dependsOn: ${{ parameters.dependsOn }}
-  jobs:
-  - template: templates/generate-release-line-files.yaml@release_tools
-    parameters:
-      azureSubscription: 'ProductionServicesSubscription'
-      environment: '${{ parameters.deploymentType }}'
-      productMetadataDir: '$(Build.SourcesDirectory)/_productMetadata'
+- ${{ if ne(parameters.deploymentType, 'dev') }}:
+  - stage: approve_${{ parameters.deploymentType }}
+    displayName: Approve ${{ parameters.deploymentType }} deployment
+    dependsOn: ${{ parameters.dependsOn }}
+    jobs:
+    - deployment: approve
+      ${{ if eq(parameters.deploymentType, 'preview') }}:
+        environment: 'preview'
+      ${{ if eq(parameters.deploymentType, 'prod') }}:
+        environment: 'production'
+      displayName: Approve ${{ parameters.deploymentType }} deployment
+      pool:
+        vmImage: 'ubuntu-22.04'
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            - pwsh: Write-Host "Deployment approved for ${{ parameters.deploymentType }}"
+              displayName: Deployment approved
 
 - stage: upload_${{ parameters.deploymentType }}
   displayName: Upload artifacts (${{ parameters.deploymentType }})
-  dependsOn:
-  - generate_release_data_${{ parameters.deploymentType }}
+  ${{ if eq(parameters.deploymentType, 'dev') }}:
+    dependsOn: ${{ parameters.dependsOn }}
+  ${{ else }}:
+    dependsOn:
+    - approve_${{ parameters.deploymentType }}
   jobs:
-  - deployment: upload
-    ${{ if eq(parameters.deploymentType, 'dev') }}:
-      environment: 'development'
-      displayName: Upload to dev
-    ${{ if eq(parameters.deploymentType, 'preview') }}:
-      environment: 'preview'
-      displayName: Upload to preview
-    ${{ if eq(parameters.deploymentType, 'prod') }}:
-      environment: 'production'
-      displayName: Upload to production
+  - job: upload
+    displayName: Upload (${{ parameters.deploymentType }})
     pool:
       vmImage: 'ubuntu-22.04'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - template: templates/checkout.yaml@release_tools
-          - template: templates/upload-artifacts.yaml@release_tools
-            parameters:
-              azureSubscription: 'ProductionServicesSubscription'
-              environment: '${{ parameters.deploymentType }}'
+    steps:
+    - template: templates/checkout.yaml@release_tools
+    - template: templates/upload-artifacts.yaml@release_tools
+      parameters:
+        azureSubscription: 'ProductionServicesSubscription'
+        environment: '${{ parameters.deploymentType }}'
 
 - stage: promote_${{ parameters.deploymentType }}
   displayName: Promote artifacts (${{ parameters.deploymentType }})

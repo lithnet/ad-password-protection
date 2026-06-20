@@ -4,6 +4,10 @@ resources:
     type: git
     name: release-tools/release-tools
     ref: refs/heads/master
+  - repository: docs
+    type: github
+    name: lithnet/ad-password-protection-docs
+    endpoint: github-connection
 
 pool:
   vmImage: 'windows-latest'
@@ -227,7 +231,7 @@ stages:
 
     - template: templates/generate-manifest.yaml@release_tools
       parameters:
-        artifactName: 'installer-win-x64'
+        artifactName: 'service-win-x64'
         packages:
           - fileName: '$(installer.fileName)'
             description: 'EXE installer'
@@ -241,20 +245,32 @@ stages:
           - win/server-2019
           - win/server-2022
           - win/server-2025
+        storageName: 'password-protection'
         description: 'Password Protection for Active Directory (x64)'
 
     - task: PublishPipelineArtifact@1
       displayName: Publish installer artifact
       inputs:
         targetPath: '$(Build.ArtifactStagingDirectory)'
-        artifact: 'installer-win-x64'
+        artifact: 'service-win-x64'
         publishLocation: 'pipeline'
+
+# ── Generate release-line files (once, after all builds) ────────────────
+- stage: generate_release_data
+  displayName: Generate release data
+  dependsOn: [main_build_stage]
+  jobs:
+  - template: templates/generate-release-line-files.yaml@release_tools
+    parameters:
+      azureSubscription: 'ProductionServicesSubscription'
+      environment: 'prod'
+      productMetadataDir: '$(Build.SourcesDirectory)/_productMetadata'
 
 # ── Publish: dev → preview → prod ──────────────────────────────────────
 - template: publish-packages.yml
   parameters:
     deploymentType: dev
-    dependsOn: [main_build_stage]
+    dependsOn: [generate_release_data]
 
 - template: templates/release-management.yaml@release_tools
   parameters:
@@ -283,3 +299,20 @@ stages:
     deploymentType: prod
     releaseLine: 'v$(build.version.major).$(build.version.minor)'
     dependsOn: [cdn_purge_prod]
+
+# ── Publish changelog to docs repo ─────────────────────────────────────
+- stage: publish_changelog
+  displayName: Publish changelog
+  dependsOn: [release_management_prod]
+  jobs:
+  - job: publish
+    displayName: Publish changelog to docs repo
+    pool:
+      vmImage: 'ubuntu-22.04'
+    steps:
+    - template: templates/checkout.yaml@release_tools
+      parameters:
+        checkoutSelf: false
+    - template: templates/publish-changelog.yaml@release_tools
+      parameters:
+        docsRepo: 'docs'

@@ -1,0 +1,4 @@
+summary: "Updates dependencies to the latest versions to ensure compatibility and security"
+type: enhancement
+priority: normal
+breaking: false
