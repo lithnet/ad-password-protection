@@ -1,0 +1,10 @@
+id: password-protection
+displayName: "Password Protection for Active Directory"
+components:
+  - id: "installer"
+    name: "Installer"
+    displayName: "Password Protection installer"
+    artifacts:
+      - id: "installer-win-x64"
+        name: "x64"
+        displayName: "Windows (x64)"
