@@ -143,6 +143,7 @@ stages:
       pool: server
       steps:
       - task: ManualValidation@0
+        timeoutInMinutes: 1440
         inputs:
           notifyUsers: |
             [ad-password-protection]\Project Administrators
