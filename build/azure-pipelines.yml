@@ -149,18 +149,17 @@ stages:
             [ad-password-protection]\Project Administrators
             [ad-password-protection]\Build Administrators
           instructions: |
-            Please download the LPP artifact
+            Download the CAB:
 
-            az login
             az pipelines runs artifact download --artifact-name lpp_filter_for_signing --path "." --run-id $(Build.BuildId) --organization $(System.CollectionUri) --project "$(System.TeamProject)"
 
             Submit the CAB to Microsoft for signing at
 
             https://partner.microsoft.com/en-us/dashboard/hardware/FileSign/NewLSA
 
-            When it is signed, use the following command to upload the resulting DLL file
+            When it is signed, upload the signed ZIP:
 
-            az pipelines runs artifact upload --artifact-name lpp_filter_ms_signed --path "%cd%\lithnetpwdf.dll" --run-id $(Build.BuildId) --organization $(System.CollectionUri) --project "$(System.TeamProject)"
+            az pipelines runs artifact upload --artifact-name lpp_filter_ms_signed --path "%cd%\lithnetpwdf.cab.zip" --run-id $(Build.BuildId) --organization $(System.CollectionUri) --project "$(System.TeamProject)"
 
 # ── Main build ──────────────────────────────────────────────────────────
 - stage: main_build_stage
@@ -227,11 +226,17 @@ stages:
         description: 'Lithnet Password Protection for Active Directory'
 
     - task: DownloadPipelineArtifact@2
-      displayName: Download signed filter DLL
+      displayName: Download MS-signed artifact
       inputs:
         buildType: 'current'
         artifactName: 'lpp_filter_ms_signed'
-        targetPath: 'D:\build\lpp\filter'
+        targetPath: 'D:\build\lpp\ms_signed'
+
+    - task: ExtractFiles@1
+      displayName: Extract signed filter DLL from ZIP
+      inputs:
+        archiveFilePatterns: 'D:\build\lpp\ms_signed\*.zip'
+        destinationFolder: 'D:\build\lpp\filter'
 
     - task: DownloadPipelineArtifact@2
       displayName: Download messages DLL
