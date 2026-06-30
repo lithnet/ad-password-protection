@@ -1,0 +1,4 @@
+summary: "Fixes an issue where the Sync-PasswordsFromHibp cmdlet throws an error due to a missing dependency"
+type: fix
+priority: normal
+breaking: false
