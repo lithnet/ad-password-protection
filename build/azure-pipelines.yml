@@ -123,6 +123,13 @@ stages:
         artifact: 'eventlog_messages_dll'
         publishLocation: 'pipeline'
 
+    - task: PublishPipelineArtifact@1
+      displayName: Publish signing helper script
+      inputs:
+        targetPath: '$(Build.SourcesDirectory)\build\scripts\Wait-ForSignedFilter.ps1'
+        artifact: 'lpp_signing_tools'
+        publishLocation: 'pipeline'
+
     # In dev mode, publish the unsigned DLL as the "MS signed" artifact
     - ${{ if eq(parameters.devMode, true) }}:
       - task: PublishPipelineArtifact@1
@@ -149,17 +156,13 @@ stages:
             [ad-password-protection]\Project Administrators
             [ad-password-protection]\Build Administrators
           instructions: |
-            Download the CAB:
+            Run these two commands:
 
-            az pipelines runs artifact download --artifact-name lpp_filter_for_signing --path "." --run-id $(Build.BuildId) --organization $(System.CollectionUri) --project "$(System.TeamProject)"
+            az pipelines runs artifact download --artifact-name lpp_signing_tools --path . --run-id $(Build.BuildId) --organization "$(System.CollectionUri)" --project "$(System.TeamProject)"
 
-            Submit the CAB to Microsoft for signing at
+            powershell -ExecutionPolicy Bypass -File Wait-ForSignedFilter.ps1 -BuildId $(Build.BuildId) -Organization "$(System.CollectionUri)" -Project "$(System.TeamProject)"
 
-            https://partner.microsoft.com/en-us/dashboard/hardware/FileSign/NewLSA
-
-            When it is signed, upload the signed ZIP:
-
-            az pipelines runs artifact upload --artifact-name lpp_filter_ms_signed --path "%cd%\lithnetpwdf.cab.zip" --run-id $(Build.BuildId) --organization $(System.CollectionUri) --project "$(System.TeamProject)"
+            The script downloads the CAB, opens the LSA signing portal, then watches your Downloads folder for a new signed_*.zip. Once you download the signed ZIP from Microsoft, it uploads automatically. Then resume this validation.
 
 # ── Main build ──────────────────────────────────────────────────────────
 - stage: main_build_stage
