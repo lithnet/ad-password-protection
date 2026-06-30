@@ -270,7 +270,6 @@ stages:
           - win/server-2019
           - win/server-2022
           - win/server-2025
-        storageName: 'password-protection'
         description: 'Password Protection for Active Directory (x64)'
 
     - task: PublishPipelineArtifact@1
