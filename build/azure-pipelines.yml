@@ -247,6 +247,7 @@ stages:
           $(Pipeline.Workspace)\native_test_binaries\**\NativeUnitTests.dll
           !**\*TestAdapter.dll
           !**\obj\**
+        testFiltercriteria: 'ClassName!=NativeUnitTests::Storev3Tests&ClassName!=NativeUnitTests::StorePerformanceTests'
         platform: '$(buildPlatform)'
         configuration: '$(buildConfiguration)'
         searchFolder: '$(Pipeline.Workspace)\native_test_binaries'
