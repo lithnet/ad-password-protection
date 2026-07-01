@@ -5,12 +5,33 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Win32;
 
 namespace ManagedUnitTests
 {
     public static class TestHelpers
     {
-        public static string TestStorePath = Environment.GetEnvironmentVariable("LPP_TEST_STORE_PATH") ?? Path.Combine(Path.GetTempPath(), "lppstore-test");
+        public static string TestStorePath = ResolveStorePath();
+
+        private static string ResolveStorePath()
+        {
+            string path = Environment.GetEnvironmentVariable("LPP_TEST_STORE_PATH");
+            if (!string.IsNullOrEmpty(path))
+            {
+                return path;
+            }
+
+            using (RegistryKey key = Registry.LocalMachine.OpenSubKey(@"Software\Lithnet\PasswordFilter"))
+            {
+                path = key?.GetValue("TestStorePath") as string;
+                if (!string.IsNullOrEmpty(path))
+                {
+                    return path;
+                }
+            }
+
+            return Path.Combine(Path.GetTempPath(), "lppstore-test");
+        }
 
         public static void AssertFileIsExpectedSize(string rawFile, int size)
         {
