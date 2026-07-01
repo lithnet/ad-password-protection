@@ -93,7 +93,37 @@ while ($true)
         }
 
         Write-Host ""
-        Write-Host "Done. Signed artifact uploaded. Resume the pipeline validation to continue the build." -ForegroundColor Green
+        Write-Host "Signed artifact uploaded. Resuming pipeline..." -ForegroundColor Cyan
+
+        $orgUrl = $Organization.TrimEnd('/')
+        $timeline = az rest --method get --url "$orgUrl/$Project/_apis/build/builds/$BuildId/timeline?api-version=7.1" -o json 2>$null | ConvertFrom-Json
+
+        if ($LASTEXITCODE -ne 0 -or -not $timeline)
+        {
+            Write-Host "Could not query build timeline. Please resume the validation manually." -ForegroundColor Yellow
+            break
+        }
+
+        $checkpointId = $timeline.records | Where-Object { $_.type -eq "Checkpoint.Approval" -and $_.state -eq "inProgress" } | Select-Object -First 1 -ExpandProperty id
+
+        if (-not $checkpointId)
+        {
+            Write-Host "No pending approval found. Please resume the validation manually." -ForegroundColor Yellow
+            break
+        }
+
+        $body = @{ status = "approved"; comment = "Signed artifact uploaded by Wait-ForSignedFilter.ps1" } | ConvertTo-Json -Compress
+        az rest --method patch --url "$orgUrl/$Project/_apis/pipelines/approvals/$($checkpointId)?api-version=7.1-preview.1" --body $body --headers "Content-Type=application/json" -o none 2>$null
+
+        if ($LASTEXITCODE -eq 0)
+        {
+            Write-Host "Done. Pipeline resumed." -ForegroundColor Green
+        }
+        else
+        {
+            Write-Host "Could not auto-resume. Please resume the validation manually." -ForegroundColor Yellow
+        }
+
         break
     }
 

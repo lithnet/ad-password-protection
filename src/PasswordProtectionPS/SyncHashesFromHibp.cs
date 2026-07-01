@@ -17,6 +17,12 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
         [Parameter]
         public string ProxyAddress { get; set; }
 
+        [Parameter]
+        public int RangeStart { get; set; } = 0;
+
+        [Parameter]
+        public int RangeEnd { get; set; } = 0xFFFF;
+
         protected override void BeginProcessing()
         {
             Global.OpenExistingDefaultOrThrow();
@@ -50,7 +56,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
             {
                 try
                 {
-                    await downloader.ExecuteAsync(this.Progress, this.Threads, this.token.Token).ConfigureAwait(false);
+                    await downloader.ExecuteAsync(this.Progress, this.Threads, this.token.Token, this.RangeStart, this.RangeEnd).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException)
                 {

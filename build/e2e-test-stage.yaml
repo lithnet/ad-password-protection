@@ -1,0 +1,216 @@
+parameters:
+- name: vmName
+  type: string
+  default: 't3ws2025x64-dc'
+- name: resourceGroup
+  type: string
+  default: 'rg-ams-testhosts'
+- name: snapshotName
+  type: string
+  default: 't3ws2025x64-dc-baseline'
+- name: diskPrefix
+  type: string
+  default: 't3ws2025x64-dc-osdisk'
+- name: diskSku
+  type: string
+  default: 'StandardSSD_LRS'
+- name: azureSubscription
+  type: string
+  default: 'ProductionServicesSubscription'
+- name: adoEnvironment
+  type: string
+  default: 'TestEnv3'
+- name: adoProject
+  type: string
+  default: 'password-protection'
+- name: initialWaitSeconds
+  type: number
+  default: 60
+- name: agentTimeoutSeconds
+  type: number
+  default: 600
+
+stages:
+- stage: e2e_test_stage
+  displayName: E2E tests on DC
+  dependsOn: main_build_stage
+  jobs:
+
+  # 1. Restore the DC to a clean baseline from snapshot
+  - template: templates/restore-vm-from-snapshot.yaml@release_tools
+    parameters:
+      jobName: RestoreTestDc
+      vmName: ${{ parameters.vmName }}
+      resourceGroup: ${{ parameters.resourceGroup }}
+      snapshotName: ${{ parameters.snapshotName }}
+      diskPrefix: ${{ parameters.diskPrefix }}
+      diskSku: ${{ parameters.diskSku }}
+      azureSubscription: ${{ parameters.azureSubscription }}
+
+  # 2. Push ADO agent registration and wait for it to come online
+  - template: templates/push-ado-agent.yaml
+    parameters:
+      jobName: RegisterAgent
+      vmName: ${{ parameters.vmName }}
+      resourceGroup: ${{ parameters.resourceGroup }}
+      azureSubscription: ${{ parameters.azureSubscription }}
+      adoEnvironment: ${{ parameters.adoEnvironment }}
+      adoProject: ${{ parameters.adoProject }}
+      dependsOn: RestoreTestDc
+      timeoutSeconds: ${{ parameters.agentTimeoutSeconds }}
+
+  # 3. Install the MSI and configure the password filter policy
+  - deployment: InstallFilter
+    displayName: Install LPP and configure filter policy
+    dependsOn: RegisterAgent
+    environment: ${{ parameters.adoEnvironment }}
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: service-win-x64
+            displayName: Download MSI artifact
+
+          - task: PowerShell@2
+            displayName: Install LPP MSI
+            inputs:
+              targetType: inline
+              script: |
+                $msi = Get-ChildItem "$(Pipeline.Workspace)\service-win-x64" -Filter "*.exe" -Recurse | Select-Object -First 1
+                if (-not $msi) {
+                    throw "No installer found in artifact"
+                }
+
+                Write-Host "Installing $($msi.FullName)..."
+                $process = Start-Process $msi.FullName -ArgumentList '/exenoui /quiet /qn /norestart' -Wait -PassThru
+                if ($process.ExitCode -ne 0) {
+                    throw "Installer failed with exit code $($process.ExitCode)"
+                }
+
+                $installed = Get-ItemProperty 'HKLM:\Software\Lithnet\Password Protection for Active Directory' -ErrorAction SilentlyContinue
+                if ($installed) {
+                    Write-Host "Installed version: $($installed.DisplayVersion)"
+                } else {
+                    Write-Host "Checking uninstall registry..."
+                    $uninstall = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*' |
+                        Where-Object { $_.DisplayName -like '*Lithnet*Password*' }
+                    Write-Host "Installed: $($uninstall.DisplayName) v$($uninstall.DisplayVersion)"
+                }
+              failOnStderr: false
+
+          - task: PowerShell@2
+            displayName: Verify installed files
+            inputs:
+              targetType: inline
+              script: |
+                $modulePath = 'C:\Program Files\WindowsPowerShell\Modules\LithnetPasswordProtection'
+                $requiredFiles = @(
+                    'LithnetPasswordProtection.dll',
+                    'Lithnet.ActiveDirectory.PasswordProtection.dll',
+                    'Polly.dll',
+                    'Polly.Extensions.Http.dll',
+                    'Microsoft.Extensions.Http.Polly.dll',
+                    'LithnetPasswordProtection.psd1'
+                )
+
+                foreach ($file in $requiredFiles) {
+                    $path = Join-Path $modulePath $file
+                    if (-not (Test-Path $path)) {
+                        throw "Required file missing: $file"
+                    }
+                }
+
+                Write-Host "All required files present."
+
+          - task: PowerShell@2
+            displayName: Configure password filter group policy
+            inputs:
+              targetType: inline
+              script: |
+                $policyPath = 'HKLM:\Software\Policies\Lithnet\PasswordFilter\Default'
+                New-Item -Path $policyPath -Force | Out-Null
+
+                Set-ItemProperty -Path $policyPath -Name 'Enabled' -Value 1 -Type DWord
+                Set-ItemProperty -Path $policyPath -Name 'CheckCompromisedPasswords' -Value 1 -Type DWord
+                Set-ItemProperty -Path $policyPath -Name 'CheckBannedWords' -Value 1 -Type DWord
+                Set-ItemProperty -Path $policyPath -Name 'CheckComplexity' -Value 1 -Type DWord
+
+                Write-Host "Password filter policy configured."
+                Get-ItemProperty -Path $policyPath | Format-List
+
+  # 4. Reboot the DC so the filter loads into LSASS
+  - template: templates/azure-vm-restart.yaml@release_tools
+    parameters:
+      jobName: RestartTestDc
+      vmName: ${{ parameters.vmName }}
+      resourceGroup: ${{ parameters.resourceGroup }}
+      azureSubscription: ${{ parameters.azureSubscription }}
+      initialWaitSeconds: ${{ parameters.initialWaitSeconds }}
+      dependsOn: InstallFilter
+
+  # 5. Wait for the ADO agent to reconnect after reboot
+  - job: WaitForAgent
+    displayName: Wait for agent after reboot
+    dependsOn: RestartTestDc
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - template: templates/checkout.yaml@release_tools
+      parameters:
+        checkoutSelf: false
+    - template: templates/wait-for-agents-online.yaml@release_tools
+      parameters:
+        mode: environment
+        environmentName: ${{ parameters.adoEnvironment }}
+        agentNames: ${{ parameters.vmName }}
+        timeoutSeconds: ${{ parameters.agentTimeoutSeconds }}
+
+  # 6. Run ALL Pester E2E tests
+  - deployment: E2ETests
+    displayName: Run E2E Pester tests
+    dependsOn: WaitForAgent
+    environment: ${{ parameters.adoEnvironment }}
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self
+
+          - task: PowerShell@2
+            displayName: Run Pester tests
+            inputs:
+              targetType: inline
+              script: |
+                $testPath = '$(Build.SourcesDirectory)\src\PasswordProtectionPS\Tests'
+                $resultsPath = '$(Agent.TempDirectory)\pester-results.xml'
+
+                $config = New-PesterConfiguration
+                $config.Run.Path = $testPath
+                $config.Run.Exit = $true
+                $config.TestResult.Enabled = $true
+                $config.TestResult.OutputPath = $resultsPath
+                $config.TestResult.OutputFormat = 'NUnitXml'
+                $config.Output.Verbosity = 'Detailed'
+
+                Invoke-Pester -Configuration $config
+              failOnStderr: false
+
+          - task: PublishTestResults@2
+            displayName: Publish Pester test results
+            condition: always()
+            inputs:
+              testResultsFormat: 'NUnit'
+              testResultsFiles: '$(Agent.TempDirectory)/pester-results.xml'
+              testRunTitle: 'LPP E2E Tests'
+              failTaskOnFailedTests: true
+
+  # 7. Always deallocate the DC
+  - template: templates/azure-vm-stop.yaml@release_tools
+    parameters:
+      jobName: DeallocateTestDc
+      deployEnvironment: ${{ parameters.adoEnvironment }}
+      distroType: 'win'
+      resourceGroup: ${{ parameters.resourceGroup }}
+      azureSubscription: ${{ parameters.azureSubscription }}
+      dependsOn: E2ETests

@@ -43,13 +43,13 @@ stages:
 # ── Validate product metadata ───────────────────────────────────────────
 - template: templates/validate-release-metadata-stage.yaml@release_tools
 
-# ── Build filter DLL ────────────────────────────────────────────────────
-- stage: build_lpp_stage
-  displayName: Build filter DLL
+# ── Build and test ─────────────────────────────────────────────────────
+- stage: build_and_test_stage
+  displayName: Build and run unit tests
   dependsOn: [validate_metadata]
   jobs:
-  - job: build_lpp_job
-    displayName: Build password filter DLL
+  - job: build_and_test_job
+    displayName: Build and test
     steps:
     - template: templates/checkout.yaml@release_tools
 
@@ -73,9 +73,67 @@ stages:
         failOnStderr: true
 
     - task: VSBuild@1
+      displayName: Build password filter DLL
       inputs:
         solution: 'src/PasswordFilter/PasswordFilter.vcxproj'
         msbuildArgs: '/p:OutDir=$(Build.ArtifactStagingDirectory)\'
+        platform: '$(buildPlatform)'
+        configuration: '$(buildConfiguration)'
+
+    - task: VSBuild@1
+      displayName: Build native unit tests
+      inputs:
+        solution: 'src/NativeUnitTests/NativeUnitTests.vcxproj'
+        platform: '$(buildPlatform)'
+        configuration: '$(buildConfiguration)'
+
+    - task: PowerShell@2
+      displayName: Setup native test store
+      inputs:
+        targetType: inline
+        script: |
+          $storePath = "$(Agent.TempDirectory)\lpp-test-store"
+          New-Item -ItemType Directory -Force -Path $storePath | Out-Null
+          New-ItemProperty -Path 'HKLM:\Software\Policies\Lithnet\PasswordFilter\UnitTests' -Name 'StorePath' -Value $storePath -PropertyType String -Force | Out-Null
+          Write-Host "Test store created at $storePath"
+
+    - task: VisualStudioTestPlatformInstaller@1
+      displayName: Install VS Test Platform
+
+    - task: VSTest@3
+      displayName: Run native unit tests
+      inputs:
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: |
+          **\NativeUnitTests.dll
+          !**\*TestAdapter.dll
+          !**\obj\**
+        platform: '$(buildPlatform)'
+        configuration: '$(buildConfiguration)'
+
+    - task: NuGetToolInstaller@1
+
+    - task: NuGetCommand@2
+      displayName: Restore managed solution
+      inputs:
+        restoreSolution: 'src/Lithnet.ActiveDirectory.PasswordProtection.sln'
+
+    - task: VSBuild@1
+      displayName: Build managed unit tests
+      inputs:
+        solution: 'src/ManagedUnitTests/ManagedUnitTests.csproj'
+        platform: '$(buildPlatform)'
+        configuration: '$(buildConfiguration)'
+
+    - task: VSTest@3
+      displayName: Run managed unit tests
+      inputs:
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: |
+          **\ManagedUnitTests.dll
+          !**\*TestAdapter.dll
+          !**\obj\**
+        testFiltercriteria: 'ClassName!=ManagedUnitTests.LsassTests'
         platform: '$(buildPlatform)'
         configuration: '$(buildConfiguration)'
 
@@ -143,7 +201,7 @@ stages:
 - ${{ if eq(parameters.devMode, false) }}:
   - stage: ms_sign_stage
     displayName: Pause for Microsoft LSA Signing
-    dependsOn: build_lpp_stage
+    dependsOn: build_and_test_stage
     jobs:
     - job: get_lpp_signed_by_ms
       displayName: Pause for LPP DLL signing by Microsoft
@@ -156,7 +214,9 @@ stages:
             [ad-password-protection]\Project Administrators
             [ad-password-protection]\Build Administrators
           instructions: |
-            Run these two commands:
+            Run these commands:
+
+            az login --allow-no-subscriptions
 
             az pipelines runs artifact download --artifact-name lpp_signing_tools --path . --run-id $(Build.BuildId) --organization "$(System.CollectionUri)" --project "$(System.TeamProject)"
 
@@ -168,7 +228,7 @@ stages:
 - stage: main_build_stage
   displayName: Perform main build
   ${{ if eq(parameters.devMode, true) }}:
-    dependsOn: build_lpp_stage
+    dependsOn: build_and_test_stage
   ${{ else }}:
     dependsOn: ms_sign_stage
   jobs:
@@ -282,10 +342,13 @@ stages:
         artifact: 'service-win-x64'
         publishLocation: 'pipeline'
 
+# ── E2E tests on DC ────────────────────────────────────────────────────
+- template: e2e-test-stage.yaml
+
 # ── Generate release-line files (once, after all builds) ────────────────
 - stage: generate_release_data
   displayName: Generate release data
-  dependsOn: [main_build_stage]
+  dependsOn: [e2e_test_stage]
   jobs:
   - template: templates/generate-release-line-files.yaml@release_tools
     parameters:

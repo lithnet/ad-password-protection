@@ -10,7 +10,7 @@ namespace ManagedUnitTests
 {
     public static class TestHelpers
     {
-        public static string TestStorePath = @"D:\dev\lppstore";
+        public static string TestStorePath = Environment.GetEnvironmentVariable("LPP_TEST_STORE_PATH") ?? Path.Combine(Path.GetTempPath(), "lppstore-test");
 
         public static void AssertFileIsExpectedSize(string rawFile, int size)
         {

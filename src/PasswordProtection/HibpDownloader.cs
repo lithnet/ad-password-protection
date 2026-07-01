@@ -83,7 +83,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             return client;
         }
 
-        public async Task ExecuteAsync(OperationProgress progress, int threads, CancellationToken ct)
+        public async Task ExecuteAsync(OperationProgress progress, int threads, CancellationToken ct, int rangeStart = 0, int rangeEnd = 0xFFFF)
         {
             if (threads <= 0)
             {
@@ -94,7 +94,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
             try
             {
-                await this.ProcessRangesAsync(progress, threads, ct).ConfigureAwait(false);
+                await this.ProcessRangesAsync(progress, threads, ct, rangeStart, rangeEnd).ConfigureAwait(false);
             }
             finally
             {
@@ -146,10 +146,11 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             }
         }
 
-        private async Task ProcessRangesAsync(OperationProgress progress, int threads, CancellationToken ct)
+        private async Task ProcessRangesAsync(OperationProgress progress, int threads, CancellationToken ct, int rangeStart = 0, int rangeEnd = 0xFFFF)
         {
+            int rangeCount = (rangeEnd - rangeStart + 1) * (0xF + 1);
             progress.HibpReadInProgress = true;
-            progress.HibpHashTotal = totalHashes + 1;
+            progress.HibpHashTotal = rangeCount;
             progress.HibpStartTime = DateTime.Now;
 
             ParallelOptions op = new ParallelOptions()
@@ -158,9 +159,12 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
                 MaxDegreeOfParallelism = threads
             };
 
-            await this.DownloadRangeAsync(progress, 0, ct).ConfigureAwait(false);
+            await this.DownloadRangeAsync(progress, rangeStart, ct).ConfigureAwait(false);
 
-            var result = Parallel.For(1, 0xFFFF + 1, op, i => this.DownloadRangeAsync(progress, i, ct).ConfigureAwait(false).GetAwaiter().GetResult());
+            if (rangeStart < rangeEnd)
+            {
+                var result = Parallel.For(rangeStart + 1, rangeEnd + 1, op, i => this.DownloadRangeAsync(progress, i, ct).ConfigureAwait(false).GetAwaiter().GetResult());
+            }
         }
 
         private async Task DownloadRangeAsync(OperationProgress progress, int range, CancellationToken ct)
