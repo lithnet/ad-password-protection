@@ -27,7 +27,10 @@ namespace ManagedUnitTests
             HibpDownloader downloader = new HibpDownloader(this.Store);
             var progress = new OperationProgress();
 
-            await downloader.ExecuteAsync(progress, 1, CancellationToken.None);
+            await downloader.ExecuteAsync(progress, 1, CancellationToken.None, 0x0000, 0x000F);
+
+            Assert.IsTrue(progress.HibpCurrentHash > 0);
+            Assert.IsTrue(progress.HashesAdded > 0);
         }
 
         protected override string GetFileNameFromHash(string hash)
