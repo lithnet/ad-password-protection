@@ -215,10 +215,17 @@ stages:
         script: |
           $storePath = "$(Agent.TempDirectory)\lpp-test-store"
           New-Item -ItemType Directory -Force -Path $storePath | Out-Null
-          New-Item -Path 'HKLM:\Software\Policies\Lithnet\PasswordFilter\UnitTests' -Force | Out-Null
-          New-ItemProperty -Path 'HKLM:\Software\Policies\Lithnet\PasswordFilter\UnitTests' -Name 'StorePath' -Value $storePath -PropertyType String -Force | Out-Null
-          New-Item -Path 'HKLM:\Software\Lithnet\PasswordFilter' -Force | Out-Null
-          New-ItemProperty -Path 'HKLM:\Software\Lithnet\PasswordFilter' -Name 'StorePath' -Value $storePath -PropertyType String -Force | Out-Null
+          $policyPath = 'HKLM:\Software\Policies\Lithnet\PasswordFilter'
+          New-Item -Path $policyPath -Force | Out-Null
+          New-ItemProperty -Path $policyPath -Name 'Store' -Value $storePath -PropertyType String -Force | Out-Null
+          New-ItemProperty -Path $policyPath -Name 'CheckPasswordNotInBannedPasswordStoreOnSet' -Value 1 -PropertyType DWord -Force | Out-Null
+          New-ItemProperty -Path $policyPath -Name 'CheckPasswordNotInBannedPasswordStoreOnChange' -Value 1 -PropertyType DWord -Force | Out-Null
+          New-ItemProperty -Path $policyPath -Name 'CheckNormalizedPasswordNotInBannedPasswordStoreOnSet' -Value 1 -PropertyType DWord -Force | Out-Null
+          New-ItemProperty -Path $policyPath -Name 'CheckNormalizedPasswordNotInBannedPasswordStoreOnChange' -Value 1 -PropertyType DWord -Force | Out-Null
+          New-ItemProperty -Path $policyPath -Name 'CheckNormalizedPasswordNotInBannedWordStoreOnSet' -Value 1 -PropertyType DWord -Force | Out-Null
+          New-ItemProperty -Path $policyPath -Name 'CheckNormalizedPasswordNotInBannedWordStoreOnChange' -Value 1 -PropertyType DWord -Force | Out-Null
+          New-Item -Path "$policyPath\UnitTests" -Force | Out-Null
+          New-ItemProperty -Path "$policyPath\UnitTests" -Name 'StorePath' -Value $storePath -PropertyType String -Force | Out-Null
 
           Import-Module "$(Pipeline.Workspace)\ps_module\LithnetPasswordProtection.psd1" -ErrorAction Stop
           Open-Store -Path $storePath -ErrorAction Stop
@@ -247,7 +254,6 @@ stages:
           $(Pipeline.Workspace)\native_test_binaries\**\NativeUnitTests.dll
           !**\*TestAdapter.dll
           !**\obj\**
-        testFiltercriteria: 'ClassName!=NativeUnitTests::Storev3Tests&ClassName!=NativeUnitTests::StorePerformanceTests'
         platform: '$(buildPlatform)'
         configuration: '$(buildConfiguration)'
         searchFolder: '$(Pipeline.Workspace)\native_test_binaries'
