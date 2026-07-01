@@ -43,13 +43,13 @@ stages:
 # ── Validate product metadata ───────────────────────────────────────────
 - template: templates/validate-release-metadata-stage.yaml@release_tools
 
-# ── Build and test ─────────────────────────────────────────────────────
-- stage: build_and_test_stage
-  displayName: Build and run unit tests
+# ── Build ──────────────────────────────────────────────────────────────
+- stage: build_stage
+  displayName: Build
   dependsOn: [validate_metadata]
   jobs:
-  - job: build_and_test_job
-    displayName: Build and test
+  - job: build_job
+    displayName: Build all projects
     steps:
     - template: templates/checkout.yaml@release_tools
 
@@ -88,39 +88,6 @@ stages:
           Copy-Item "D:\build\lpp\filter\lithnetpwdf.pdb" "$(Build.ArtifactStagingDirectory)\" -Force
           Copy-Item "D:\build\lpp\filter\messages.dll" "$(Build.ArtifactStagingDirectory)\" -Force
 
-    - task: PowerShell@2
-      displayName: Setup native test store
-      inputs:
-        targetType: inline
-        script: |
-          $storePath = "$(Agent.TempDirectory)\lpp-test-store"
-          New-Item -ItemType Directory -Force -Path $storePath | Out-Null
-          New-Item -Path 'HKLM:\Software\Policies\Lithnet\PasswordFilter\UnitTests' -Force | Out-Null
-          New-ItemProperty -Path 'HKLM:\Software\Policies\Lithnet\PasswordFilter\UnitTests' -Name 'StorePath' -Value $storePath -PropertyType String -Force | Out-Null
-
-          $env:LPP_TEST_STORE_PATH = $storePath
-          Import-Module "$(Build.SourcesDirectory)\src\PasswordProtectionPS\bin\$(buildPlatform)\$(buildConfiguration)\net472\win-x64\LithnetPasswordProtection.dll" -ErrorAction Stop
-          Open-Store -Path $storePath -ErrorAction Stop
-          Add-CompromisedPassword -Value "password" -ErrorAction Stop
-          Add-CompromisedPassword -Value "abacus" -ErrorAction Stop
-          Add-BannedWord -Value "abacus" -ErrorAction Stop
-          Add-BannedWord -Value "password" -ErrorAction Stop
-          Write-Host "Test store created and populated at $storePath"
-
-    - task: VisualStudioTestPlatformInstaller@1
-      displayName: Install VS Test Platform
-
-    - task: VSTest@3
-      displayName: Run native unit tests
-      inputs:
-        testSelector: 'testAssemblies'
-        testAssemblyVer2: |
-          **\NativeUnitTests.dll
-          !**\*TestAdapter.dll
-          !**\obj\**
-        platform: '$(buildPlatform)'
-        configuration: '$(buildConfiguration)'
-
     - task: NuGetToolInstaller@1
 
     - task: NuGetCommand@2
@@ -135,17 +102,19 @@ stages:
         platform: '$(buildPlatform)'
         configuration: '$(buildConfiguration)'
 
-    - task: VSTest@3
-      displayName: Run managed unit tests
+    - task: PublishPipelineArtifact@1
+      displayName: Publish native test binaries
       inputs:
-        testSelector: 'testAssemblies'
-        testAssemblyVer2: |
-          **\ManagedUnitTests.dll
-          !**\*TestAdapter.dll
-          !**\obj\**
-        testFiltercriteria: 'ClassName!=ManagedUnitTests.LsassTests'
-        platform: '$(buildPlatform)'
-        configuration: '$(buildConfiguration)'
+        targetPath: 'src\NativeUnitTests\x64\Release'
+        artifact: 'native_test_binaries'
+        publishLocation: 'pipeline'
+
+    - task: PublishPipelineArtifact@1
+      displayName: Publish managed test binaries
+      inputs:
+        targetPath: 'src\ManagedUnitTests\bin\x64\Release'
+        artifact: 'managed_test_binaries'
+        publishLocation: 'pipeline'
 
     - task: PublishSymbols@2
       displayName: Publish Password Filter symbols
@@ -207,11 +176,87 @@ stages:
           artifact: 'lpp_filter_ms_signed'
           publishLocation: 'pipeline'
 
+# ── Unit tests ─────────────────────────────────────────────────────────
+- stage: unit_test_stage
+  displayName: Run unit tests
+  dependsOn: [build_stage]
+  jobs:
+  - job: native_tests
+    displayName: Native unit tests
+    steps:
+    - task: DownloadPipelineArtifact@2
+      displayName: Download native test binaries
+      inputs:
+        buildType: 'current'
+        artifactName: 'native_test_binaries'
+        targetPath: '$(Pipeline.Workspace)\native_test_binaries'
+
+    - task: PowerShell@2
+      displayName: Setup native test store
+      inputs:
+        targetType: inline
+        script: |
+          $storePath = "$(Agent.TempDirectory)\lpp-test-store"
+          New-Item -ItemType Directory -Force -Path $storePath | Out-Null
+          New-Item -Path 'HKLM:\Software\Policies\Lithnet\PasswordFilter\UnitTests' -Force | Out-Null
+          New-ItemProperty -Path 'HKLM:\Software\Policies\Lithnet\PasswordFilter\UnitTests' -Name 'StorePath' -Value $storePath -PropertyType String -Force | Out-Null
+
+          $psModulePath = "$(Pipeline.Workspace)\native_test_binaries"
+          $lppDll = Get-ChildItem $psModulePath -Recurse -Filter 'Lithnet.ActiveDirectory.PasswordProtection.dll' | Select-Object -First 1
+          if ($lppDll) {
+              Import-Module $lppDll.FullName -ErrorAction Stop
+          } else {
+              Import-Module LithnetPasswordProtection -ErrorAction Stop
+          }
+          Open-Store -Path $storePath -ErrorAction Stop
+          Add-CompromisedPassword -Value "password" -ErrorAction Stop
+          Add-CompromisedPassword -Value "abacus" -ErrorAction Stop
+          Add-BannedWord -Value "abacus" -ErrorAction Stop
+          Add-BannedWord -Value "password" -ErrorAction Stop
+          Write-Host "Test store created and populated at $storePath"
+
+    - task: VisualStudioTestPlatformInstaller@1
+      displayName: Install VS Test Platform
+
+    - task: VSTest@3
+      displayName: Run native unit tests
+      inputs:
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: |
+          $(Pipeline.Workspace)\native_test_binaries\**\NativeUnitTests.dll
+          !**\*TestAdapter.dll
+        platform: '$(buildPlatform)'
+        configuration: '$(buildConfiguration)'
+
+  - job: managed_tests
+    displayName: Managed unit tests
+    steps:
+    - task: DownloadPipelineArtifact@2
+      displayName: Download managed test binaries
+      inputs:
+        buildType: 'current'
+        artifactName: 'managed_test_binaries'
+        targetPath: '$(Pipeline.Workspace)\managed_test_binaries'
+
+    - task: VisualStudioTestPlatformInstaller@1
+      displayName: Install VS Test Platform
+
+    - task: VSTest@3
+      displayName: Run managed unit tests
+      inputs:
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: |
+          $(Pipeline.Workspace)\managed_test_binaries\**\ManagedUnitTests.dll
+          !**\*TestAdapter.dll
+        testFiltercriteria: 'ClassName!=ManagedUnitTests.LsassTests'
+        platform: '$(buildPlatform)'
+        configuration: '$(buildConfiguration)'
+
 # ── Pause for Microsoft LSA signing ─────────────────────────────────────
 - ${{ if eq(parameters.devMode, false) }}:
   - stage: ms_sign_stage
     displayName: Pause for Microsoft LSA Signing
-    dependsOn: build_and_test_stage
+    dependsOn: unit_test_stage
     jobs:
     - job: get_lpp_signed_by_ms
       displayName: Pause for LPP DLL signing by Microsoft
@@ -238,7 +283,7 @@ stages:
 - stage: main_build_stage
   displayName: Perform main build
   ${{ if eq(parameters.devMode, true) }}:
-    dependsOn: build_and_test_stage
+    dependsOn: unit_test_stage
   ${{ else }}:
     dependsOn: ms_sign_stage
   jobs:
