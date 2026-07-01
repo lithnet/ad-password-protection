@@ -73,19 +73,20 @@ stages:
         failOnStderr: true
 
     - task: VSBuild@1
-      displayName: Build password filter DLL
-      inputs:
-        solution: 'src/PasswordFilter/PasswordFilter.vcxproj'
-        msbuildArgs: '/p:OutDir=$(Build.ArtifactStagingDirectory)\'
-        platform: '$(buildPlatform)'
-        configuration: '$(buildConfiguration)'
-
-    - task: VSBuild@1
-      displayName: Build native unit tests
+      displayName: Build password filter DLL and native unit tests
       inputs:
         solution: 'src/NativeUnitTests/NativeUnitTests.vcxproj'
         platform: '$(buildPlatform)'
         configuration: '$(buildConfiguration)'
+
+    - task: PowerShell@2
+      displayName: Copy filter DLL to staging
+      inputs:
+        targetType: inline
+        script: |
+          Copy-Item "D:\build\lpp\filter\lithnetpwdf.dll" "$(Build.ArtifactStagingDirectory)\" -Force
+          Copy-Item "D:\build\lpp\filter\lithnetpwdf.pdb" "$(Build.ArtifactStagingDirectory)\" -Force
+          Copy-Item "D:\build\lpp\filter\messages.dll" "$(Build.ArtifactStagingDirectory)\" -Force
 
     - task: PowerShell@2
       displayName: Setup native test store
