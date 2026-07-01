@@ -216,6 +216,14 @@ stages:
           Add-BannedWord -Value "password" -ErrorAction Stop
           Write-Host "Test store created and populated at $storePath"
 
+    - task: PowerShell@2
+      displayName: List native test artifact contents
+      inputs:
+        targetType: inline
+        script: |
+          Write-Host "Pipeline.Workspace: $(Pipeline.Workspace)"
+          Get-ChildItem "$(Pipeline.Workspace)\native_test_binaries" -Recurse | ForEach-Object { Write-Host $_.FullName }
+
     - task: VisualStudioTestPlatformInstaller@1
       displayName: Install VS Test Platform
 
@@ -224,9 +232,7 @@ stages:
       inputs:
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
-          **\NativeUnitTests.dll
-          !**\*TestAdapter.dll
-        searchFolder: '$(Pipeline.Workspace)\native_test_binaries'
+          $(Pipeline.Workspace)\native_test_binaries\NativeUnitTests.dll
         platform: '$(buildPlatform)'
         configuration: '$(buildConfiguration)'
 
@@ -240,6 +246,13 @@ stages:
         artifactName: 'managed_test_binaries'
         targetPath: '$(Pipeline.Workspace)\managed_test_binaries'
 
+    - task: PowerShell@2
+      displayName: List managed test artifact contents
+      inputs:
+        targetType: inline
+        script: |
+          Get-ChildItem "$(Pipeline.Workspace)\managed_test_binaries" -Recurse | ForEach-Object { Write-Host $_.FullName }
+
     - task: VisualStudioTestPlatformInstaller@1
       displayName: Install VS Test Platform
 
@@ -248,9 +261,7 @@ stages:
       inputs:
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
-          **\ManagedUnitTests.dll
-          !**\*TestAdapter.dll
-        searchFolder: '$(Pipeline.Workspace)\managed_test_binaries'
+          $(Pipeline.Workspace)\managed_test_binaries\ManagedUnitTests.dll
         testFiltercriteria: 'ClassName!=ManagedUnitTests.LsassTests'
         platform: '$(buildPlatform)'
         configuration: '$(buildConfiguration)'
