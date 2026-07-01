@@ -217,6 +217,8 @@ stages:
           New-Item -ItemType Directory -Force -Path $storePath | Out-Null
           New-Item -Path 'HKLM:\Software\Policies\Lithnet\PasswordFilter\UnitTests' -Force | Out-Null
           New-ItemProperty -Path 'HKLM:\Software\Policies\Lithnet\PasswordFilter\UnitTests' -Name 'StorePath' -Value $storePath -PropertyType String -Force | Out-Null
+          New-Item -Path 'HKLM:\Software\Lithnet\PasswordFilter' -Force | Out-Null
+          New-ItemProperty -Path 'HKLM:\Software\Lithnet\PasswordFilter' -Name 'StorePath' -Value $storePath -PropertyType String -Force | Out-Null
 
           Import-Module "$(Pipeline.Workspace)\ps_module\LithnetPasswordProtection.psd1" -ErrorAction Stop
           Open-Store -Path $storePath -ErrorAction Stop
