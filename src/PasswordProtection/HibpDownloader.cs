@@ -85,6 +85,21 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
         public async Task ExecuteAsync(OperationProgress progress, int threads, CancellationToken ct, int rangeStart = 0, int rangeEnd = 0xFFFF)
         {
+            if (rangeStart < 0 || rangeStart > 0xFFFF)
+            {
+                throw new ArgumentOutOfRangeException(nameof(rangeStart), $"RangeStart must be between 0x0000 and 0xFFFF (got 0x{rangeStart:X4}).");
+            }
+
+            if (rangeEnd < 0 || rangeEnd > 0xFFFF)
+            {
+                throw new ArgumentOutOfRangeException(nameof(rangeEnd), $"RangeEnd must be between 0x0000 and 0xFFFF (got 0x{rangeEnd:X4}).");
+            }
+
+            if (rangeStart > rangeEnd)
+            {
+                throw new ArgumentException($"RangeStart (0x{rangeStart:X4}) must not be greater than RangeEnd (0x{rangeEnd:X4}).");
+            }
+
             if (threads <= 0)
             {
                 threads = Environment.ProcessorCount * 8;

@@ -41,6 +41,20 @@ Describe 'LSASS password filter' {
                 $lsassModules | Should -Contain 'lithnetpwdf.dll'
             }
         }
+
+        It 'is running as a protected process (PPL)' {
+            $lsass = Get-Process lsass -ErrorAction Stop
+            $lsass.Path | Should -Not -BeNullOrEmpty
+            $protectionInfo = (Get-CimInstance Win32_Process -Filter "ProcessId = $($lsass.Id)" -ErrorAction Stop).ExtendedProtectionInformation
+            if ($null -ne $protectionInfo) {
+                $protectionInfo | Should -Not -Be 0
+            }
+            else {
+                $regPath = 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa'
+                $runAsPPL = (Get-ItemProperty -Path $regPath -ErrorAction Stop).RunAsPPL
+                $runAsPPL | Should -Be 1
+            }
+        }
     }
 
     Context 'password change enforcement' {
@@ -72,12 +86,6 @@ Describe 'LSASS password filter' {
         }
     }
 
-    Context 'post-test cleanup' {
-        It 'resets TestUser1 back to the original password' {
-            Set-ADAccountPassword -Identity $script:testUser1 -Reset -NewPassword $script:originalPassword -Server 'lpptest.local' -ErrorAction Stop
-        }
-    }
-
     Context 'event log' {
         It 'has no LPP errors in the Application log since boot' {
             $errors = Get-WinEvent -FilterHashtable @{
@@ -98,5 +106,9 @@ Describe 'LSASS password filter' {
 
             $errors | Should -BeNullOrEmpty
         }
+    }
+
+    AfterAll {
+        Set-ADAccountPassword -Identity $script:testUser1 -Reset -NewPassword $script:originalPassword -Server 'lpptest.local' -ErrorAction SilentlyContinue
     }
 }

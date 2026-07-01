@@ -79,7 +79,7 @@ jobs:
             '    Remove-Item $zip' \
             '}' \
             'Write-Host "Configuring agent..."' \
-            '& "$agentDir\config.cmd" --unattended --replace --url $org --auth pat --token $pat --environment $env --projectname $project --addvirtualmachineresourcetags --virtualmachineresourcetags "role:dc,product:lpp" --runAsService --windowsLogonAccount "NT AUTHORITY\SYSTEM" 2>&1 | Write-Host' \
+            '& "$agentDir\config.cmd" --unattended --replace --agent $vmName --url $org --auth pat --token $pat --environment $env --projectname $project --addvirtualmachineresourcetags --virtualmachineresourcetags "role:dc,product:lpp" --runAsService --windowsLogonAccount "NT AUTHORITY\SYSTEM" 2>&1 | Write-Host' \
             'if ($LASTEXITCODE -ne 0) { throw "Agent configuration failed with exit code $LASTEXITCODE" }' \
             'Write-Host "Agent registered and service started."' \
           --parameters \

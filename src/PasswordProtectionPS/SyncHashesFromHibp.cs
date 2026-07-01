@@ -18,9 +18,11 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
         public string ProxyAddress { get; set; }
 
         [Parameter]
+        [ValidateRange(0, 0xFFFF)]
         public int RangeStart { get; set; } = 0;
 
         [Parameter]
+        [ValidateRange(0, 0xFFFF)]
         public int RangeEnd { get; set; } = 0xFFFF;
 
         protected override void BeginProcessing()

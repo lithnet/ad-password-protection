@@ -182,6 +182,8 @@ stages:
             inputs:
               targetType: inline
               script: |
+                $env:LPP_EXPECTED_VERSION = '$(build.version).0'
+
                 $testPath = '$(Build.SourcesDirectory)\src\PasswordProtectionPS\Tests'
                 $resultsPath = '$(Agent.TempDirectory)\pester-results.xml'
 

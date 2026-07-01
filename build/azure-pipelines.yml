@@ -94,8 +94,17 @@ stages:
         script: |
           $storePath = "$(Agent.TempDirectory)\lpp-test-store"
           New-Item -ItemType Directory -Force -Path $storePath | Out-Null
+          New-Item -Path 'HKLM:\Software\Policies\Lithnet\PasswordFilter\UnitTests' -Force | Out-Null
           New-ItemProperty -Path 'HKLM:\Software\Policies\Lithnet\PasswordFilter\UnitTests' -Name 'StorePath' -Value $storePath -PropertyType String -Force | Out-Null
-          Write-Host "Test store created at $storePath"
+
+          $env:LPP_TEST_STORE_PATH = $storePath
+          Import-Module "$(Build.SourcesDirectory)\src\PasswordProtectionPS\bin\$(buildPlatform)\$(buildConfiguration)\net472\win-x64\LithnetPasswordProtection.dll" -ErrorAction Stop
+          Open-Store -Path $storePath -ErrorAction Stop
+          Add-CompromisedPassword -Value "password" -ErrorAction Stop
+          Add-CompromisedPassword -Value "abacus" -ErrorAction Stop
+          Add-BannedWord -Value "abacus" -ErrorAction Stop
+          Add-BannedWord -Value "password" -ErrorAction Stop
+          Write-Host "Test store created and populated at $storePath"
 
     - task: VisualStudioTestPlatformInstaller@1
       displayName: Install VS Test Platform
