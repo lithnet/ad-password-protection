@@ -224,8 +224,9 @@ stages:
       inputs:
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
-          $(Pipeline.Workspace)\native_test_binaries\**\NativeUnitTests.dll
+          **\NativeUnitTests.dll
           !**\*TestAdapter.dll
+        searchFolder: '$(Pipeline.Workspace)\native_test_binaries'
         platform: '$(buildPlatform)'
         configuration: '$(buildConfiguration)'
 
@@ -247,8 +248,9 @@ stages:
       inputs:
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
-          $(Pipeline.Workspace)\managed_test_binaries\**\ManagedUnitTests.dll
+          **\ManagedUnitTests.dll
           !**\*TestAdapter.dll
+        searchFolder: '$(Pipeline.Workspace)\managed_test_binaries'
         testFiltercriteria: 'ClassName!=ManagedUnitTests.LsassTests'
         platform: '$(buildPlatform)'
         configuration: '$(buildConfiguration)'
