@@ -95,10 +95,20 @@ stages:
           Copy-Item "D:\build\lpp\filter\lithnetpwdf.pdb" "$(Build.ArtifactStagingDirectory)\" -Force
           Copy-Item "D:\build\lpp\filter\messages.dll" "$(Build.ArtifactStagingDirectory)\" -Force
 
+    - task: PowerShell@2
+      displayName: Locate native test DLL
+      inputs:
+        targetType: inline
+        script: |
+          $dll = Get-ChildItem "$(Build.SourcesDirectory)\src" -Recurse -Filter "NativeUnitTests.dll" | Select-Object -First 1
+          if (-not $dll) { throw "NativeUnitTests.dll not found" }
+          Write-Host "Found: $($dll.FullName)"
+          Write-Host "##vso[task.setvariable variable=NativeTestDir]$($dll.DirectoryName)"
+
     - task: PublishPipelineArtifact@1
       displayName: Publish native test binaries
       inputs:
-        targetPath: 'src\NativeUnitTests\x64\Release'
+        targetPath: '$(NativeTestDir)'
         artifact: 'native_test_binaries'
         publishLocation: 'pipeline'
 
