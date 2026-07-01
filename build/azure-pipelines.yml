@@ -109,6 +109,13 @@ stages:
         artifact: 'managed_test_binaries'
         publishLocation: 'pipeline'
 
+    - task: PublishPipelineArtifact@1
+      displayName: Publish PS module for test store setup
+      inputs:
+        targetPath: 'src\PasswordProtectionPS\bin\x64\Release\net472\win-x64'
+        artifact: 'ps_module_binaries'
+        publishLocation: 'pipeline'
+
     - task: PublishSymbols@2
       displayName: Publish Password Filter symbols
       inputs:
@@ -184,6 +191,13 @@ stages:
         artifactName: 'native_test_binaries'
         targetPath: '$(Pipeline.Workspace)\native_test_binaries'
 
+    - task: DownloadPipelineArtifact@2
+      displayName: Download PS module for store setup
+      inputs:
+        buildType: 'current'
+        artifactName: 'ps_module_binaries'
+        targetPath: '$(Pipeline.Workspace)\ps_module'
+
     - task: PowerShell@2
       displayName: Setup native test store
       inputs:
@@ -194,13 +208,7 @@ stages:
           New-Item -Path 'HKLM:\Software\Policies\Lithnet\PasswordFilter\UnitTests' -Force | Out-Null
           New-ItemProperty -Path 'HKLM:\Software\Policies\Lithnet\PasswordFilter\UnitTests' -Name 'StorePath' -Value $storePath -PropertyType String -Force | Out-Null
 
-          $psModulePath = "$(Pipeline.Workspace)\native_test_binaries"
-          $lppDll = Get-ChildItem $psModulePath -Recurse -Filter 'Lithnet.ActiveDirectory.PasswordProtection.dll' | Select-Object -First 1
-          if ($lppDll) {
-              Import-Module $lppDll.FullName -ErrorAction Stop
-          } else {
-              Import-Module LithnetPasswordProtection -ErrorAction Stop
-          }
+          Import-Module "$(Pipeline.Workspace)\ps_module\LithnetPasswordProtection.psd1" -ErrorAction Stop
           Open-Store -Path $storePath -ErrorAction Stop
           Add-CompromisedPassword -Value "password" -ErrorAction Stop
           Add-CompromisedPassword -Value "abacus" -ErrorAction Stop
