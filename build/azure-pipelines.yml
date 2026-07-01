@@ -72,10 +72,17 @@ stages:
           Get-Content $file
         failOnStderr: true
 
-    - task: VSBuild@1
-      displayName: Build password filter DLL and native unit tests
+    - task: NuGetToolInstaller@1
+
+    - task: NuGetCommand@2
+      displayName: Restore solution
       inputs:
-        solution: 'src/NativeUnitTests/NativeUnitTests.vcxproj'
+        restoreSolution: 'src/Lithnet.ActiveDirectory.PasswordProtection.sln'
+
+    - task: VSBuild@1
+      displayName: Build solution
+      inputs:
+        solution: 'src/Lithnet.ActiveDirectory.PasswordProtection.sln'
         platform: '$(buildPlatform)'
         configuration: '$(buildConfiguration)'
 
@@ -87,20 +94,6 @@ stages:
           Copy-Item "D:\build\lpp\filter\lithnetpwdf.dll" "$(Build.ArtifactStagingDirectory)\" -Force
           Copy-Item "D:\build\lpp\filter\lithnetpwdf.pdb" "$(Build.ArtifactStagingDirectory)\" -Force
           Copy-Item "D:\build\lpp\filter\messages.dll" "$(Build.ArtifactStagingDirectory)\" -Force
-
-    - task: NuGetToolInstaller@1
-
-    - task: NuGetCommand@2
-      displayName: Restore managed solution
-      inputs:
-        restoreSolution: 'src/Lithnet.ActiveDirectory.PasswordProtection.sln'
-
-    - task: VSBuild@1
-      displayName: Build managed unit tests
-      inputs:
-        solution: 'src/ManagedUnitTests/ManagedUnitTests.csproj'
-        platform: '$(buildPlatform)'
-        configuration: '$(buildConfiguration)'
 
     - task: PublishPipelineArtifact@1
       displayName: Publish native test binaries
