@@ -98,7 +98,7 @@ stages:
                 $process = Start-Process $msi.FullName -ArgumentList '/exenoui /quiet /qn /norestart' -Wait -PassThru
                 if ($process.ExitCode -ne 0) { throw "Installer failed with exit code $($process.ExitCode)" }
 
-                $store = (Get-ItemProperty 'HKLM:\Software\Lithnet\PasswordFilter' -ErrorAction Stop).Store
+                $store = (Get-ItemProperty 'HKLM:\Software\Lithnet\PasswordFilter' -ErrorAction Stop).Store.TrimEnd('\')
                 Write-Host "Store path after install: $store"
                 if ($store -ne 'C:\Password-Protection\store') {
                     throw "Installer overwrote store path. Expected 'C:\Password-Protection\store', got '$store'"
