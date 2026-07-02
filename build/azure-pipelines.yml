@@ -389,13 +389,13 @@ stages:
         artifactName: 'lpp_filter_ms_signed'
         targetPath: 'D:\build\lpp\filter'
 
-    - task: ExtractFiles@1
-      displayName: Extract signed filter DLL from ZIP
-      inputs:
-        archiveFilePatterns: 'D:\build\lpp\filter\*.zip'
-        destinationFolder: 'D:\build\lpp\filter'
-        cleanDestinationFolder: false
-      continueOnError: true
+    - ${{ if eq(parameters.devMode, false) }}:
+      - task: ExtractFiles@1
+        displayName: Extract signed filter DLL from ZIP
+        inputs:
+          archiveFilePatterns: 'D:\build\lpp\filter\*.zip'
+          destinationFolder: 'D:\build\lpp\filter'
+          cleanDestinationFolder: false
 
     - task: DownloadPipelineArtifact@2
       displayName: Download messages DLL
