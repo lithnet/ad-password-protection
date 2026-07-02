@@ -53,38 +53,43 @@ stages:
 # ── Validate product metadata ───────────────────────────────────────────
 - template: templates/validate-release-metadata-stage.yaml@release_tools
 
-# ── Security scans (parallel, does not block the build) ────────────────
-- ${{ if eq(parameters.enableSecurityScans, true) }}:
-  - stage: security_scans
-    displayName: Security Scans
-    dependsOn: []
-    jobs:
-    - job: codeql_and_dependency
-      displayName: CodeQL and dependency scanning
-      pool:
-        vmImage: 'windows-latest'
-      steps:
-      - checkout: self
-        fetchDepth: 1
-      - task: NuGetToolInstaller@1
-      - task: NuGetCommand@2
-        displayName: Restore solution
-        inputs:
-          restoreSolution: 'src/Lithnet.ActiveDirectory.PasswordProtection.sln'
-      - task: AdvancedSecurity-Codeql-Init@1
-        displayName: Initialize CodeQL
-        inputs:
-          languages: 'csharp'
-      - task: VSBuild@1
-        displayName: Build for CodeQL analysis
-        inputs:
-          solution: 'src/Lithnet.ActiveDirectory.PasswordProtection.sln'
-          platform: '$(buildPlatform)'
-          configuration: '$(buildConfiguration)'
-      - task: AdvancedSecurity-Codeql-Analyze@1
-        displayName: Run CodeQL analysis
-      - task: AdvancedSecurity-Dependency-Scanning@1
-        displayName: Scan dependencies
+# ── Security scans ─────────────────────────────────────────────────────
+# TODO: ADO Advanced Security (CodeQL) requires an ADO-hosted repo.
+# LPP is on GitHub, so we need an alternative: either MSDO extension,
+# GitHub Actions CodeQL workflow, or another scanner compatible with
+# GitHub repos in ADO pipelines. Uncomment and adapt when resolved.
+#
+# - ${{ if eq(parameters.enableSecurityScans, true) }}:
+#   - stage: security_scans
+#     displayName: Security Scans
+#     dependsOn: []
+#     jobs:
+#     - job: codeql_and_dependency
+#       displayName: CodeQL and dependency scanning
+#       pool:
+#         vmImage: 'windows-latest'
+#       steps:
+#       - checkout: self
+#         fetchDepth: 1
+#       - task: NuGetToolInstaller@1
+#       - task: NuGetCommand@2
+#         displayName: Restore solution
+#         inputs:
+#           restoreSolution: 'src/Lithnet.ActiveDirectory.PasswordProtection.sln'
+#       - task: AdvancedSecurity-Codeql-Init@1
+#         displayName: Initialize CodeQL
+#         inputs:
+#           languages: 'csharp'
+#       - task: VSBuild@1
+#         displayName: Build for CodeQL analysis
+#         inputs:
+#           solution: 'src/Lithnet.ActiveDirectory.PasswordProtection.sln'
+#           platform: '$(buildPlatform)'
+#           configuration: '$(buildConfiguration)'
+#       - task: AdvancedSecurity-Codeql-Analyze@1
+#         displayName: Run CodeQL analysis
+#       - task: AdvancedSecurity-Dependency-Scanning@1
+#         displayName: Scan dependencies
 
 # ── Build ──────────────────────────────────────────────────────────────
 - stage: build_stage
