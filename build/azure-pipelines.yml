@@ -394,6 +394,22 @@ stages:
       inputs:
         archiveFilePatterns: 'D:\build\lpp\ms_signed\*.zip'
         destinationFolder: 'D:\build\lpp\filter'
+      continueOnError: true
+
+    - task: PowerShell@2
+      displayName: Ensure filter DLL in build folder
+      inputs:
+        targetType: inline
+        script: |
+          if (-not (Test-Path 'D:\build\lpp\filter\lithnetpwdf.dll')) {
+              $dll = Get-ChildItem 'D:\build\lpp\ms_signed' -Filter 'lithnetpwdf.dll' -Recurse | Select-Object -First 1
+              if ($dll) {
+                  Copy-Item $dll.FullName 'D:\build\lpp\filter\' -Force
+                  Write-Host "Copied filter DLL from ms_signed to filter directory"
+              } else {
+                  throw "lithnetpwdf.dll not found in ms_signed artifact"
+              }
+          }
 
     - task: DownloadPipelineArtifact@2
       displayName: Download messages DLL
