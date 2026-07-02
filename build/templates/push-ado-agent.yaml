@@ -12,7 +12,7 @@ parameters:
   type: string
 - name: adoProject
   type: string
-  default: 'password-protection'
+  default: 'ad-password-protection'
 - name: adoOrganization
   type: string
   default: 'https://dev.azure.com/lithnet/'
