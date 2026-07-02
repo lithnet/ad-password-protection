@@ -182,6 +182,13 @@ stages:
           - checkout: self
 
           - task: PowerShell@2
+            displayName: Install Pester 5
+            inputs:
+              targetType: inline
+              script: |
+                Install-Module Pester -Force -SkipPublisherCheck -MinimumVersion 5.0.0
+
+          - task: PowerShell@2
             displayName: Run Pester tests
             inputs:
               targetType: inline
