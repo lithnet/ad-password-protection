@@ -222,6 +222,68 @@ stages:
                   Write-Host "PPL is enabled (RunAsPPL=$runAsPPL)."
 
           - task: PowerShell@2
+            displayName: Diagnose filter state after reboot
+            inputs:
+              targetType: inline
+              script: |
+                Write-Host "=== Registry: Store path ==="
+                $root = Get-ItemProperty 'HKLM:\Software\Lithnet\PasswordFilter' -ErrorAction SilentlyContinue
+                Write-Host "Store = $($root.Store)"
+
+                Write-Host "`n=== Registry: Policy (default subkey) ==="
+                $policy = Get-ItemProperty 'HKLM:\Software\Policies\Lithnet\PasswordFilter\default' -ErrorAction SilentlyContinue
+                $policy | Format-List
+
+                Write-Host "`n=== LSASS modules containing 'lithnet' ==="
+                try {
+                    $lsass = Get-Process lsass -ErrorAction Stop
+                    $lsass.Modules | Where-Object { $_.ModuleName -match 'lithnet' } | Format-Table ModuleName, FileName -AutoSize
+                } catch {
+                    Write-Host "Cannot enumerate LSASS modules: $_"
+                }
+
+                Write-Host "`n=== Store contents ==="
+                $storePath = $root.Store
+                if ($storePath -and (Test-Path $storePath)) {
+                    Get-ChildItem $storePath -Recurse | Select-Object FullName, Length | Format-Table -AutoSize
+                } else {
+                    Write-Host "Store path not found or empty: $storePath"
+                }
+
+                Write-Host "`n=== Testing password filter via P/Invoke ==="
+                Import-Module LithnetPasswordProtection -ErrorAction Stop
+                Open-Store -Path $storePath -ErrorAction Stop
+                $r1 = Get-PasswordFilterResult -Password 'KnownPassword123!' -Username 'TestUser1' -Fullname 'TestUser1' -ErrorAction Stop
+                Write-Host "FilterResult for KnownPassword123!: $r1"
+                $r2 = Get-PasswordFilterResult -Password 'V@lid8edCle@nPwd!2026' -Username 'TestUser1' -Fullname 'TestUser1' -ErrorAction Stop
+                Write-Host "FilterResult for clean password: $r2"
+
+                Write-Host "`n=== Testing actual AD password change ==="
+                Import-Module ActiveDirectory -ErrorAction Stop
+                $domain = (Get-ADDomain).DNSRoot
+                $cleanPwd = ConvertTo-SecureString 'DiagClean!Pwd9876' -AsPlainText -Force
+                Set-ADAccountPassword -Identity TestUser1 -Reset -NewPassword $cleanPwd -Server $domain -ErrorAction Stop
+                Write-Host "Set clean password: OK"
+
+                $compromisedPwd = ConvertTo-SecureString 'KnownPassword123!' -AsPlainText -Force
+                try {
+                    Set-ADAccountPassword -Identity TestUser1 -Reset -NewPassword $compromisedPwd -Server $domain -ErrorAction Stop
+                    Write-Host "Set compromised password: SUCCEEDED (filter did NOT reject)"
+                } catch {
+                    Write-Host "Set compromised password: REJECTED by filter (expected): $_"
+                }
+
+                Write-Host "`n=== Event log: ALL LPP events since boot ==="
+                $bootTime = (Get-CimInstance Win32_OperatingSystem).LastBootUpTime
+                $events = Get-WinEvent -FilterHashtable @{LogName='Application'; StartTime=$bootTime} -ErrorAction SilentlyContinue |
+                    Where-Object { $_.ProviderName -match 'lithnet|passwordprotection|lithnetpwdf' }
+                if ($events) {
+                    $events | Format-Table TimeCreated, LevelDisplayName, Id, Message -Wrap -AutoSize
+                } else {
+                    Write-Host "No LPP events found — filter may not be loading in LSASS"
+                }
+
+          - task: PowerShell@2
             displayName: Run Pester tests
             inputs:
               targetType: inline
