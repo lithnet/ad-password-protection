@@ -24,15 +24,20 @@ Describe 'LSASS password filter' {
         }
     }
 
-    Context 'filter DLL loaded by LSASS' {
+    Context 'filter DLL' {
         It 'has lithnetpwdf.dll in System32' {
             $dllPath = Join-Path $env:SystemRoot 'System32\lithnetpwdf.dll'
             Test-Path $dllPath | Should -BeTrue
         }
 
-        It 'has lithnetpwdf.dll loaded in the lsass process' -Skip:$script:isDevMode {
-            $lsassModules = (Get-Process lsass -ErrorAction Stop).Modules | ForEach-Object { $_.ModuleName }
-            $lsassModules | Should -Contain 'lithnetpwdf.dll'
+        It 'logged initialization event since boot' -Skip:$script:isDevMode {
+            $initEvent = Get-WinEvent -FilterHashtable @{
+                ProviderName = 'LithnetPasswordProtection'
+                Id           = 3
+                StartTime    = $script:bootTime
+            } -MaxEvents 1 -ErrorAction SilentlyContinue
+
+            $initEvent | Should -Not -BeNullOrEmpty -Because 'LSASS should have loaded lithnetpwdf.dll and logged MSG_AGENT_INITIALIZED (event ID 3)'
         }
     }
 
