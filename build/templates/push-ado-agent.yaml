@@ -62,7 +62,7 @@ jobs:
           --name "$VM_NAME" \
           --command-id RunPowerShellScript \
           --scripts \
-            'param($pat, $org, $project, $env, $agentVersion, $vmName)' \
+            'param($pat, $org, $project, $adoEnv, $agentVersion, $vmName)' \
             '$ErrorActionPreference = "Stop"' \
             '$agentDir = "C:\azagent\A1"' \
             'if (Test-Path "$agentDir\.agent") {' \
@@ -80,14 +80,14 @@ jobs:
             '    Remove-Item $zip' \
             '}' \
             'Write-Host "Configuring agent..."' \
-            '& "$agentDir\config.cmd" --unattended --replace --agent $vmName --url $org --auth pat --token $pat --environment $env --projectname $project --addvirtualmachineresourcetags --virtualmachineresourcetags "role:dc,product:lpp" --runAsService --windowsLogonAccount "NT AUTHORITY\SYSTEM" 2>&1 | Write-Host' \
+            '& "$agentDir\config.cmd" --unattended --replace --agent $vmName --url $org --auth pat --token $pat --environment $adoEnv --projectname $project --addvirtualmachineresourcetags --virtualmachineresourcetags "role:dc,product:lpp" --runAsService --windowsLogonAccount "NT AUTHORITY\SYSTEM" 2>&1 | Write-Host' \
             'if ($LASTEXITCODE -ne 0) { throw "Agent configuration failed with exit code $LASTEXITCODE" }' \
             'Write-Host "Agent registered and service started."' \
           --parameters \
             "pat=$PAT" \
             "org=$ADO_ORG" \
             "project=$ADO_PROJECT" \
-            "env=$ADO_ENV" \
+            "adoEnv=$ADO_ENV" \
             "agentVersion=$AGENT_VERSION" \
             "vmName=$VM_NAME" \
           -o json)
