@@ -1,3 +1,15 @@
+# Installs and registers an Azure DevOps pipeline agent on a VM via Run Command.
+#
+# We register the agent without --runAsService because config.cmd's service
+# installer creates a local group and tries to add the service account to it.
+# On a domain controller, built-in machine accounts (SYSTEM) can't be added
+# to local groups, so that fails. The local group only controls folder ACLs
+# which SYSTEM already has, so it's unnecessary.
+#
+# Instead we create a scheduled task to run the agent as SYSTEM on startup
+# and trigger it immediately. The task survives reboots, and SYSTEM on a DC
+# has the permissions the E2E tests need (including DRS replication).
+
 param (
     [Parameter(Mandatory=$true)]
     [string] $pat,
@@ -14,9 +26,10 @@ param (
 $ErrorActionPreference = "Stop"
 
 $computerName = $env:ComputerName
-Write-Host "Computer name: $computerName"
-
 $agentDir = "C:\azagent\A1"
+$taskName = "AzurePipelinesAgent"
+
+Write-Host "Computer name: $computerName"
 
 if (Test-Path "$agentDir\.agent") {
     Write-Host "Removing existing agent registration..."
@@ -55,6 +68,18 @@ if ($LASTEXITCODE -ne 0) {
     throw "config.cmd failed with exit code $LASTEXITCODE"
 }
 
-Write-Host "Starting agent interactively..."
-Start-Process -FilePath "$agentDir\run.cmd" -WorkingDirectory $agentDir -WindowStyle Hidden
-Write-Host "Agent registered and started."
+Write-Host "Creating scheduled task to run agent as SYSTEM..."
+$existingTask = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
+if ($existingTask) {
+    Unregister-ScheduledTask -TaskName $taskName -Confirm:$false
+}
+
+$action = New-ScheduledTaskAction -Execute "$agentDir\run.cmd" -WorkingDirectory $agentDir
+$trigger = New-ScheduledTaskTrigger -AtStartup
+$principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount -RunLevel Highest
+$settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit ([TimeSpan]::Zero)
+
+Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Principal $principal -Settings $settings | Out-Null
+Start-ScheduledTask -TaskName $taskName
+
+Write-Host "Agent registered and started via scheduled task."
