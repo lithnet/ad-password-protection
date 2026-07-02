@@ -57,12 +57,13 @@ jobs:
 
         echo "Registering ADO agent on $VM_NAME..."
 
-        az vm run-command invoke \
+        OUTPUT=$(az vm run-command invoke \
           --resource-group "$RG" \
           --name "$VM_NAME" \
           --command-id RunPowerShellScript \
           --scripts \
             'param($pat, $org, $project, $env, $agentVersion, $vmName)' \
+            '$ErrorActionPreference = "Stop"' \
             '$agentDir = "C:\azagent\A1"' \
             'if (Test-Path "$agentDir\.agent") {' \
             '    Write-Host "Removing existing agent registration..."' \
@@ -73,7 +74,7 @@ jobs:
             '    New-Item -ItemType Directory -Force -Path $agentDir | Out-Null' \
             '    $zip = "$env:TEMP\agent.zip"' \
             '    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12' \
-            '    (New-Object Net.WebClient).DownloadFile("https://vstsagentpackage.azureedge.net/agent/$agentVersion/vsts-agent-win-x64-$agentVersion.zip", $zip)' \
+            '    (New-Object Net.WebClient).DownloadFile("https://download.agent.dev.azure.com/agent/$agentVersion/vsts-agent-win-x64-$agentVersion.zip", $zip)' \
             '    Add-Type -AssemblyName System.IO.Compression.FileSystem' \
             '    [IO.Compression.ZipFile]::ExtractToDirectory($zip, $agentDir)' \
             '    Remove-Item $zip' \
@@ -88,9 +89,19 @@ jobs:
             "project=$ADO_PROJECT" \
             "env=$ADO_ENV" \
             "agentVersion=$AGENT_VERSION" \
-            "vmName=$VM_NAME"
+            "vmName=$VM_NAME" \
+          -o json)
 
-        echo "Agent registration pushed successfully."
+        echo "$OUTPUT" | jq -r '.value[] | select(.code | contains("StdOut")) | .message' || true
+        STDERR=$(echo "$OUTPUT" | jq -r '.value[] | select(.code | contains("StdErr")) | .message' 2>/dev/null)
+
+        if [ -n "$STDERR" ]; then
+          echo "##[error]Agent registration failed on the VM:"
+          echo "$STDERR"
+          exit 1
+        fi
+
+        echo "Agent registration completed."
 
   - template: templates/wait-for-agents-online.yaml@release_tools
     parameters:
