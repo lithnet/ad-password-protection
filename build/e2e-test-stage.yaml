@@ -29,6 +29,9 @@ parameters:
 - name: agentTimeoutSeconds
   type: number
   default: 600
+- name: devMode
+  type: boolean
+  default: false
 
 stages:
 - stage: e2e_test_stage
@@ -59,9 +62,9 @@ stages:
       dependsOn: RestoreTestDc
       timeoutSeconds: ${{ parameters.agentTimeoutSeconds }}
 
-  # 3. Install the MSI and configure the password filter policy
+  # 3. Install the MSI, configure filter policy, and import test data
   - deployment: InstallFilter
-    displayName: Install LPP and configure filter policy
+    displayName: Install LPP and configure filter
     dependsOn: RegisterAgent
     environment:
       name: ${{ parameters.adoEnvironment }}
@@ -70,9 +73,18 @@ stages:
       runOnce:
         deploy:
           steps:
+          - checkout: self
+
           - download: current
             artifact: service-win-x64
             displayName: Download MSI artifact
+
+          - task: PowerShell@2
+            displayName: Create AD objects, store, and test data
+            inputs:
+              targetType: filePath
+              filePath: $(Build.SourcesDirectory)\src\PasswordProtectionPS\Tests\Initialize-TestEnvironment.ps1
+              arguments: -StorePath 'C:\Password-Protection\store'
 
           - task: PowerShell@2
             displayName: Install LPP MSI
@@ -80,24 +92,16 @@ stages:
               targetType: inline
               script: |
                 $msi = Get-ChildItem "$(Pipeline.Workspace)\service-win-x64" -Filter "*.exe" -Recurse | Select-Object -First 1
-                if (-not $msi) {
-                    throw "No installer found in artifact"
-                }
+                if (-not $msi) { throw "No installer found in artifact" }
 
                 Write-Host "Installing $($msi.FullName)..."
                 $process = Start-Process $msi.FullName -ArgumentList '/exenoui /quiet /qn /norestart' -Wait -PassThru
-                if ($process.ExitCode -ne 0) {
-                    throw "Installer failed with exit code $($process.ExitCode)"
-                }
+                if ($process.ExitCode -ne 0) { throw "Installer failed with exit code $($process.ExitCode)" }
 
-                $installed = Get-ItemProperty 'HKLM:\Software\Lithnet\Password Protection for Active Directory' -ErrorAction SilentlyContinue
-                if ($installed) {
-                    Write-Host "Installed version: $($installed.DisplayVersion)"
-                } else {
-                    Write-Host "Checking uninstall registry..."
-                    $uninstall = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*' |
-                        Where-Object { $_.DisplayName -like '*Lithnet*Password*' }
-                    Write-Host "Installed: $($uninstall.DisplayName) v$($uninstall.DisplayVersion)"
+                $store = (Get-ItemProperty 'HKLM:\Software\Lithnet\PasswordFilter' -ErrorAction Stop).Store
+                Write-Host "Store path after install: $store"
+                if ($store -ne 'C:\Password-Protection\store') {
+                    throw "Installer overwrote store path. Expected 'C:\Password-Protection\store', got '$store'"
                 }
               failOnStderr: false
 
@@ -118,28 +122,45 @@ stages:
 
                 foreach ($file in $requiredFiles) {
                     $path = Join-Path $modulePath $file
-                    if (-not (Test-Path $path)) {
-                        throw "Required file missing: $file"
-                    }
+                    if (-not (Test-Path $path)) { throw "Required file missing: $file" }
                 }
-
                 Write-Host "All required files present."
+
+          - task: PowerShell@2
+            displayName: Import test data into store
+            inputs:
+              targetType: filePath
+              filePath: $(Build.SourcesDirectory)\src\PasswordProtectionPS\Tests\Import-TestData.ps1
+              arguments: -StorePath 'C:\Password-Protection\store'
 
           - task: PowerShell@2
             displayName: Configure password filter group policy
             inputs:
               targetType: inline
               script: |
-                $policyPath = 'HKLM:\Software\Policies\Lithnet\PasswordFilter\Default'
+                $policyPath = 'HKLM:\Software\Policies\Lithnet\PasswordFilter\default'
                 New-Item -Path $policyPath -Force | Out-Null
 
-                Set-ItemProperty -Path $policyPath -Name 'Enabled' -Value 1 -Type DWord
-                Set-ItemProperty -Path $policyPath -Name 'CheckCompromisedPasswords' -Value 1 -Type DWord
-                Set-ItemProperty -Path $policyPath -Name 'CheckBannedWords' -Value 1 -Type DWord
-                Set-ItemProperty -Path $policyPath -Name 'CheckComplexity' -Value 1 -Type DWord
+                Set-ItemProperty -Path $policyPath -Name 'Disabled' -Value 0 -Type DWord
+                Set-ItemProperty -Path $policyPath -Name 'CheckPasswordNotInBannedPasswordStoreOnSet' -Value 1 -Type DWord
+                Set-ItemProperty -Path $policyPath -Name 'CheckPasswordNotInBannedPasswordStoreOnChange' -Value 1 -Type DWord
+                Set-ItemProperty -Path $policyPath -Name 'CheckNormalizedPasswordNotInBannedPasswordStoreOnSet' -Value 1 -Type DWord
+                Set-ItemProperty -Path $policyPath -Name 'CheckNormalizedPasswordNotInBannedPasswordStoreOnChange' -Value 1 -Type DWord
+                Set-ItemProperty -Path $policyPath -Name 'CheckNormalizedPasswordNotInBannedWordStoreOnSet' -Value 1 -Type DWord
+                Set-ItemProperty -Path $policyPath -Name 'CheckNormalizedPasswordNotInBannedWordStoreOnChange' -Value 1 -Type DWord
 
-                Write-Host "Password filter policy configured."
+                Write-Host "Policy configured at $policyPath"
                 Get-ItemProperty -Path $policyPath | Format-List
+
+          - task: PowerShell@2
+            displayName: Configure LSASS PPL mode
+            inputs:
+              targetType: inline
+              script: |
+                $pplValue = if ('${{ parameters.devMode }}' -eq 'true') { 0 } else { 1 }
+                Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa' -Name 'RunAsPPL' -Value $pplValue -Type DWord
+                $mode = if ($pplValue -eq 1) { 'ENABLED (production)' } else { 'DISABLED (devMode)' }
+                Write-Host "LSASS PPL: $mode"
 
   # 4. Reboot the DC so the filter loads into LSASS
   - template: templates/azure-vm-restart.yaml@release_tools
@@ -187,6 +208,18 @@ stages:
               targetType: inline
               script: |
                 Install-Module Pester -Force -SkipPublisherCheck -MinimumVersion 5.0.0
+
+          - ${{ if ne(parameters.devMode, true) }}:
+            - task: PowerShell@2
+              displayName: Verify PPL is enabled
+              inputs:
+                targetType: inline
+                script: |
+                  $runAsPPL = (Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa' -ErrorAction Stop).RunAsPPL
+                  if ($runAsPPL -ne 1) {
+                      throw "PPL is not enabled (RunAsPPL=$runAsPPL). Production builds require LSASS PPL mode."
+                  }
+                  Write-Host "PPL is enabled (RunAsPPL=$runAsPPL)."
 
           - task: PowerShell@2
             displayName: Run Pester tests

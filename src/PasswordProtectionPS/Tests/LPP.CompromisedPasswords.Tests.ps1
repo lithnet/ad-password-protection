@@ -37,16 +37,15 @@ Describe 'Compromised password operations' {
 
     Context 'normalize flag' {
         BeforeAll {
-            $normalizePassword = 'NormalizeTest!55'
-            Add-CompromisedPassword -Value $normalizePassword -ErrorAction Stop
+            Add-CompromisedPassword -Value 'normalizetest' -ErrorAction Stop
         }
 
         AfterAll {
-            Remove-CompromisedPassword -Value $normalizePassword -ErrorAction SilentlyContinue
+            Remove-CompromisedPassword -Value 'normalizetest' -ErrorAction SilentlyContinue
         }
 
-        It 'returns true when testing with -Normalize' {
-            Test-IsCompromisedPassword -Value $normalizePassword -Normalize -ErrorAction Stop | Should -BeTrue
+        It 'returns true when a variation matches the normalized base' {
+            Test-IsCompromisedPassword -Value 'NormalizeTest!55' -Normalize -ErrorAction Stop | Should -BeTrue
         }
     }
 }

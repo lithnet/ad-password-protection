@@ -16,9 +16,9 @@ Describe 'Open-Store' {
             $result.StorePath | Should -Not -BeNullOrEmpty
         }
 
-        It 'returns the expected default store path' {
+        It 'returns a valid store path' {
             $result = Open-Store -ErrorAction Stop
-            $result.StorePath | Should -Be 'C:\Password-Protection\store'
+            Test-Path $result.StorePath | Should -BeTrue
         }
     }
 }

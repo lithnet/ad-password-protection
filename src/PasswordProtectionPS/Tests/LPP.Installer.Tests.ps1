@@ -1,5 +1,7 @@
 Describe 'LPP installation' {
-    $modulePath = 'C:\Program Files\WindowsPowerShell\Modules\LithnetPasswordProtection'
+    BeforeAll {
+        $script:modulePath = 'C:\Program Files\WindowsPowerShell\Modules\LithnetPasswordProtection'
+    }
 
     Context 'module directory' {
         It 'exists on disk' {
@@ -121,9 +123,9 @@ Describe 'LPP installation' {
                 return
             }
 
-            $registryPath = 'HKLM:\Software\Lithnet\PasswordFilter'
-            $installedVersion = (Get-ItemProperty -Path $registryPath -ErrorAction Stop).Version
-            $installedVersion | Should -Be $env:LPP_EXPECTED_VERSION
+            $mod = Get-Module LithnetPasswordProtection -ListAvailable | Select-Object -First 1
+            $mod | Should -Not -BeNull
+            $mod.Version.ToString() | Should -Be $env:LPP_EXPECTED_VERSION
         }
     }
 }

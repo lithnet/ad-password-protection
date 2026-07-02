@@ -440,6 +440,8 @@ stages:
 
 # ── E2E tests on DC ────────────────────────────────────────────────────
 - template: e2e-test-stage.yaml
+  parameters:
+    devMode: ${{ parameters.devMode }}
 
 # ── Generate release-line files (once, after all builds) ────────────────
 - stage: generate_release_data
