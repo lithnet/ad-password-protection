@@ -22,7 +22,7 @@ parameters:
   default: 'TestEnv3'
 - name: adoProject
   type: string
-  default: 'password-protection'
+  default: 'ad-password-protection'
 - name: initialWaitSeconds
   type: number
   default: 60
