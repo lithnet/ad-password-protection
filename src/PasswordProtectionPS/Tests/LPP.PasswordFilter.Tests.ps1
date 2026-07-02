@@ -8,15 +8,7 @@ BeforeAll {
     $script:testUser1 = 'TestUser1'
     $script:domainDns = (Get-ADDomain).DNSRoot
     $script:bootTime = (Get-CimInstance Win32_OperatingSystem).LastBootUpTime
-
-    $script:filterLoadedInLsass = $false
-    try {
-        $modules = (Get-Process lsass -ErrorAction Stop).Modules | ForEach-Object { $_.ModuleName }
-        $script:filterLoadedInLsass = $modules -contains 'lithnetpwdf.dll'
-    }
-    catch {
-        $script:filterLoadedInLsass = $false
-    }
+    $script:isDevMode = $env:LPP_DEVMODE -eq 'true'
 }
 
 Describe 'LSASS password filter' {
@@ -37,9 +29,14 @@ Describe 'LSASS password filter' {
             $dllPath = Join-Path $env:SystemRoot 'System32\lithnetpwdf.dll'
             Test-Path $dllPath | Should -BeTrue
         }
+
+        It 'has lithnetpwdf.dll loaded in the lsass process' -Skip:$script:isDevMode {
+            $lsassModules = (Get-Process lsass -ErrorAction Stop).Modules | ForEach-Object { $_.ModuleName }
+            $lsassModules | Should -Contain 'lithnetpwdf.dll'
+        }
     }
 
-    Context 'password change enforcement' -Skip:(-not $script:filterLoadedInLsass) {
+    Context 'password change enforcement' -Skip:$script:isDevMode {
         It 'rejects a compromised password' {
             $cleanPassword = ConvertTo-SecureString 'Tmp$etup!Pwd4Test' -AsPlainText -Force
             Set-ADAccountPassword -Identity $script:testUser1 -Reset -NewPassword $cleanPassword -Server $script:domainDns -ErrorAction Stop
