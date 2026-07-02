@@ -35,8 +35,6 @@ jobs:
   timeoutInMinutes: 15
   steps:
   - template: templates/checkout.yaml@release_tools
-    parameters:
-      checkoutSelf: false
 
   - task: AzureCLI@2
     displayName: 'Push ADO agent registration via Run Command'
@@ -53,45 +51,17 @@ jobs:
 
         echo "Registering ADO agent on $VM_NAME..."
 
-        SCRIPT=$(cat <<'PWSH'
-        $ErrorActionPreference = "Stop"
-        $agentDir = "C:\azagent\A1"
-        $agentVersion = "__AGENT_VERSION__"
-        $vmName = "__VM_NAME__"
-
-        if (Test-Path "$agentDir\.agent") {
-            Write-Host "Removing existing agent registration..."
-            & "$agentDir\config.cmd" remove --unattended --auth pat --token $args[0] 2>&1 | Write-Host
-        }
-        if (-not (Test-Path "$agentDir\config.cmd")) {
-            Write-Host "Downloading agent v$agentVersion..."
-            New-Item -ItemType Directory -Force -Path $agentDir | Out-Null
-            $zip = "$env:TEMP\agent.zip"
-            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-            (New-Object Net.WebClient).DownloadFile("https://download.agent.dev.azure.com/agent/$agentVersion/vsts-agent-win-x64-$agentVersion.zip", $zip)
-            Add-Type -AssemblyName System.IO.Compression.FileSystem
-            [IO.Compression.ZipFile]::ExtractToDirectory($zip, $agentDir)
-            Remove-Item $zip
-        }
-        Write-Host "Configuring agent..."
-        & "$agentDir\config.cmd" --unattended --replace --agent $vmName --url "__ADO_ORG__" --auth pat --token $args[0] --environment "__ADO_ENV__" --projectname "__ADO_PROJECT__" --addvirtualmachineresourcetags --virtualmachineresourcetags "role:dc,product:lpp" --runAsService --windowsLogonAccount "NT AUTHORITY\SYSTEM" 2>&1 | Write-Host
-        if ($LASTEXITCODE -ne 0) { throw "Agent configuration failed with exit code $LASTEXITCODE" }
-        Write-Host "Agent registered and service started."
-        PWSH
-        )
-
-        SCRIPT="${SCRIPT//__AGENT_VERSION__/${{ parameters.agentVersion }}}"
-        SCRIPT="${SCRIPT//__VM_NAME__/$VM_NAME}"
-        SCRIPT="${SCRIPT//__ADO_ORG__/${{ parameters.adoOrganization }}}"
-        SCRIPT="${SCRIPT//__ADO_ENV__/${{ parameters.adoEnvironment }}}"
-        SCRIPT="${SCRIPT//__ADO_PROJECT__/${{ parameters.adoProject }}}"
-
         OUTPUT=$(az vm run-command invoke \
           --resource-group "$RG" \
           --name "$VM_NAME" \
           --command-id RunPowerShellScript \
-          --scripts "$SCRIPT" \
-          --parameters "pat=$PAT" \
+          --scripts @"$(Build.SourcesDirectory)/build/scripts/Install-AdoAgent.ps1" \
+          --parameters \
+            "pat=$PAT" \
+            "environmentName=${{ parameters.adoEnvironment }}" \
+            "projectName=${{ parameters.adoProject }}" \
+            "organizationUrl=${{ parameters.adoOrganization }}" \
+            "agentVersion=${{ parameters.agentVersion }}" \
           -o json)
 
         echo "$OUTPUT" | jq -r '.value[] | select(.code | contains("StdOut")) | .message' || true
