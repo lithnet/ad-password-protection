@@ -2,12 +2,11 @@ BeforeAll {
     Import-Module LithnetPasswordProtection -ErrorAction Stop
     Import-Module ActiveDirectory -ErrorAction Stop
     Open-Store -Path 'C:\Password-Protection\store' -ErrorAction Stop
-    Import-CompromisedPasswords -Filename 'C:\LPP-TestData\test-passwords.txt' -ErrorAction Stop
-    Import-BannedWords -Filename 'C:\LPP-TestData\test-banned-words.txt' -ErrorAction Stop
+    Import-CompromisedPasswords -Filename (Join-Path $PSScriptRoot 'TestData\test-passwords.txt') -ErrorAction Stop
+    Import-BannedWords -Filename (Join-Path $PSScriptRoot 'TestData\test-banned-words.txt') -ErrorAction Stop
 
-    $script:testOU = 'OU=LPP Testing,DC=lpptest,DC=local'
     $script:testUser1 = 'TestUser1'
-    $script:originalPassword = ConvertTo-SecureString 'KnownPassword123!' -AsPlainText -Force
+    $script:domainDns = (Get-ADDomain).DNSRoot
     $script:bootTime = (Get-CimInstance Win32_OperatingSystem).LastBootUpTime
 }
 
@@ -45,29 +44,26 @@ Describe 'LSASS password filter' {
 
     Context 'password change enforcement' {
         It 'rejects a compromised password' {
+            $cleanPassword = ConvertTo-SecureString 'Tmp$etup!Pwd4Test' -AsPlainText -Force
+            Set-ADAccountPassword -Identity $script:testUser1 -Reset -NewPassword $cleanPassword -Server $script:domainDns -ErrorAction Stop
+
             $compromisedPassword = ConvertTo-SecureString 'KnownPassword123!' -AsPlainText -Force
-            $cleanPassword = ConvertTo-SecureString 'N3w$ecureP@ss!2026' -AsPlainText -Force
-
-            Set-ADAccountPassword -Identity $script:testUser1 -Reset -NewPassword $cleanPassword -Server 'lpptest.local' -ErrorAction Stop
-
             {
-                Set-ADAccountPassword -Identity $script:testUser1 -Reset -NewPassword $compromisedPassword -Server 'lpptest.local' -ErrorAction Stop
+                Set-ADAccountPassword -Identity $script:testUser1 -Reset -NewPassword $compromisedPassword -Server $script:domainDns -ErrorAction Stop
             } | Should -Throw
         }
 
         It 'rejects a banned-word-based password' {
             $bannedPassword = ConvertTo-SecureString 'lithnet123!' -AsPlainText -Force
-
             {
-                Set-ADAccountPassword -Identity $script:testUser1 -Reset -NewPassword $bannedPassword -Server 'lpptest.local' -ErrorAction Stop
+                Set-ADAccountPassword -Identity $script:testUser1 -Reset -NewPassword $bannedPassword -Server $script:domainDns -ErrorAction Stop
             } | Should -Throw
         }
 
         It 'accepts a clean complex password' {
-            $cleanPassword = ConvertTo-SecureString 'N3w$ecureP@ss!2026' -AsPlainText -Force
-
+            $cleanPassword = ConvertTo-SecureString 'V@lid8edCle@nPwd!2026' -AsPlainText -Force
             {
-                Set-ADAccountPassword -Identity $script:testUser1 -Reset -NewPassword $cleanPassword -Server 'lpptest.local' -ErrorAction Stop
+                Set-ADAccountPassword -Identity $script:testUser1 -Reset -NewPassword $cleanPassword -Server $script:domainDns -ErrorAction Stop
             } | Should -Not -Throw
         }
     }
@@ -94,7 +90,4 @@ Describe 'LSASS password filter' {
         }
     }
 
-    AfterAll {
-        Set-ADAccountPassword -Identity $script:testUser1 -Reset -NewPassword $script:originalPassword -Server 'lpptest.local' -ErrorAction SilentlyContinue
-    }
 }

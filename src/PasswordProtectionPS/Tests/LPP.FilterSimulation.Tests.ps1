@@ -1,8 +1,8 @@
 BeforeAll {
     Import-Module LithnetPasswordProtection -ErrorAction Stop
     Open-Store -Path 'C:\Password-Protection\store' -ErrorAction Stop
-    Import-CompromisedPasswords -Filename 'C:\LPP-TestData\test-passwords.txt' -ErrorAction Stop
-    Import-BannedWords -Filename 'C:\LPP-TestData\test-banned-words.txt' -ErrorAction Stop
+    Import-CompromisedPasswords -Filename (Join-Path $PSScriptRoot 'TestData\test-passwords.txt') -ErrorAction Stop
+    Import-BannedWords -Filename (Join-Path $PSScriptRoot 'TestData\test-banned-words.txt') -ErrorAction Stop
 }
 
 Describe 'Get-PasswordFilterResult' {

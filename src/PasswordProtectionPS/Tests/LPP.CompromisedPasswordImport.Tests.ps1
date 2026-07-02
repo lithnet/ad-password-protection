@@ -6,7 +6,7 @@ BeforeAll {
 Describe 'Import compromised passwords' {
     Context 'from plaintext file' {
         BeforeAll {
-            Import-CompromisedPasswords -Filename 'C:\LPP-TestData\test-passwords.txt' -ErrorAction Stop
+            Import-CompromisedPasswords -Filename (Join-Path $PSScriptRoot 'TestData\test-passwords.txt') -ErrorAction Stop
         }
 
         It 'detects KnownPassword123! as compromised' {
@@ -24,7 +24,7 @@ Describe 'Import compromised passwords' {
 
     Context 'from NTLM hash file' {
         BeforeAll {
-            Import-CompromisedPasswordHashes -Filename 'C:\LPP-TestData\test-hashes.txt' -ErrorAction Stop
+            Import-CompromisedPasswordHashes -Filename (Join-Path $PSScriptRoot 'TestData\test-hashes.txt') -ErrorAction Stop
         }
 
         It 'detects the hash for KnownPassword123! as compromised' {

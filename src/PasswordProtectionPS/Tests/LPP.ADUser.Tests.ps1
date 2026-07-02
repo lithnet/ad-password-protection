@@ -1,7 +1,7 @@
 BeforeAll {
     Import-Module LithnetPasswordProtection -ErrorAction Stop
     Open-Store -Path 'C:\Password-Protection\store' -ErrorAction Stop
-    Import-CompromisedPasswordHashes -Filename 'C:\LPP-TestData\test-hashes.txt' -ErrorAction Stop
+    Import-CompromisedPasswordHashes -Filename (Join-Path $PSScriptRoot 'TestData\test-hashes.txt') -ErrorAction Stop
 }
 
 Describe 'Test-IsADUserPasswordCompromised' {

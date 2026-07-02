@@ -59,21 +59,3 @@ $regPath = 'HKLM:\Software\Lithnet\PasswordFilter'
 New-Item -Path $regPath -Force | Out-Null
 Set-ItemProperty -Path $regPath -Name 'Store' -Value $StorePath -Type String
 Write-Host "Registry Store = $((Get-ItemProperty $regPath).Store)"
-
-# Stage test data files
-$testDataPath = 'C:\LPP-TestData'
-New-Item -ItemType Directory -Path $testDataPath -Force | Out-Null
-
-'KnownPassword123!', 'Password1!', 'Summer2024!' |
-    Set-Content "$testDataPath\test-passwords.txt" -Encoding UTF8
-
-'b334aa6dd26d7f2969d1dcf507759bac', '7facdc498ed1680c4fd1448319a8c04f', '72f0eefcc213ea8f350773b831cf2c9c' |
-    Set-Content "$testDataPath\test-hashes.txt" -Encoding UTF8
-
-'password', 'lithnet', 'company' |
-    Set-Content "$testDataPath\test-banned-words.txt" -Encoding UTF8
-
-Write-Host "Test data files created in $testDataPath"
-Get-ChildItem $testDataPath | ForEach-Object {
-    Write-Host "  $($_.Name): $(Get-Content $_.FullName | Measure-Object -Line | Select-Object -ExpandProperty Lines) lines"
-}

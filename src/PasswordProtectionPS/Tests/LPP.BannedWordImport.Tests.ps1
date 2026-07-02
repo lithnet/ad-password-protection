@@ -6,7 +6,7 @@ BeforeAll {
 Describe 'Import banned words' {
     Context 'from text file' {
         BeforeAll {
-            Import-BannedWords -Filename 'C:\LPP-TestData\test-banned-words.txt' -ErrorAction Stop
+            Import-BannedWords -Filename (Join-Path $PSScriptRoot 'TestData\test-banned-words.txt') -ErrorAction Stop
         }
 
         It 'detects password as a banned word' {
