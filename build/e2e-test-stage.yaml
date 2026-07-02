@@ -16,7 +16,7 @@ parameters:
   default: 'StandardSSD_LRS'
 - name: azureSubscription
   type: string
-  default: 'ProductionServicesSubscription'
+  default: 'DevEnvironment'
 - name: adoEnvironment
   type: string
   default: 'TestEnv3'
