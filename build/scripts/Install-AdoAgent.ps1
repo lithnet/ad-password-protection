@@ -41,10 +41,8 @@ Write-Host "Configuring agent for environment '$environmentName' in project '$pr
     --environment `
     --environmentname $environmentName `
     --agent $computerName `
-    --runasservice `
     --replace `
     --unattended `
-    --windowsLogonAccount "NT AUTHORITY\SYSTEM" `
     --work '_work' `
     --url $organizationUrl `
     --projectname $projectName `
@@ -57,4 +55,6 @@ if ($LASTEXITCODE -ne 0) {
     throw "config.cmd failed with exit code $LASTEXITCODE"
 }
 
-Write-Host "Agent registered and service started."
+Write-Host "Starting agent interactively..."
+Start-Process -FilePath "$agentDir\run.cmd" -WorkingDirectory $agentDir -WindowStyle Hidden
+Write-Host "Agent registered and started."
