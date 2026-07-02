@@ -8,7 +8,6 @@ BeforeAll {
     $script:testUser1 = 'TestUser1'
     $script:domainDns = (Get-ADDomain).DNSRoot
     $script:bootTime = (Get-CimInstance Win32_OperatingSystem).LastBootUpTime
-    $script:isDevMode = $env:LPP_DEVMODE -eq 'true'
 }
 
 Describe 'LSASS password filter' {
@@ -30,7 +29,7 @@ Describe 'LSASS password filter' {
             Test-Path $dllPath | Should -BeTrue
         }
 
-        It 'logged initialization event since boot' -Skip:$script:isDevMode {
+        It 'logged initialization event since boot' -Skip:($env:LPP_DEVMODE -eq 'true') {
             $initEvent = Get-WinEvent -FilterHashtable @{
                 ProviderName = 'LithnetPasswordProtection'
                 Id           = 3
@@ -41,7 +40,7 @@ Describe 'LSASS password filter' {
         }
     }
 
-    Context 'password change enforcement' -Skip:$script:isDevMode {
+    Context 'password change enforcement' -Skip:($env:LPP_DEVMODE -eq 'true') {
         It 'rejects a compromised password' {
             $cleanPassword = ConvertTo-SecureString 'Tmp$etup!Pwd4Test' -AsPlainText -Force
             Set-ADAccountPassword -Identity $script:testUser1 -Reset -NewPassword $cleanPassword -Server $script:domainDns -ErrorAction Stop
