@@ -21,7 +21,7 @@ namespace NativeUnitTests
 
 			size_t  len = wcslen(pwd);
 			wchar_t * p = (wchar_t*)malloc((len + 1) * sizeof(wchar_t));
-			wcscpy(p, pwd);
+			wcscpy_s(p, len + 1, pwd);
 
 			PUNICODE_STRING password = new UNICODE_STRING();
 			RtlInitUnicodeString(password, p);
@@ -47,7 +47,7 @@ namespace NativeUnitTests
 
 			size_t  len = wcslen(pwd);
 			wchar_t * p = (wchar_t*)malloc((len + 1) * sizeof(wchar_t));
-			wcscpy(p, pwd);
+			wcscpy_s(p, len + 1, pwd);
 
 			PUNICODE_STRING password = new UNICODE_STRING();
 			RtlInitUnicodeString(password, p);

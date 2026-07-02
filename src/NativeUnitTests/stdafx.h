@@ -23,7 +23,7 @@ class TestString : public SecureArrayT<WCHAR>
 public:
 
 	TestString(std::wstring str)
-		: SecureArrayT<WCHAR>((wcslen(str.c_str()) + 1) * sizeof(wchar_t))
+		: SecureArrayT<WCHAR>(static_cast<int>((wcslen(str.c_str()) + 1) * sizeof(wchar_t)))
 	{
 		size_t i;
 		WCHAR* p = get();
@@ -37,7 +37,7 @@ public:
 	}
 
 	TestString(LPWSTR str)
-		: SecureArrayT<WCHAR>((wcslen(str) + 1) * sizeof(wchar_t))
+		: SecureArrayT<WCHAR>(static_cast<int>((wcslen(str) + 1) * sizeof(wchar_t)))
 	{
 		size_t i;
 		WCHAR* p = get();

@@ -44,7 +44,7 @@ void SetValue(std::wstring key, std::wstring value)
 {
 	HKEY hkey = OpenSettingsKeyWritable();
 
-	LSTATUS result = RegSetValueEx(hkey, key.c_str(), 0, REG_SZ, (LPBYTE)value.c_str(), (value.size() + 1) * sizeof(wchar_t));
+	LSTATUS result = RegSetValueEx(hkey, key.c_str(), 0, REG_SZ, (LPBYTE)value.c_str(), static_cast<DWORD>((value.size() + 1) * sizeof(wchar_t)));
 
 	if (result != ERROR_SUCCESS)
 	{
