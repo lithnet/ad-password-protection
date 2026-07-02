@@ -63,7 +63,9 @@ stages:
   - deployment: InstallFilter
     displayName: Install LPP and configure filter policy
     dependsOn: RegisterAgent
-    environment: ${{ parameters.adoEnvironment }}
+    environment:
+      name: ${{ parameters.adoEnvironment }}
+      resourceType: VirtualMachine
     strategy:
       runOnce:
         deploy:
@@ -170,7 +172,9 @@ stages:
   - deployment: E2ETests
     displayName: Run E2E Pester tests
     dependsOn: WaitForAgent
-    environment: ${{ parameters.adoEnvironment }}
+    environment:
+      name: ${{ parameters.adoEnvironment }}
+      resourceType: VirtualMachine
     strategy:
       runOnce:
         deploy:
