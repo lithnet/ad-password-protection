@@ -348,6 +348,7 @@ stages:
     - job: get_lpp_signed_by_ms
       displayName: Pause for LPP DLL signing by Microsoft
       pool: server
+      timeoutInMinutes: 1440 
       steps:
       - task: ManualValidation@0
         timeoutInMinutes: 1440
