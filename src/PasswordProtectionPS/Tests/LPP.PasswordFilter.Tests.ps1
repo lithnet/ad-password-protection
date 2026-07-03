@@ -8,7 +8,6 @@ BeforeAll {
     $script:testUser1 = 'TestUser1'
     $script:domainDns = (Get-ADDomain).DNSRoot
     $script:bootTime = (Get-CimInstance Win32_OperatingSystem).LastBootUpTime
-    $script:isDevMode = $env:LPP_DEVMODE -eq 'true'
 }
 
 Describe 'LSASS password filter' {
@@ -24,19 +23,24 @@ Describe 'LSASS password filter' {
         }
     }
 
-    Context 'filter DLL loaded by LSASS' {
+    Context 'filter DLL' {
         It 'has lithnetpwdf.dll in System32' {
             $dllPath = Join-Path $env:SystemRoot 'System32\lithnetpwdf.dll'
             Test-Path $dllPath | Should -BeTrue
         }
 
-        It 'has lithnetpwdf.dll loaded in the lsass process' -Skip:$script:isDevMode {
-            $lsassModules = (Get-Process lsass -ErrorAction Stop).Modules | ForEach-Object { $_.ModuleName }
-            $lsassModules | Should -Contain 'lithnetpwdf.dll'
+        It 'logged initialization event since boot' -Skip:($env:LPP_DEVMODE -eq 'true') {
+            $initEvent = Get-WinEvent -FilterHashtable @{
+                ProviderName = 'LithnetPasswordProtection'
+                Id           = 3
+                StartTime    = $script:bootTime
+            } -MaxEvents 1 -ErrorAction SilentlyContinue
+
+            $initEvent | Should -Not -BeNullOrEmpty -Because 'LSASS should have loaded lithnetpwdf.dll and logged MSG_AGENT_INITIALIZED (event ID 3)'
         }
     }
 
-    Context 'password change enforcement' -Skip:$script:isDevMode {
+    Context 'password change enforcement' -Skip:($env:LPP_DEVMODE -eq 'true') {
         It 'rejects a compromised password' {
             $cleanPassword = ConvertTo-SecureString 'Tmp$etup!Pwd4Test' -AsPlainText -Force
             Set-ADAccountPassword -Identity $script:testUser1 -Reset -NewPassword $cleanPassword -Server $script:domainDns -ErrorAction Stop
