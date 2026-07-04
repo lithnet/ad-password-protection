@@ -154,7 +154,7 @@ stages:
 
             Write-Host "== Token validated - proceeding with analysis =="
 
-            $env:GITHUB_TOKEN = $token
+            $headers = @{ Authorization = "Bearer $token"; Accept = "application/vnd.github+json"; "X-GitHub-Api-Version" = "2022-11-28" }
 
             foreach ($lang in @("csharp", "cpp"))
             {
@@ -163,9 +163,19 @@ stages:
                 Write-Host "Analyzing $lang..."
                 codeql database analyze $dbPath --format=sarif-latest --output=$sarifPath "$lang-security-extended"
                 if ($LASTEXITCODE -ne 0) { throw "CodeQL analysis failed for $lang" }
+
                 Write-Host "Uploading $lang results to GitHub..."
-                codeql github upload-results --sarif=$sarifPath --repository=$repo --ref=$ref --commit=$commit
-                if ($LASTEXITCODE -ne 0) { throw "CodeQL upload failed for $lang" }
+                $sarifContent = Get-Content -Raw $sarifPath
+                $sarifBytes = [System.Text.Encoding]::UTF8.GetBytes($sarifContent)
+                $gzipStream = [System.IO.MemoryStream]::new()
+                $compressor = [System.IO.Compression.GzipStream]::new($gzipStream, [System.IO.Compression.CompressionMode]::Compress)
+                $compressor.Write($sarifBytes, 0, $sarifBytes.Length)
+                $compressor.Close()
+                $encoded = [Convert]::ToBase64String($gzipStream.ToArray())
+
+                $body = @{ commit_sha = $commit; ref = $ref; sarif = $encoded } | ConvertTo-Json
+                $response = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/code-scanning/sarifs" -Headers $headers -Method Post -Body $body -ContentType "application/json"
+                Write-Host "Uploaded $lang SARIF (id: $($response.id))"
             }
             Write-Host "All results uploaded to GitHub Security tab."
 
