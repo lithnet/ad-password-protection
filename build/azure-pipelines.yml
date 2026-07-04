@@ -127,7 +127,8 @@ stages:
           targetType: inline
           script: |
             $cluster = "$(codeqlDbCluster)"
-            $token = "$(GitHubAppToken)"
+            $token = $env:CODEQL_GITHUB_TOKEN
+            if (-not $token) { throw "GitHub App token is empty" }
             $repo = "lithnet/ad-password-protection"
             $ref = "$(Build.SourceBranch)"
             $commit = "$(Build.SourceVersion)"
@@ -144,6 +145,8 @@ stages:
                 if ($LASTEXITCODE -ne 0) { throw "CodeQL upload failed for $lang" }
             }
             Write-Host "All results uploaded to GitHub Security tab."
+        env:
+          CODEQL_GITHUB_TOKEN: $(GitHubAppToken)
 
 # ── Build ──────────────────────────────────────────────────────────────
 - stage: build_stage
