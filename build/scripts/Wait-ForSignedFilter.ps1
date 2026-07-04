@@ -96,24 +96,40 @@ while ($true)
         Write-Host "Signed artifact uploaded. Resuming pipeline..." -ForegroundColor Cyan
 
         $orgUrl = $Organization.TrimEnd('/')
-        $timeline = az rest --method get --url "$orgUrl/$Project/_apis/build/builds/$BuildId/timeline?api-version=7.1" -o json 2>$null | ConvertFrom-Json
+        $adoResource = "499b84ac-1321-427f-aa17-267ca6975798"
+        $token = az account get-access-token --resource $adoResource --query accessToken -o tsv
+        $headers = @{ Authorization = "Bearer $token"; "Content-Type" = "application/json" }
 
-        if ($LASTEXITCODE -ne 0 -or -not $timeline)
+        try
+        {
+            $timeline = Invoke-RestMethod -Uri "$orgUrl/$Project/_apis/build/builds/$BuildId/timeline?api-version=7.1" -Headers $headers
+        }
+        catch
         {
             Write-Host "Could not query build timeline. Please resume the validation manually." -ForegroundColor Yellow
             break
         }
 
-        $checkpointId = $timeline.records | Where-Object { $_.type -eq "Checkpoint.Approval" -and $_.state -eq "inProgress" } | Select-Object -First 1 -ExpandProperty id
+        $approvals = Invoke-RestMethod -Uri "$orgUrl/$Project/_apis/pipelines/approvals?buildIds=$BuildId&api-version=7.1-preview.1" -Headers $headers
+        $pending = $approvals.value | Where-Object { $_.status -eq "pending" } | Select-Object -First 1
 
-        if (-not $checkpointId)
+        if (-not $pending)
         {
             Write-Host "No pending approval found. Please resume the validation manually." -ForegroundColor Yellow
             break
         }
 
-        $body = @{ status = "approved"; comment = "Signed artifact uploaded by Wait-ForSignedFilter.ps1" } | ConvertTo-Json -Compress
-        az rest --method patch --url "$orgUrl/$Project/_apis/pipelines/approvals/$($checkpointId)?api-version=7.1-preview.1" --body $body --headers "Content-Type=application/json" -o none 2>$null
+        $body = ConvertTo-Json @(@{ approvalId = $pending.id; status = "approved"; comment = "Signed artifact uploaded by Wait-ForSignedFilter.ps1" }) -Compress
+        try
+        {
+            Invoke-RestMethod -Uri "$orgUrl/$Project/_apis/pipelines/approvals?api-version=7.1-preview.1" -Headers $headers -Method Patch -Body $body -ContentType "application/json" | Out-Null
+        }
+        catch
+        {
+            Write-Host "Could not auto-resume: $_" -ForegroundColor Yellow
+            Write-Host "Please resume the validation manually." -ForegroundColor Yellow
+            break
+        }
 
         if ($LASTEXITCODE -eq 0)
         {

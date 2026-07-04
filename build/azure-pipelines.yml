@@ -348,6 +348,7 @@ stages:
     - job: get_lpp_signed_by_ms
       displayName: Pause for LPP DLL signing by Microsoft
       pool: server
+      timeoutInMinutes: 1440 
       steps:
       - task: ManualValidation@0
         timeoutInMinutes: 1440
@@ -537,6 +538,36 @@ stages:
       deploymentType: prod
       releaseLine: 'v$(build.version.major).$(build.version.minor)'
       dependsOn: [cdn_purge_prod]
+
+  # ── GitHub release ──────────────────────────────────────────────────
+  - stage: publish_github_release
+    displayName: Publish GitHub pre-release
+    dependsOn: [cdn_purge_preview]
+    jobs:
+    - job: publish
+      displayName: Create GitHub pre-release
+      pool:
+        vmImage: 'ubuntu-22.04'
+      steps:
+      - template: templates/publish-github-release.yaml@release_tools
+        parameters:
+          gitHubConnection: 'github-connection'
+          isPreRelease: true
+          repositoryName: 'lithnet/ad-password-protection'
+
+  - stage: promote_github_release
+    displayName: Promote GitHub release
+    dependsOn: [cdn_purge_prod, publish_github_release]
+    jobs:
+    - job: promote
+      displayName: Promote pre-release to full release
+      pool:
+        vmImage: 'ubuntu-22.04'
+      steps:
+      - template: templates/promote-github-release.yaml@release_tools
+        parameters:
+          gitHubConnection: 'github-connection'
+          repositoryName: 'lithnet/ad-password-protection'
 
   # ── Publish changelog to docs repo ───────────────────────────────────
   - stage: publish_changelog
