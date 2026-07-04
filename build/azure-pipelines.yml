@@ -23,6 +23,7 @@ pool:
   vmImage: 'windows-latest'
 
 variables:
+  - group: github-app-variables
   - name: buildPlatform
     value: 'x64'
   - name: buildConfiguration
@@ -41,10 +42,6 @@ variables:
     value: 'LithnetPasswordProtection-$(build.version).exe'
   - name: build.isRelease
     value: ${{ startsWith(variables['Build.SourceBranch'], 'refs/heads/release/') }}
-  - name: advancedsecurity.codeql.querysuite
-    value: security-extended
-  - name: advancedsecurity.submittoadvancedsecurity
-    value: true
 
 name: $(build.version.major).$(build.version.minor).$(build.version.revision)
 trigger: none
@@ -53,43 +50,134 @@ stages:
 # ── Validate product metadata ───────────────────────────────────────────
 - template: templates/validate-release-metadata-stage.yaml@release_tools
 
-# ── Security scans ─────────────────────────────────────────────────────
-# TODO: ADO Advanced Security (CodeQL) requires an ADO-hosted repo.
-# LPP is on GitHub, so we need an alternative: either MSDO extension,
-# GitHub Actions CodeQL workflow, or another scanner compatible with
-# GitHub repos in ADO pipelines. Uncomment and adapt when resolved.
-#
-# - ${{ if eq(parameters.enableSecurityScans, true) }}:
-#   - stage: security_scans
-#     displayName: Security Scans
-#     dependsOn: []
-#     jobs:
-#     - job: codeql_and_dependency
-#       displayName: CodeQL and dependency scanning
-#       pool:
-#         vmImage: 'windows-latest'
-#       steps:
-#       - checkout: self
-#         fetchDepth: 1
-#       - task: NuGetToolInstaller@1
-#       - task: NuGetCommand@2
-#         displayName: Restore solution
-#         inputs:
-#           restoreSolution: 'src/Lithnet.ActiveDirectory.PasswordProtection.sln'
-#       - task: AdvancedSecurity-Codeql-Init@1
-#         displayName: Initialize CodeQL
-#         inputs:
-#           languages: 'csharp'
-#       - task: VSBuild@1
-#         displayName: Build for CodeQL analysis
-#         inputs:
-#           solution: 'src/Lithnet.ActiveDirectory.PasswordProtection.sln'
-#           platform: '$(buildPlatform)'
-#           configuration: '$(buildConfiguration)'
-#       - task: AdvancedSecurity-Codeql-Analyze@1
-#         displayName: Run CodeQL analysis
-#       - task: AdvancedSecurity-Dependency-Scanning@1
-#         displayName: Scan dependencies
+# ── Security scans (CodeQL → GitHub Security tab) ─────────────────────
+- ${{ if eq(parameters.enableSecurityScans, true) }}:
+  - stage: security_scans
+    displayName: Security Scans
+    dependsOn: []
+    jobs:
+    - job: codeql_scan
+      displayName: CodeQL analysis
+      pool:
+        vmImage: 'windows-latest'
+      steps:
+      - checkout: self
+        fetchDepth: 0
+
+      - task: NuGetToolInstaller@1
+
+      - task: NuGetCommand@2
+        displayName: Restore solution
+        inputs:
+          restoreSolution: 'src/Lithnet.ActiveDirectory.PasswordProtection.sln'
+
+      - task: PowerShell@2
+        displayName: Download CodeQL CLI
+        inputs:
+          targetType: inline
+          script: |
+            $codeqlDir = "$(Agent.ToolsDirectory)\codeql"
+            if (Test-Path "$codeqlDir\codeql.exe")
+            {
+                Write-Host "CodeQL already present at $codeqlDir"
+            }
+            else
+            {
+                $release = Invoke-RestMethod "https://api.github.com/repos/github/codeql-action/releases/latest"
+                $bundle = $release.assets | Where-Object { $_.name -match "codeql-bundle-win64" } | Select-Object -First 1
+                if (-not $bundle)
+                {
+                    throw "Could not find CodeQL bundle asset in latest release"
+                }
+                Write-Host "Downloading $($bundle.name)..."
+                $zipPath = "$(Agent.TempDirectory)\codeql-bundle.tar.gz"
+                Invoke-WebRequest -Uri $bundle.browser_download_url -OutFile $zipPath
+                Write-Host "Extracting..."
+                tar -xzf $zipPath -C "$(Agent.ToolsDirectory)"
+            }
+            Write-Host "##vso[task.prependpath]$codeqlDir"
+
+      - task: PowerShell@2
+        displayName: Create CodeQL databases (C# + C++)
+        inputs:
+          targetType: inline
+          script: |
+            $dbCluster = "$(Agent.TempDirectory)\codeql-dbs"
+            $msbuild = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -requires Microsoft.Component.MSBuild -find "MSBuild\**\Bin\MSBuild.exe" | Select-Object -First 1
+            Write-Host "MSBuild path: $msbuild"
+            $buildScript = Join-Path "$(Agent.TempDirectory)" "codeql-build.cmd"
+            Set-Content -Path $buildScript -Value "`"$msbuild`" src\Lithnet.ActiveDirectory.PasswordProtection.sln /t:rebuild /p:Platform=$(buildPlatform) /p:Configuration=$(buildConfiguration)"
+            Write-Host "Build script contents:"
+            Get-Content $buildScript
+            codeql database create $dbCluster --db-cluster --language=csharp,cpp --command=$buildScript --overwrite
+            if ($LASTEXITCODE -ne 0) { throw "CodeQL database creation failed" }
+            Write-Host "##vso[task.setvariable variable=codeqlDbCluster]$dbCluster"
+
+      - task: PowerShell@2
+        displayName: Acquire GitHub App token
+        inputs:
+          targetType: filePath
+          filePath: '$(Build.SourcesDirectory)/build/scripts/Get-GitHubAppToken.ps1'
+          arguments: -ClientId "$(github.app.client-id)" -PrivateKeyPem "$(github.app.private-key)" -Repository "lithnet/ad-password-protection"
+          pwsh: true
+
+      - task: PowerShell@2
+        displayName: Analyze and upload results
+        inputs:
+          targetType: inline
+          script: |
+            $cluster = "$(codeqlDbCluster)"
+            $token = "$(GitHubAppToken)"
+            $repo = "lithnet/ad-password-protection"
+            $ref = "$(Build.SourceBranch)"
+            $commit = "$(Build.SourceVersion)"
+
+            Write-Host "== Token diagnostics =="
+            Write-Host "Token length: $($token.Length)"
+            Write-Host "Token prefix: $($token.Substring(0, [Math]::Min(4, $token.Length)))..."
+            Write-Host "Ref: $ref"
+            Write-Host "Commit: $commit"
+
+            Write-Host "== Testing token against GitHub API =="
+            try
+            {
+                $headers = @{ Authorization = "Bearer $token"; Accept = "application/vnd.github+json" }
+                $repoInfo = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo" -Headers $headers
+                Write-Host "Token works - repo: $($repoInfo.full_name)"
+            }
+            catch
+            {
+                Write-Host "Token test FAILED: $($_.Exception.Message)"
+                Write-Host "Response: $($_.ErrorDetails.Message)"
+                throw "GitHub token is invalid - cannot proceed with upload"
+            }
+
+            Write-Host "== Token validated - proceeding with analysis =="
+
+            $headers = @{ Authorization = "Bearer $token"; Accept = "application/vnd.github+json"; "X-GitHub-Api-Version" = "2022-11-28" }
+
+            foreach ($lang in @("csharp", "cpp"))
+            {
+                $dbPath = Join-Path $cluster $lang
+                $sarifPath = "$(Agent.TempDirectory)\codeql-results-$lang.sarif"
+                Write-Host "Analyzing $lang..."
+                codeql database analyze $dbPath --format=sarif-latest --output=$sarifPath "$lang-security-extended"
+                if ($LASTEXITCODE -ne 0) { throw "CodeQL analysis failed for $lang" }
+
+                Write-Host "Uploading $lang results to GitHub..."
+                $sarifContent = Get-Content -Raw $sarifPath
+                $sarifBytes = [System.Text.Encoding]::UTF8.GetBytes($sarifContent)
+                $gzipStream = [System.IO.MemoryStream]::new()
+                $compressor = [System.IO.Compression.GzipStream]::new($gzipStream, [System.IO.Compression.CompressionMode]::Compress)
+                $compressor.Write($sarifBytes, 0, $sarifBytes.Length)
+                $compressor.Close()
+                $encoded = [Convert]::ToBase64String($gzipStream.ToArray())
+
+                $body = @{ commit_sha = $commit; ref = $ref; sarif = $encoded } | ConvertTo-Json
+                $response = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/code-scanning/sarifs" -Headers $headers -Method Post -Body $body -ContentType "application/json"
+                Write-Host "Uploaded $lang SARIF (id: $($response.id))"
+            }
+            Write-Host "All results uploaded to GitHub Security tab."
 
 # ── Build ──────────────────────────────────────────────────────────────
 - stage: build_stage
