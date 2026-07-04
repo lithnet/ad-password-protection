@@ -154,6 +154,8 @@ stages:
 
             Write-Host "== Token validated - proceeding with analysis =="
 
+            $env:GITHUB_TOKEN = $token
+
             foreach ($lang in @("csharp", "cpp"))
             {
                 $dbPath = Join-Path $cluster $lang
@@ -162,7 +164,7 @@ stages:
                 codeql database analyze $dbPath --format=sarif-latest --output=$sarifPath "$lang-security-extended"
                 if ($LASTEXITCODE -ne 0) { throw "CodeQL analysis failed for $lang" }
                 Write-Host "Uploading $lang results to GitHub..."
-                $token | codeql github upload-results --sarif=$sarifPath --repository=$repo --ref=$ref --commit=$commit --github-auth-stdin
+                codeql github upload-results --sarif=$sarifPath --repository=$repo --ref=$ref --commit=$commit
                 if ($LASTEXITCODE -ne 0) { throw "CodeQL upload failed for $lang" }
             }
             Write-Host "All results uploaded to GitHub Security tab."
