@@ -5,8 +5,11 @@ param(
     [Parameter(Mandatory)]
     [string]$PrivateKeyPem,
 
-    [Parameter(Mandatory)]
-    [string]$Repository
+    [Parameter(Mandatory, ParameterSetName = 'Repository')]
+    [string]$Repository,
+
+    [Parameter(Mandatory, ParameterSetName = 'Organization')]
+    [string]$Organization
 )
 
 $ErrorActionPreference = 'Stop'
@@ -36,12 +39,20 @@ $sigB64 = & $toBase64Url $sigBytes
 $jwt = "$unsigned.$sigB64"
 
 $headers = @{
-    Authorization    = "Bearer $jwt"
-    Accept           = 'application/vnd.github+json'
+    Authorization          = "Bearer $jwt"
+    Accept                 = 'application/vnd.github+json'
     'X-GitHub-Api-Version' = '2022-11-28'
 }
 
-$installation = Invoke-RestMethod -Uri "https://api.github.com/repos/$Repository/installation" -Headers $headers
+if ($Repository)
+{
+    $installation = Invoke-RestMethod -Uri "https://api.github.com/repos/$Repository/installation" -Headers $headers
+}
+else
+{
+    $installation = Invoke-RestMethod -Uri "https://api.github.com/orgs/$Organization/installation" -Headers $headers
+}
+
 $installationId = $installation.id
 Write-Host "Found installation ID: $installationId"
 
