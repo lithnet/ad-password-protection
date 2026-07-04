@@ -131,29 +131,6 @@ stages:
             $repo = "lithnet/ad-password-protection"
             $ref = "$(Build.SourceBranch)"
             $commit = "$(Build.SourceVersion)"
-
-            Write-Host "== Token diagnostics =="
-            Write-Host "Token length: $($token.Length)"
-            Write-Host "Token prefix: $($token.Substring(0, [Math]::Min(4, $token.Length)))..."
-            Write-Host "Ref: $ref"
-            Write-Host "Commit: $commit"
-
-            Write-Host "== Testing token against GitHub API =="
-            try
-            {
-                $headers = @{ Authorization = "Bearer $token"; Accept = "application/vnd.github+json" }
-                $repoInfo = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo" -Headers $headers
-                Write-Host "Token works - repo: $($repoInfo.full_name)"
-            }
-            catch
-            {
-                Write-Host "Token test FAILED: $($_.Exception.Message)"
-                Write-Host "Response: $($_.ErrorDetails.Message)"
-                throw "GitHub token is invalid - cannot proceed with upload"
-            }
-
-            Write-Host "== Token validated - proceeding with analysis =="
-
             $headers = @{ Authorization = "Bearer $token"; Accept = "application/vnd.github+json"; "X-GitHub-Api-Version" = "2022-11-28" }
 
             foreach ($lang in @("csharp", "cpp"))
