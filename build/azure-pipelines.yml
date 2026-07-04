@@ -152,19 +152,7 @@ stages:
                 throw "GitHub token is invalid - cannot proceed with upload"
             }
 
-            Write-Host "== Testing code-scanning permission =="
-            try
-            {
-                $alerts = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/code-scanning/alerts?per_page=1" -Headers $headers
-                Write-Host "Code scanning access confirmed"
-            }
-            catch
-            {
-                Write-Host "Code scanning access FAILED: $($_.Exception.Message)"
-                Write-Host "Response: $($_.ErrorDetails.Message)"
-                Write-Host "The GitHub App may be missing 'Code scanning alerts: Write' permission"
-                throw "Token lacks code-scanning permission"
-            }
+            Write-Host "== Token validated - proceeding with analysis =="
 
             foreach ($lang in @("csharp", "cpp"))
             {
