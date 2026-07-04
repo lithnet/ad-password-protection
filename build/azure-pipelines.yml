@@ -127,11 +127,44 @@ stages:
           targetType: inline
           script: |
             $cluster = "$(codeqlDbCluster)"
-            $token = $env:CODEQL_GITHUB_TOKEN
-            if (-not $token) { throw "GitHub App token is empty" }
+            $token = "$(GitHubAppToken)"
             $repo = "lithnet/ad-password-protection"
             $ref = "$(Build.SourceBranch)"
             $commit = "$(Build.SourceVersion)"
+
+            Write-Host "== Token diagnostics =="
+            Write-Host "Token length: $($token.Length)"
+            Write-Host "Token prefix: $($token.Substring(0, [Math]::Min(4, $token.Length)))..."
+            Write-Host "Ref: $ref"
+            Write-Host "Commit: $commit"
+
+            Write-Host "== Testing token against GitHub API =="
+            try
+            {
+                $headers = @{ Authorization = "Bearer $token"; Accept = "application/vnd.github+json" }
+                $repoInfo = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo" -Headers $headers
+                Write-Host "Token works - repo: $($repoInfo.full_name)"
+            }
+            catch
+            {
+                Write-Host "Token test FAILED: $($_.Exception.Message)"
+                Write-Host "Response: $($_.ErrorDetails.Message)"
+                throw "GitHub token is invalid - cannot proceed with upload"
+            }
+
+            Write-Host "== Testing code-scanning permission =="
+            try
+            {
+                $alerts = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/code-scanning/alerts?per_page=1" -Headers $headers
+                Write-Host "Code scanning access confirmed"
+            }
+            catch
+            {
+                Write-Host "Code scanning access FAILED: $($_.Exception.Message)"
+                Write-Host "Response: $($_.ErrorDetails.Message)"
+                Write-Host "The GitHub App may be missing 'Code scanning alerts: Write' permission"
+                throw "Token lacks code-scanning permission"
+            }
 
             foreach ($lang in @("csharp", "cpp"))
             {
@@ -145,8 +178,6 @@ stages:
                 if ($LASTEXITCODE -ne 0) { throw "CodeQL upload failed for $lang" }
             }
             Write-Host "All results uploaded to GitHub Security tab."
-        env:
-          CODEQL_GITHUB_TOKEN: $(GitHubAppToken)
 
 # ── Build ──────────────────────────────────────────────────────────────
 - stage: build_stage
