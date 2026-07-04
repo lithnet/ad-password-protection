@@ -105,7 +105,11 @@ stages:
             $dbCluster = "$(Agent.TempDirectory)\codeql-dbs"
             $msbuild = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -requires Microsoft.Component.MSBuild -find "MSBuild\**\Bin\MSBuild.exe" | Select-Object -First 1
             Write-Host "MSBuild path: $msbuild"
-            codeql database create $dbCluster --db-cluster --language=csharp,cpp --command="`"$msbuild`" src/Lithnet.ActiveDirectory.PasswordProtection.sln /t:rebuild /p:Platform=$(buildPlatform) /p:Configuration=$(buildConfiguration)" --overwrite
+            $buildScript = Join-Path "$(Agent.TempDirectory)" "codeql-build.cmd"
+            Set-Content -Path $buildScript -Value "`"$msbuild`" src\Lithnet.ActiveDirectory.PasswordProtection.sln /t:rebuild /p:Platform=$(buildPlatform) /p:Configuration=$(buildConfiguration)"
+            Write-Host "Build script contents:"
+            Get-Content $buildScript
+            codeql database create $dbCluster --db-cluster --language=csharp,cpp --command=$buildScript --overwrite
             if ($LASTEXITCODE -ne 0) { throw "CodeQL database creation failed" }
             Write-Host "##vso[task.setvariable variable=codeqlDbCluster]$dbCluster"
 
