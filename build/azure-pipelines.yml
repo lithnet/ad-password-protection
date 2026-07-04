@@ -115,6 +115,7 @@ stages:
           targetType: filePath
           filePath: '$(Build.SourcesDirectory)/build/scripts/Get-GitHubAppToken.ps1'
           arguments: -ClientId "$(github.app.client-id)" -PrivateKeyPem "$(github.app.private-key)" -Repository "lithnet/ad-password-protection"
+          pwsh: true
 
       - task: PowerShell@2
         displayName: Analyze and upload results
