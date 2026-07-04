@@ -23,6 +23,7 @@ pool:
   vmImage: 'windows-latest'
 
 variables:
+  - group: github-app-variables
   - name: buildPlatform
     value: 'x64'
   - name: buildConfiguration
@@ -41,10 +42,6 @@ variables:
     value: 'LithnetPasswordProtection-$(build.version).exe'
   - name: build.isRelease
     value: ${{ startsWith(variables['Build.SourceBranch'], 'refs/heads/release/') }}
-  - name: advancedsecurity.codeql.querysuite
-    value: security-extended
-  - name: advancedsecurity.submittoadvancedsecurity
-    value: true
 
 name: $(build.version.major).$(build.version.minor).$(build.version.revision)
 trigger: none
@@ -53,43 +50,94 @@ stages:
 # ── Validate product metadata ───────────────────────────────────────────
 - template: templates/validate-release-metadata-stage.yaml@release_tools
 
-# ── Security scans ─────────────────────────────────────────────────────
-# TODO: ADO Advanced Security (CodeQL) requires an ADO-hosted repo.
-# LPP is on GitHub, so we need an alternative: either MSDO extension,
-# GitHub Actions CodeQL workflow, or another scanner compatible with
-# GitHub repos in ADO pipelines. Uncomment and adapt when resolved.
-#
-# - ${{ if eq(parameters.enableSecurityScans, true) }}:
-#   - stage: security_scans
-#     displayName: Security Scans
-#     dependsOn: []
-#     jobs:
-#     - job: codeql_and_dependency
-#       displayName: CodeQL and dependency scanning
-#       pool:
-#         vmImage: 'windows-latest'
-#       steps:
-#       - checkout: self
-#         fetchDepth: 1
-#       - task: NuGetToolInstaller@1
-#       - task: NuGetCommand@2
-#         displayName: Restore solution
-#         inputs:
-#           restoreSolution: 'src/Lithnet.ActiveDirectory.PasswordProtection.sln'
-#       - task: AdvancedSecurity-Codeql-Init@1
-#         displayName: Initialize CodeQL
-#         inputs:
-#           languages: 'csharp'
-#       - task: VSBuild@1
-#         displayName: Build for CodeQL analysis
-#         inputs:
-#           solution: 'src/Lithnet.ActiveDirectory.PasswordProtection.sln'
-#           platform: '$(buildPlatform)'
-#           configuration: '$(buildConfiguration)'
-#       - task: AdvancedSecurity-Codeql-Analyze@1
-#         displayName: Run CodeQL analysis
-#       - task: AdvancedSecurity-Dependency-Scanning@1
-#         displayName: Scan dependencies
+# ── Security scans (CodeQL → GitHub Security tab) ─────────────────────
+- ${{ if eq(parameters.enableSecurityScans, true) }}:
+  - stage: security_scans
+    displayName: Security Scans
+    dependsOn: []
+    jobs:
+    - job: codeql_scan
+      displayName: CodeQL analysis
+      pool:
+        vmImage: 'windows-latest'
+      steps:
+      - checkout: self
+        fetchDepth: 0
+
+      - task: NuGetToolInstaller@1
+
+      - task: NuGetCommand@2
+        displayName: Restore solution
+        inputs:
+          restoreSolution: 'src/Lithnet.ActiveDirectory.PasswordProtection.sln'
+
+      - task: PowerShell@2
+        displayName: Download CodeQL CLI
+        inputs:
+          targetType: inline
+          script: |
+            $codeqlDir = "$(Agent.ToolsDirectory)\codeql"
+            if (Test-Path "$codeqlDir\codeql.exe")
+            {
+                Write-Host "CodeQL already present at $codeqlDir"
+            }
+            else
+            {
+                $release = Invoke-RestMethod "https://api.github.com/repos/github/codeql-action/releases/latest"
+                $bundle = $release.assets | Where-Object { $_.name -match "codeql-bundle-win64" } | Select-Object -First 1
+                if (-not $bundle)
+                {
+                    throw "Could not find CodeQL bundle asset in latest release"
+                }
+                Write-Host "Downloading $($bundle.name)..."
+                $zipPath = "$(Agent.TempDirectory)\codeql-bundle.tar.gz"
+                Invoke-WebRequest -Uri $bundle.browser_download_url -OutFile $zipPath
+                Write-Host "Extracting..."
+                tar -xzf $zipPath -C "$(Agent.ToolsDirectory)"
+            }
+            Write-Host "##vso[task.prependpath]$codeqlDir"
+
+      - task: PowerShell@2
+        displayName: Create CodeQL databases (C# + C++)
+        inputs:
+          targetType: inline
+          script: |
+            $dbCluster = "$(Agent.TempDirectory)\codeql-dbs"
+            $msbuild = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -requires Microsoft.Component.MSBuild -find "MSBuild\**\Bin\MSBuild.exe" | Select-Object -First 1
+            codeql database create $dbCluster --db-cluster --language=csharp,cpp --command="$msbuild src/Lithnet.ActiveDirectory.PasswordProtection.sln /t:rebuild /p:Platform=$(buildPlatform) /p:Configuration=$(buildConfiguration)" --overwrite
+            if ($LASTEXITCODE -ne 0) { throw "CodeQL database creation failed" }
+            Write-Host "##vso[task.setvariable variable=codeqlDbCluster]$dbCluster"
+
+      - task: PowerShell@2
+        displayName: Acquire GitHub App token
+        inputs:
+          targetType: filePath
+          filePath: '$(Build.SourcesDirectory)/build/scripts/Get-GitHubAppToken.ps1'
+          arguments: -ClientId "$(github.app.client-id)" -PrivateKeyPem "$(github.app.private-key)" -Repository "lithnet/ad-password-protection"
+
+      - task: PowerShell@2
+        displayName: Analyze and upload results
+        inputs:
+          targetType: inline
+          script: |
+            $cluster = "$(codeqlDbCluster)"
+            $token = "$(GitHubAppToken)"
+            $repo = "lithnet/ad-password-protection"
+            $ref = "$(Build.SourceBranch)"
+            $commit = "$(Build.SourceVersion)"
+
+            foreach ($lang in @("csharp", "cpp"))
+            {
+                $dbPath = Join-Path $cluster $lang
+                $sarifPath = "$(Agent.TempDirectory)\codeql-results-$lang.sarif"
+                Write-Host "Analyzing $lang..."
+                codeql database analyze $dbPath --format=sarif-latest --output=$sarifPath "$lang-security-extended"
+                if ($LASTEXITCODE -ne 0) { throw "CodeQL analysis failed for $lang" }
+                Write-Host "Uploading $lang results to GitHub..."
+                $token | codeql github upload-results --sarif=$sarifPath --repository=$repo --ref=$ref --commit=$commit --github-auth-stdin
+                if ($LASTEXITCODE -ne 0) { throw "CodeQL upload failed for $lang" }
+            }
+            Write-Host "All results uploaded to GitHub Security tab."
 
 # ── Build ──────────────────────────────────────────────────────────────
 - stage: build_stage
