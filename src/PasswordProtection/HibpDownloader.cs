@@ -109,7 +109,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
             try
             {
-                await this.ProcessRangesAsync(progress, threads, ct, rangeStart, rangeEnd).ConfigureAwait(false);
+                await this.ProcessRangesAsync(progress, threads, rangeStart, rangeEnd, ct).ConfigureAwait(false);
             }
             finally
             {
@@ -161,7 +161,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             }
         }
 
-        private async Task ProcessRangesAsync(OperationProgress progress, int threads, CancellationToken ct, int rangeStart = 0, int rangeEnd = 0xFFFF)
+        private async Task ProcessRangesAsync(OperationProgress progress, int threads, int rangeStart, int rangeEnd, CancellationToken ct)
         {
             int rangeCount = (rangeEnd - rangeStart + 1) * (0xF + 1);
             progress.HibpReadInProgress = true;
@@ -178,7 +178,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
             if (rangeStart < rangeEnd)
             {
-                var result = Parallel.For(rangeStart + 1, rangeEnd + 1, op, i => this.DownloadRangeAsync(progress, i, ct).ConfigureAwait(false).GetAwaiter().GetResult());
+                Parallel.For(rangeStart + 1, rangeEnd + 1, op, i => this.DownloadRangeAsync(progress, i, ct).ConfigureAwait(false).GetAwaiter().GetResult());
             }
         }
 
@@ -200,21 +200,28 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
 
                     this.hibpState.TryGetValue(hibpRange, out string etag);
 
-                    var response = await this.GetRangeFromApiAsync(hibpRange, ct, etag).ConfigureAwait(false);
-
-                    if (response.StatusCode == HttpStatusCode.NotModified)
+                    using (var response = await this.GetRangeFromApiAsync(hibpRange, ct, etag).ConfigureAwait(false))
                     {
-                        progress.IncrementUnchangedRange();
-                    }
-                    else
-                    {
-                        response.EnsureSuccessStatusCode();
-                        progress.IncrementChangedRange();
+                        if (response.StatusCode == HttpStatusCode.NotModified)
+                        {
+                            progress.IncrementUnchangedRange();
+                        }
+                        else
+                        {
+                            response.EnsureSuccessStatusCode();
+                            progress.IncrementChangedRange();
 
-                        etagUpdates[hibpRange] = response.Headers.ETag.ToString();
-                        var lines = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            if (response.Headers.ETag == null)
+                            {
+                                throw new HibpEtagMissingException(hibpRange);
+                            }
 
-                        ExtractHashesFromResponse(items, hibpRange, lines);
+                            etagUpdates[hibpRange] = response.Headers.ETag.ToString();
+
+                            var lines = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+                            ExtractHashesFromResponse(items, hibpRange, lines);
+                        }
                     }
                 }
 
@@ -252,7 +259,7 @@ namespace Lithnet.ActiveDirectory.PasswordProtection
             }
         }
 
-        private async Task<HttpResponseMessage> GetRangeFromApiAsync(string range, CancellationToken ct, string etag = null)
+        protected virtual async Task<HttpResponseMessage> GetRangeFromApiAsync(string range, CancellationToken ct, string etag = null)
         {
             string requestUri = range + "?mode=ntlm";
 

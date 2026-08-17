@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Management.Automation;
 using System.Threading;
 using System.Threading.Tasks;
@@ -73,6 +73,22 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
 
             this.EndProgressUpdate();
 
+            try
+            {
+                task.GetAwaiter().GetResult();
+            }
+            catch (Exception ex)
+            {
+                HibpEtagMissingException missingEtagException = GetMissingEtagException(ex);
+                if (missingEtagException == null)
+                {
+                    throw;
+                }
+
+                this.ThrowTerminatingError(new ErrorRecord(missingEtagException, "HibpEtagMissing", ErrorCategory.InvalidData, missingEtagException.HibpRange));
+                return;
+            }
+
             var endTime = DateTime.Now;
             var results = new PSObject();
 
@@ -87,7 +103,33 @@ namespace Lithnet.ActiveDirectory.PasswordProtection.PowerShell
             results.Properties.Add(new PSNoteProperty("TotalHashesProcessed", this.Progress.HashesAdded + this.Progress.HashesDiscarded));
 
             this.WriteObject(results);
-            task.GetAwaiter().GetResult();
+        }
+
+        private static HibpEtagMissingException GetMissingEtagException(Exception ex)
+        {
+            HibpEtagMissingException missingEtagException = ex as HibpEtagMissingException;
+            if (missingEtagException != null)
+            {
+                return missingEtagException;
+            }
+
+            AggregateException aggregateException = ex as AggregateException;
+            if (aggregateException == null)
+            {
+                return null;
+            }
+
+            AggregateException flattenedException = aggregateException.Flatten();
+            foreach (Exception innerException in flattenedException.InnerExceptions)
+            {
+                missingEtagException = innerException as HibpEtagMissingException;
+                if (missingEtagException == null)
+                {
+                    return null;
+                }
+            }
+
+            return missingEtagException;
         }
     }
 }

@@ -1,0 +1,4 @@
+summary: "Provides a clear error when HIBP omits a required ETag header"
+type: fix
+priority: normal
+breaking: false
