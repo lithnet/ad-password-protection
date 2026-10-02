@@ -51,7 +51,7 @@ Community support is available via [GitHub Issues](https://github.com/lithnet/ad
 ## Getting started
 Download the installer from the [releases page](https://github.com/lithnet/ad-password-protection/releases)
 
-Read the [getting started guide](https://docs.lithnet.io/password-protection/installation/setup-guide?utm_source=github&utm_medium=readme&utm_campaign=lpp-help) on our documentation site.
+Read the [getting started guide](https://docs.lithnet.io/password-protection/setup/setup-guide?utm_source=github&utm_medium=readme&utm_campaign=lpp-help) on our documentation site.
 
 ## How can I contribute to the project?
 * Found an issue and want us to fix it? [Log it](https://github.com/lithnet/ad-password-protection/issues)
@@ -59,8 +59,8 @@ Read the [getting started guide](https://docs.lithnet.io/password-protection/ins
 
 ## Keep up to date
 * [Product documentation](https://docs.lithnet.io/password-protection?utm_source=github&utm_medium=readme&utm_campaign=lpp-help)
-* [Visit our blog](http://blog.lithnet.io)
-* [Follow us on twitter](https://twitter.com/lithnet_io)![](http://twitter.com/favicon.ico)
+* [Follow us on LinkedIn](https://linkedin.com/company/lithnet)
+* [Follow us on X](https://x.com/lithnet_io)
 
 ## Acknowledgements
 * None of this would be possible without Troy Hunt's [Have I Been Pwned](https://haveibeenpwned.com) service. [Buy him a beer to say thanks](https://haveibeenpwned.com/Donate)! 
