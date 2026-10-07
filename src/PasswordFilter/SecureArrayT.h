@@ -34,7 +34,7 @@ public:
 	{
 		if (this->internalptr && this->internalptr.use_count() <= 1)
 		{
-			SecureZeroMemory(this->internalptr.get(), this->size);
+			SecureZeroMemory(this->internalptr.get(), static_cast<SIZE_T>(this->size) * sizeof(T));
 		}
 	}
 

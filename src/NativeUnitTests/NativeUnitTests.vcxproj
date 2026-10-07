@@ -240,6 +240,7 @@
     <ClCompile Include="PasswordEvaluatorNameTests.cpp" />
     <ClCompile Include="PasswordEvaluatorRegexApproveTests.cpp" />
     <ClCompile Include="PasswordEvaluatorLengthTests.cpp" />
+    <ClCompile Include="SecureArrayTests.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
