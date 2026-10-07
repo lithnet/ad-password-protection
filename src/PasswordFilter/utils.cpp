@@ -1,6 +1,7 @@
 ﻿#include "stdafx.h"
 #include "utils.h"
 #include <vector>
+#include <new>
 #include "SecureArrayT.h"
 #include <atlalloc.h>
 
@@ -59,12 +60,16 @@ bool DirectoryExists(const std::wstring& dirName)
 
 LPCWSTR GetInteropString(LPCWSTR value)
 {
-	size_t stSize = wcslen(value) + sizeof(wchar_t);
+	const size_t charCount = wcslen(value) + 1;
 
-	wchar_t* pszReturn = NULL;
+	wchar_t* pszReturn = (wchar_t*)::CoTaskMemAlloc(charCount * sizeof(wchar_t));
 
-	pszReturn = (wchar_t*)::CoTaskMemAlloc(stSize);
-	wcscpy_s(pszReturn, stSize, value);
+	if (pszReturn == NULL)
+	{
+		throw std::bad_alloc();
+	}
+
+	wcscpy_s(pszReturn, charCount, value);
 
 	return pszReturn;
 }

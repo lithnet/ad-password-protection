@@ -235,6 +235,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HashTests.cpp" />
+    <ClCompile Include="InteropStringTests.cpp" />
     <ClCompile Include="PasswordEvaluatorComplexityPointsTests.cpp" />
     <ClCompile Include="PasswordEvaluatorComplexityThresholdTests.cpp" />
     <ClCompile Include="PasswordEvaluatorNameTests.cpp" />
