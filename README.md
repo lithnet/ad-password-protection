@@ -49,7 +49,7 @@ Enterprise support agreements give your organization direct access to the Lithne
 Community support is available via [GitHub Issues](https://github.com/lithnet/ad-password-protection/issues).
 
 ## Getting started
-Download the installer from the [releases page](https://github.com/lithnet/ad-password-protection/releases)
+Download the installer from the [downloads page](https://lithnet.io/products/password-protection/downloads/?utm_source=github&utm_medium=readme&utm_campaign=lpp-help)
 
 Read the [getting started guide](https://docs.lithnet.io/password-protection/setup/setup-guide?utm_source=github&utm_medium=readme&utm_campaign=lpp-help) on our documentation site.
 
